@@ -136,3 +136,18 @@ body {
   background: var(--accent-glow);
   color: var(--accent);
 }
+
+.badge--success {
+  background: rgba(52, 201, 138, 0.2);
+  color: #34c98a;
+}
+
+.badge--danger {
+  background: rgba(240, 82, 82, 0.2);
+  color: #f05252;
+}
+
+.badge--info {
+  background: rgba(80, 88, 112, 0.3);
+  color: #505870;
+}

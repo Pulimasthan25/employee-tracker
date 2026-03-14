@@ -1,1 +1,129 @@
-<p>overview works!</p>
+<div class="overview">
+  <!-- range selector row -->
+  <div class="overview__range">
+    <button
+      type="button"
+      class="overview__pill"
+      [class.overview__pill--active]="selectedRange() === 'today'"
+      (click)="setRange('today')"
+    >
+      Today
+    </button>
+    <button
+      type="button"
+      class="overview__pill"
+      [class.overview__pill--active]="selectedRange() === '7d'"
+      (click)="setRange('7d')"
+    >
+      7 days
+    </button>
+    <button
+      type="button"
+      class="overview__pill"
+      [class.overview__pill--active]="selectedRange() === '30d'"
+      (click)="setRange('30d')"
+    >
+      30 days
+    </button>
+  </div>
+
+  @if (loading()) {
+    <!-- skeleton cards -->
+    <div class="overview__stats">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="overview__card overview__card--skeleton"></div>
+      }
+    </div>
+    <div class="overview__charts">
+      <div class="overview__chart overview__chart--skeleton"></div>
+      <div class="overview__chart overview__chart--skeleton"></div>
+    </div>
+  } @else if (logs().length === 0) {
+    <div class="overview__empty">No activity data yet</div>
+  } @else {
+    <!-- stat cards row -->
+    <div class="overview__stats">
+      <div class="overview__card">
+        <div class="overview__card-label">Productivity score</div>
+        <div
+          class="overview__card-value"
+          [style.color]="
+            productivityScore() > 70
+              ? '#34c98a'
+              : productivityScore() >= 40
+                ? '#f5a623'
+                : '#f05252'
+          "
+        >
+          {{ productivityScore() }}%
+        </div>
+      </div>
+      <div class="overview__card">
+        <div class="overview__card-label">Active time</div>
+        <div class="overview__card-value">{{ formattedActiveTime() }}</div>
+      </div>
+      <div class="overview__card">
+        <div class="overview__card-label">Top app</div>
+        <div class="overview__card-value">
+          {{ topApps().length > 0 ? topApps()[0].appName : '—' }}
+        </div>
+      </div>
+      <div class="overview__card">
+        <div class="overview__card-label">Sessions</div>
+        <div class="overview__card-value">{{ logs().length }}</div>
+      </div>
+    </div>
+
+    <!-- charts row -->
+    <div class="overview__charts">
+      <div class="overview__chart overview__chart--doughnut">
+        <canvas id="productivity-chart"></canvas>
+      </div>
+      <div class="overview__chart overview__chart--bar">
+        <canvas id="hourly-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- top apps table -->
+    <div class="overview__table-wrap">
+      <h3 class="overview__table-title">Top apps</h3>
+      <div class="overview__table">
+        <div class="overview__table-header">
+          <span class="overview__table-cell">App name</span>
+          <span class="overview__table-cell">Time</span>
+          <span class="overview__table-cell">Category</span>
+          <span class="overview__table-cell overview__table-cell--bar">% of total</span>
+        </div>
+        @for (app of topApps(); track app.appName) {
+          <div class="overview__table-row">
+            <span class="overview__table-cell">{{ app.appName }}</span>
+            <span class="overview__table-cell">{{
+              formatAppTime(app.totalSeconds)
+            }}</span>
+            <span class="overview__table-cell">
+              <span
+                class="badge"
+                [class.badge--success]="app.category === 'productive'"
+                [class.badge--danger]="app.category === 'unproductive'"
+                [class.badge--info]="app.category === 'neutral'"
+              >
+                {{ app.category }}
+              </span>
+            </span>
+            <span class="overview__table-cell overview__table-cell--bar">
+              <div class="overview__progress-wrap">
+                <div
+                  class="overview__progress-fill"
+                  [style.width.%]="getAppPercent(app.totalSeconds)"
+                ></div>
+              </div>
+              <span class="overview__progress-label">{{
+                getAppPercent(app.totalSeconds)
+              }}%</span>
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
