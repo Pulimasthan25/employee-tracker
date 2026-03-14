@@ -1,1 +1,44 @@
-<p>login works!</p>
+<div class="login">
+  <div class="login__bg"></div>
+  <div class="login__card">
+    <div class="login__brand">
+      <span class="login__logo"></span>
+      <span class="login__name">PulseTrack</span>
+    </div>
+
+    @if (error()) {
+      <div class="login__error">
+        {{ error() }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" [formGroup]="form" class="login__form">
+      <div class="login__field">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="you&#64;company.com"
+          autocomplete="email"
+        />
+      </div>
+      <div class="login__field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+        />
+      </div>
+      <button type="submit" class="btn btn--primary login__submit" [disabled]="loading()">
+        @if (loading()) {
+          <span class="login__spinner" aria-hidden="true"></span>
+        }
+        Sign in
+      </button>
+    </form>
+  </div>
+</div>
