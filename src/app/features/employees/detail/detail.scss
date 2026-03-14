@@ -1,0 +1,129 @@
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  max-width: 480px;
+}
+
+.detail__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+
+  &:hover {
+    color: var(--accent);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.detail__card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+
+  &--skeleton {
+    min-height: 200px;
+  }
+}
+
+.detail__name {
+  margin: 0 0 var(--space-lg);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.detail__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.detail__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+
+  &:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.detail__label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.detail__value {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+
+  &--mono {
+    font-family: 'DM Mono', monospace;
+    color: var(--text-secondary);
+  }
+}
+
+.detail__actions {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.detail__btn-danger {
+  background: var(--danger);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.85);
+  }
+}
+
+.detail__not-found {
+  padding: var(--space-xl);
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+}
+
+.detail__skeleton-line {
+  height: 1rem;
+  background: var(--bg-hover);
+  border-radius: var(--radius-sm);
+  animation: detail-skeleton 1.2s ease-in-out infinite;
+
+  &--short {
+    width: 60%;
+  }
+}
+
+@keyframes detail-skeleton {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

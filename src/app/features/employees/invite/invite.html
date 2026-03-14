@@ -1,1 +1,72 @@
-<p>invite works!</p>
+<div class="invite">
+  <div class="invite__header">
+    <a routerLink="/employees" class="invite__back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back to employees
+    </a>
+    <h2 class="invite__title">Invite employee</h2>
+  </div>
+
+  @if (success()) {
+    <div class="invite__success">
+      Employee invited successfully. Redirecting to list…
+    </div>
+  } @else {
+    <form class="invite__form" (ngSubmit)="submit()">
+      @if (error()) {
+        <div class="invite__error">{{ error() }}</div>
+      }
+
+      <div class="invite__field">
+        <label for="invite-email" class="invite__label">Email</label>
+        <input
+          id="invite-email"
+          type="email"
+          class="invite__input"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="employee@example.com"
+          required
+        />
+      </div>
+
+      <div class="invite__field">
+        <label for="invite-displayName" class="invite__label">Display name</label>
+        <input
+          id="invite-displayName"
+          type="text"
+          class="invite__input"
+          [(ngModel)]="displayName"
+          name="displayName"
+          placeholder="Jane Doe"
+          required
+        />
+      </div>
+
+      <div class="invite__field">
+        <label for="invite-teamId" class="invite__label">Team ID <span class="invite__optional">(optional)</span></label>
+        <input
+          id="invite-teamId"
+          type="text"
+          class="invite__input"
+          [(ngModel)]="teamId"
+          name="teamId"
+          placeholder="e.g. sales, engineering"
+        />
+      </div>
+
+      <div class="invite__actions">
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="submitting()"
+        >
+          {{ submitting() ? 'Inviting…' : 'Invite' }}
+        </button>
+        <a routerLink="/employees" class="btn btn--ghost">Cancel</a>
+      </div>
+    </form>
+  }
+</div>

@@ -1,1 +1,72 @@
-<p>list works!</p>
+<div class="list">
+  <div class="list__header">
+    <h2 class="list__title">Employees</h2>
+    <a routerLink="/employees/invite" class="btn btn--primary">Invite employee</a>
+  </div>
+
+  @if (connectionError()) {
+    <div class="list__error">
+      Unable to reach the database. If you have an ad blocker, please disable it for localhost and refresh.
+    </div>
+  } @else if (loading()) {
+    <div class="list__table-wrap">
+      <div class="list__table">
+        <div class="list__table-header">
+          <span class="list__table-cell">Name</span>
+          <span class="list__table-cell">Email</span>
+          <span class="list__table-cell">Role</span>
+          <span class="list__table-cell">Status</span>
+          <span class="list__table-cell">Joined</span>
+        </div>
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="list__table-row list__table-row--skeleton">
+            <span class="list__table-cell list__table-cell--skeleton"></span>
+            <span class="list__table-cell list__table-cell--skeleton"></span>
+            <span class="list__table-cell list__table-cell--skeleton"></span>
+            <span class="list__table-cell list__table-cell--skeleton"></span>
+            <span class="list__table-cell list__table-cell--skeleton"></span>
+          </div>
+        }
+      </div>
+    </div>
+  } @else if (employees().length === 0) {
+    <div class="list__empty">No employees yet. Invite your first team member.</div>
+  } @else {
+    <div class="list__table-wrap">
+      <div class="list__table">
+        <div class="list__table-header">
+          <span class="list__table-cell">Name</span>
+          <span class="list__table-cell">Email</span>
+          <span class="list__table-cell">Role</span>
+          <span class="list__table-cell">Status</span>
+          <span class="list__table-cell">Joined</span>
+        </div>
+        @for (emp of employees(); track emp.uid) {
+          <a [routerLink]="['/employees', emp.uid]" class="list__table-row list__table-row--link">
+            <span class="list__table-cell list__table-cell--name">{{ emp.displayName || '—' }}</span>
+            <span class="list__table-cell">{{ emp.email }}</span>
+            <span class="list__table-cell">
+              <span
+                class="badge"
+                [class.badge--success]="emp.role === 'admin'"
+                [class.badge--info]="emp.role === 'employee'"
+              >
+                {{ emp.role }}
+              </span>
+            </span>
+            <span class="list__table-cell">
+              <span
+                class="badge"
+                [class.badge--success]="emp.active"
+                [class.badge--danger]="!emp.active"
+              >
+                {{ emp.active ? 'Active' : 'Inactive' }}
+              </span>
+            </span>
+            <span class="list__table-cell list__table-cell--mono">{{ emp.createdAt | date:'mediumDate' }}</span>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</div>
