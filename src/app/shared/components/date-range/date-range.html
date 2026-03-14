@@ -1,0 +1,15 @@
+<div class="date-range">
+  <div class="date-range__pills">
+    <button type="button" class="date-range__btn" [class.date-range__btn--active]="selectedRange() === 'today'" (click)="setRange('today')">Today</button>
+    <button type="button" class="date-range__btn" [class.date-range__btn--active]="selectedRange() === '7d'" (click)="setRange('7d')">7 days</button>
+    <button type="button" class="date-range__btn" [class.date-range__btn--active]="selectedRange() === '30d'" (click)="setRange('30d')">30 days</button>
+    <button type="button" class="date-range__btn" [class.date-range__btn--active]="selectedRange() === 'custom'" (click)="setRange('custom')">Custom</button>
+  </div>
+  @if (selectedRange() === 'custom') {
+    <div class="date-range__custom">
+      <input type="date" class="date-range__input" [ngModel]="customFrom()" (ngModelChange)="customFrom.set($event)" />
+      <span>to</span>
+      <input type="date" class="date-range__input" [ngModel]="customTo()" (ngModelChange)="customTo.set($event)" />
+    </div>
+  }
+</div>

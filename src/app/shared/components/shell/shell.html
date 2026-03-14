@@ -9,7 +9,7 @@
         <a
           [routerLink]="item.path"
           routerLinkActive="shell__nav-item--active"
-          [routerLinkActiveOptions]="{ exact: item.path !== '/employees' }"
+          [routerLinkActiveOptions]="{ exact: item.path !== '/employees' && item.path !== '/reports' }"
           class="shell__nav-item"
         >
           @switch (item.icon) {

@@ -139,6 +139,53 @@ export class ActivityService {
       .slice(0, 10);
   }
 
+  groupByDomain(
+    logs: ActivityLog[]
+  ): { domain: string; totalSeconds: number; visitCount: number; category: ActivityLog['category'] }[] {
+    const domainMap = new Map<string, { totalSeconds: number; visitCount: number; categoryMap: { productive: number; unproductive: number; neutral: number } }>();
+
+    for (const log of logs) {
+      if (!log.url) continue;
+
+      let domain = '-';
+      try {
+        const urlObj = new URL(log.url);
+        domain = urlObj.hostname.replace(/^www\./, '');
+      } catch {
+        continue;
+      }
+
+      const existing = domainMap.get(domain) ?? {
+        totalSeconds: 0,
+        visitCount: 0,
+        categoryMap: { productive: 0, unproductive: 0, neutral: 0 }
+      };
+
+      existing.totalSeconds += log.durationSeconds;
+      existing.visitCount += 1;
+      
+      if (log.category === 'productive') existing.categoryMap.productive += log.durationSeconds;
+      else if (log.category === 'unproductive') existing.categoryMap.unproductive += log.durationSeconds;
+      else existing.categoryMap.neutral += log.durationSeconds;
+
+      domainMap.set(domain, existing);
+    }
+
+    return Array.from(domainMap.entries())
+      .map(([domain, data]) => {
+        const cat = data.categoryMap;
+        const category: ActivityLog['category'] =
+          cat.productive >= cat.unproductive && cat.productive >= cat.neutral
+            ? 'productive'
+            : cat.unproductive >= cat.neutral
+              ? 'unproductive'
+              : 'neutral';
+        return { domain, totalSeconds: data.totalSeconds, visitCount: data.visitCount, category };
+      })
+      .sort((a, b) => b.totalSeconds - a.totalSeconds)
+      .slice(0, 20);
+  }
+
   groupByHour(
     logs: ActivityLog[],
     date: Date

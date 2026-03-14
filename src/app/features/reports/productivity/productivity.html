@@ -1,1 +1,51 @@
-<p>productivity works!</p>
+<div class="report">
+  <div class="report__header">
+    <h2>Productivity report</h2>
+    <app-date-range (rangeChange)="onRangeChange($event)" />
+    <button class="export-btn" (click)="exportCsv()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Export CSV
+    </button>
+  </div>
+  <div class="report__card">
+    <table class="report__table">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Score</th>
+          <th>Active time</th>
+          <th>Top app</th>
+          <th>Sessions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
+          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
+          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
+          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
+          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
+        } @else {
+          @for (emp of employees(); track emp.user.uid) {
+            <tr>
+              <td>
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-weight: 500;">{{ emp.user.displayName }}</span>
+                  <span style="font-size: 12px; color: var(--text-muted);">{{ emp.user.email }}</span>
+                </div>
+              </td>
+              <td [style.color]="getScoreColor(emp.productivityScore)" style="font-weight: 600;">{{ emp.productivityScore }}%</td>
+              <td>{{ formatDurationStr(emp.activeSeconds) }}</td>
+              <td>{{ emp.topApp }}</td>
+              <td>{{ emp.sessions }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

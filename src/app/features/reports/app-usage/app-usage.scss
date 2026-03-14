@@ -1,0 +1,14 @@
+@use '../report-shared';
+.form-select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  border-radius: var(--radius-md, 8px);
+  font-size: 13px;
+  outline: none;
+  
+  &:focus {
+    border-color: var(--accent);
+  }
+}

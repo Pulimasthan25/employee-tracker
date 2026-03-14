@@ -8,9 +8,14 @@ export const REPORT_ROUTES: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () =>
-          import('./productivity/productivity').then((m) => m.Productivity),
-      },
-    ],
-  },
+        loadComponent: () => import('./reports-layout/reports-layout').then(m => m.ReportsLayout),
+        children: [
+          { path: '', redirectTo: 'productivity', pathMatch: 'full' },
+          { path: 'productivity', loadComponent: () => import('./productivity/productivity').then(m => m.Productivity) },
+          { path: 'apps', loadComponent: () => import('./app-usage/app-usage').then(m => m.AppUsage) },
+          { path: 'urls', loadComponent: () => import('./url-usage/url-usage').then(m => m.UrlUsage) },
+        ]
+      }
+    ]
+  }
 ];

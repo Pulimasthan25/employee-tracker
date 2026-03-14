@@ -1,0 +1,56 @@
+<div class="report">
+  <div class="report__header">
+    <h2>App usage report</h2>
+    <app-date-range (rangeChange)="onRangeChange($event)" />
+    
+    @if (isAdmin()) {
+      <select class="form-select" [ngModel]="selectedEmployee()" (ngModelChange)="selectedEmployee.set($event)" style="margin-left: auto; max-width: 200px;">
+        <option value="all">All employees</option>
+        @for (emp of employees(); track emp.uid) {
+          <option [value]="emp.uid">{{ emp.displayName }}</option>
+        }
+      </select>
+    }
+  </div>
+
+  <div class="report__card" style="padding: 24px;">
+    <div style="height: 300px; width: 100%;">
+      <canvas #chartCanvas></canvas>
+    </div>
+  </div>
+
+  <div class="report__card">
+    <table class="report__table">
+      <thead>
+        <tr>
+          <th>App name</th>
+          <th>Category</th>
+          <th>Total time</th>
+          <th>% of total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
+          <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
+          <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
+        } @else {
+          @for (item of data(); track item.appName) {
+            <tr>
+              <td style="font-weight: 500;">{{ item.appName }}</td>
+              <td>
+                <span class="badge badge--{{ item.category }}">{{ item.category }}</span>
+              </td>
+              <td>{{ formatDurationStr(item.totalSeconds) }}</td>
+              <td>{{ getPercentage(item.totalSeconds) }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 32px;">No app usage recorded for this period.</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
