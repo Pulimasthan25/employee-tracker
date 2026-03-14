@@ -15,7 +15,21 @@
 
   <div class="report__card" style="padding: 24px;">
     <div style="height: 300px; width: 100%;">
-      <canvas #chartCanvas></canvas>
+      @if (loading()) {
+        <div class="chart-placeholder loading">
+          <span>Loading chart...</span>
+        </div>
+      } @else if (data().length === 0) {
+        <div class="chart-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 3v18h18" />
+            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+          </svg>
+          <span>No usage data to visualize</span>
+        </div>
+      } @else {
+        <canvas #chartCanvas></canvas>
+      }
     </div>
   </div>
 
@@ -46,7 +60,17 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 32px;">No app usage recorded for this period.</td>
+              <td colspan="4" class="empty-state-cell">
+                <div class="empty-state">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                  <p>No app usage recorded for this period.</p>
+                </div>
+              </td>
             </tr>
           }
         }
