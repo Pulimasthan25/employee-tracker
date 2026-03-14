@@ -28,6 +28,7 @@ export class AuthService {
   readonly firebaseUser = signal<User | null>(null);
   readonly appUser = signal<AppUser | null>(null);
   readonly isLoading = signal(true);
+  readonly authReady = signal(false);
 
   readonly isLoggedIn = computed(() => !!this.firebaseUser());
   readonly isAdmin = computed(() => this.appUser()?.role === 'admin');
@@ -42,6 +43,7 @@ export class AuthService {
         this.appUser.set(null);
       }
       this.isLoading.set(false);
+      this.authReady.set(true);
     });
   }
 

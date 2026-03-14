@@ -179,10 +179,6 @@ export class ActivityService {
   }
 }
 
-/**
- * Seed fake activity logs for testing the dashboard without the desktop agent.
- * Call from browser console: seedFakeActivities('YOUR_USER_ID')
- */
 export async function seedFakeActivities(userId: string): Promise<void> {
   const { collection, addDoc, Timestamp } = await import('firebase/firestore');
   const { db } = await import('../firebase');
@@ -204,14 +200,15 @@ export async function seedFakeActivities(userId: string): Promise<void> {
   for (let i = 0; i < 50; i++) {
     const app = apps[i % apps.length];
     const start = new Date(now);
-    start.setHours(start.getHours() - i % 24, start.getMinutes() - i * 7, 0, 0);
+    start.setHours(start.getHours() - (i % 8));
+    start.setMinutes(start.getMinutes() - (i * 7));
     const duration = 60 + Math.floor(Math.random() * 600);
     const end = new Date(start.getTime() + duration * 1000);
 
     await addDoc(col, {
       userId,
       appName: app.name,
-      windowTitle: `${app.name} - Window ${i}`,
+      windowTitle: `${app.name} — Window ${i}`,
       category: app.category,
       startTime: Timestamp.fromDate(start),
       endTime: Timestamp.fromDate(end),

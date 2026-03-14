@@ -67,6 +67,15 @@
   font-family: 'DM Mono', monospace;
 }
 
+.connection-error {
+  padding: var(--space-lg);
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-lg);
+  font-size: 0.9375rem;
+}
+
 .overview__empty {
   display: flex;
   align-items: center;

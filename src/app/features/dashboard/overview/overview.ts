@@ -5,6 +5,7 @@ import {
   signal,
   computed,
   effect,
+  untracked,
   afterNextRender,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -51,6 +52,7 @@ export class Overview {
 
   logs = signal<ActivityLog[]>([]);
   loading = signal(true);
+  connectionError = signal(false);
   selectedRange = signal<'today' | '7d' | '30d'>('today');
 
   productivityScore = computed(() =>
@@ -86,13 +88,12 @@ export class Overview {
   private hourlyChart: Chart<'bar'> | null = null;
 
   constructor() {
-    effect(
-      () => {
-        this.selectedRange();
-        this.loadData();
-      },
-      { allowSignalWrites: true }
-    );
+    effect(() => {
+      const ready = this.authService.authReady();
+      const range = this.selectedRange();
+      if (!ready) return;
+      untracked(() => this.loadData());
+    });
     effect(() => {
       if (this.loading()) return;
       afterNextRender(
@@ -108,6 +109,7 @@ export class Overview {
 
   private async loadData(): Promise<void> {
     this.loading.set(true);
+    this.connectionError.set(false);
     const { from, to } = getDateRange(this.selectedRange());
     try {
       if (this.authService.isAdmin()) {
@@ -117,7 +119,7 @@ export class Overview {
         );
         this.logs.set(data);
       } else {
-        const uid = this.authService.appUser()?.uid;
+        const uid = this.authService.firebaseUser()?.uid;
         if (!uid) {
           this.logs.set([]);
           return;
@@ -129,6 +131,10 @@ export class Overview {
         );
         this.logs.set(data);
       }
+    } catch (e) {
+      console.error('Failed to load activity:', e);
+      this.connectionError.set(true);
+      this.logs.set([]);
     } finally {
       this.loading.set(false);
     }

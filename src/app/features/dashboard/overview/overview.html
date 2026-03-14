@@ -27,7 +27,11 @@
     </button>
   </div>
 
-  @if (loading()) {
+  @if (connectionError()) {
+    <div class="connection-error">
+      Unable to reach the database. If you have an ad blocker, please disable it for localhost and refresh.
+    </div>
+  } @else if (loading()) {
     <!-- skeleton cards -->
     <div class="overview__stats">
       @for (i of [1,2,3,4]; track i) {
