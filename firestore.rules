@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: checks if the logged-in user is an admin
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // USERS collection
+    // - Any logged-in user can read their own profile
+    // - Only admins can read other users or write/create users
+    match /users/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // ACTIVITIES collection (app usage, URL tracking, time logs)
+    // - Admins can read everything
+    // - Employees can only read their own activity
+    // - Any logged-in user can create activity (the desktop agent does this)
+    // - Only admins can update or delete
+    match /activities/{docId} {
+      allow read:   if request.auth != null && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // SCREENSHOTS collection
+    // - Same read rule as activities
+    // - Any logged-in user can upload (the desktop agent does this)
+    // - Only admins can delete
+    match /screenshots/{docId} {
+      allow read:   if request.auth != null && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null;
+      allow delete: if isAdmin();
+    }
+  }
+}
