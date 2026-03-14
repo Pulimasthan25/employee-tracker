@@ -8,6 +8,7 @@ import {
   untracked,
   afterNextRender,
   ChangeDetectionStrategy,
+  OnDestroy,
 } from '@angular/core';
 import Chart from 'chart.js/auto';
 import type { ActivityLog } from '../../../core/services/activity.service';
@@ -45,7 +46,7 @@ function getDateRange(range: 'today' | '7d' | '30d'): { from: Date; to: Date } {
   styleUrl: './overview.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Overview {
+export class Overview implements OnDestroy {
   private activityService = inject(ActivityService);
   private authService = inject(AuthService);
   private injector = inject(Injector);
@@ -54,6 +55,8 @@ export class Overview {
   loading = signal(true);
   connectionError = signal(false);
   selectedRange = signal<'today' | '7d' | '30d'>('today');
+
+  private unsubscribe: (() => void) | null = null;
 
   productivityScore = computed(() =>
     this.activityService.getDailyProductivityScore(this.logs())
@@ -107,35 +110,52 @@ export class Overview {
     });
   }
 
-  private async loadData(): Promise<void> {
+  ngOnDestroy(): void {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    this.destroyCharts();
+  }
+
+  private loadData(): void {
+    // Cancel the previous listener before setting up a new one
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+
     this.loading.set(true);
     this.connectionError.set(false);
     const { from, to } = getDateRange(this.selectedRange());
+
     try {
       if (this.authService.isAdmin()) {
-        const data = await this.activityService.getTeamActivitySummary(
+        this.unsubscribe = this.activityService.listenTeamActivity(
           from,
-          to
+          to,
+          (logs) => {
+            this.logs.set(logs);
+            this.loading.set(false);
+          }
         );
-        this.logs.set(data);
       } else {
         const uid = this.authService.firebaseUser()?.uid;
         if (!uid) {
           this.logs.set([]);
+          this.loading.set(false);
           return;
         }
-        const data = await this.activityService.getActivityForUser(
+        this.unsubscribe = this.activityService.listenActivityForUser(
           uid,
           from,
-          to
+          to,
+          (logs) => {
+            this.logs.set(logs);
+            this.loading.set(false);
+          }
         );
-        this.logs.set(data);
       }
     } catch (e) {
-      console.error('Failed to load activity:', e);
+      console.error('Failed to set up activity listener:', e);
       this.connectionError.set(true);
       this.logs.set([]);
-    } finally {
       this.loading.set(false);
     }
   }

@@ -2,12 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>EmployeeTracker</title>
+  <title>Pulse</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Pulse — real-time employee productivity tracker">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-  <app-root></app-root>
+  <app-root>
+    <div style="
+      position: fixed; inset: 0;
+      background: #0f1117;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+    ">
+      <div style="
+        width: 10px; height: 10px; border-radius: 50%;
+        background: #4f8ef7;
+        box-shadow: 0 0 12px #4f8ef7;
+        animation: p 1.2s ease-in-out infinite;
+      "></div>
+      <style>
+        @keyframes p {
+          0%,100% { opacity: 1; transform: scale(1); }
+          50%      { opacity: 0.3; transform: scale(0.7); }
+        }
+      </style>
+    </div>
+  </app-root>
 </body>
 </html>
