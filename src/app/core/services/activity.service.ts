@@ -6,8 +6,10 @@ import {
   orderBy,
   limit,
   getDocs,
+  onSnapshot,
   Timestamp,
 } from 'firebase/firestore';
+import type { Unsubscribe } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { AppUser } from './auth.service';
 
@@ -90,6 +92,70 @@ export class ActivityService {
     });
   }
 
+  listenActivityForUser(
+    userId: string,
+    from: Date,
+    to: Date,
+    callback: (logs: ActivityLog[]) => void
+  ): Unsubscribe {
+    const q = query(
+      collection(db, 'activities'),
+      where('userId', '==', userId),
+      where('startTime', '>=', Timestamp.fromDate(from)),
+      where('startTime', '<=', Timestamp.fromDate(to)),
+      orderBy('startTime', 'desc'),
+      limit(500)
+    );
+    return onSnapshot(q, (snap) => {
+      const logs = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          userId: data['userId'],
+          appName: data['appName'] ?? '',
+          windowTitle: data['windowTitle'] ?? '',
+          url: data['url'],
+          category: data['category'] ?? 'neutral',
+          startTime: toDate(data['startTime']),
+          endTime: toDate(data['endTime']),
+          durationSeconds: data['durationSeconds'] ?? 0,
+        } as ActivityLog;
+      });
+      callback(logs);
+    });
+  }
+
+  listenTeamActivity(
+    from: Date,
+    to: Date,
+    callback: (logs: ActivityLog[]) => void
+  ): Unsubscribe {
+    const q = query(
+      collection(db, 'activities'),
+      where('startTime', '>=', Timestamp.fromDate(from)),
+      where('startTime', '<=', Timestamp.fromDate(to)),
+      orderBy('startTime', 'desc'),
+      limit(1000)
+    );
+    return onSnapshot(q, (snap) => {
+      const logs = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          userId: data['userId'],
+          appName: data['appName'] ?? '',
+          windowTitle: data['windowTitle'] ?? '',
+          url: data['url'],
+          category: data['category'] ?? 'neutral',
+          startTime: toDate(data['startTime']),
+          endTime: toDate(data['endTime']),
+          durationSeconds: data['durationSeconds'] ?? 0,
+        } as ActivityLog;
+      });
+      callback(logs);
+    });
+  }
+
   getDailyProductivityScore(logs: ActivityLog[]): number {
     if (logs.length === 0) return 0;
     let productive = 0;
@@ -163,7 +229,7 @@ export class ActivityService {
 
       existing.totalSeconds += log.durationSeconds;
       existing.visitCount += 1;
-      
+
       if (log.category === 'productive') existing.categoryMap.productive += log.durationSeconds;
       else if (log.category === 'unproductive') existing.categoryMap.unproductive += log.durationSeconds;
       else existing.categoryMap.neutral += log.durationSeconds;

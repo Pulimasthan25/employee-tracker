@@ -25,7 +25,14 @@
     >
       30 days
     </button>
+    @if (!loading() && logs().length > 0) {
+      <span class="live-indicator">
+        <span class="live-dot"></span>
+        Live
+      </span>
+    }
   </div>
+
 
   @if (connectionError()) {
     <div class="connection-error">
