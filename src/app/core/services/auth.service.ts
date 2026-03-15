@@ -17,6 +17,7 @@ export interface AppUser {
   role: 'admin' | 'employee';
   teamId?: string;
   active: boolean;
+  screenshotIntervalSeconds: number;
   createdAt: Date;
 }
 

@@ -62,6 +62,38 @@
         </div>
       </div>
 
+      <div class="detail__settings">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Screenshot interval</span>
+            <span class="setting-desc">
+              How often screenshots are taken for this employee.
+              Changes take effect immediately on their device.
+            </span>
+          </div>
+          <div class="setting-control">
+            @if (savingInterval()) {
+              <span class="saving-text">Saving…</span>
+            } @else {
+              <select
+                [value]="emp.screenshotIntervalSeconds"
+                (change)="onIntervalChange(+$any($event.target).value)"
+                class="interval-select"
+              >
+                @for (opt of intervalOptions; track opt.value) {
+                  <option
+                    [value]="opt.value"
+                    [selected]="emp.screenshotIntervalSeconds === opt.value"
+                  >
+                    {{ opt.label }}
+                  </option>
+                }
+              </select>
+            }
+          </div>
+        </div>
+      </div>
+
       @if (emp.active) {
         <div class="detail__actions">
           <button

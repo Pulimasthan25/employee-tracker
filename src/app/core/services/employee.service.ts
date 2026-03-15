@@ -27,6 +27,7 @@ function toAppUser(id: string, data: Record<string, unknown>): AppUser {
     role: (data['role'] as 'admin' | 'employee') ?? 'employee',
     teamId: data['teamId'] as string | undefined,
     active: (data['active'] as boolean) ?? true,
+    screenshotIntervalSeconds: (data['screenshotIntervalSeconds'] as number) ?? 30,
     createdAt: toDate(data['createdAt']),
   };
 }
@@ -63,5 +64,11 @@ export class EmployeeService {
 
   async deactivate(uid: string): Promise<void> {
     await updateDoc(doc(db, 'users', uid), { active: false });
+  }
+
+  async updateScreenshotInterval(uid: string, intervalSeconds: number): Promise<void> {
+    await updateDoc(doc(db, 'users', uid), {
+      screenshotIntervalSeconds: intervalSeconds
+    });
   }
 }

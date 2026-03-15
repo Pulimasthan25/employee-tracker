@@ -11,6 +11,7 @@ import { DatePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { ToastService } from '../../../core/services/toast.service';
 import type { AppUser } from '../../../core/services/auth.service';
 
 @Component({
@@ -23,6 +24,7 @@ import type { AppUser } from '../../../core/services/auth.service';
 export class Detail {
   private readonly route = inject(ActivatedRoute);
   private readonly employeeService = inject(EmployeeService);
+  private readonly toastService = inject(ToastService);
 
   readonly id = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
@@ -32,6 +34,17 @@ export class Detail {
   readonly loading = signal(true);
   readonly notFound = signal(false);
   readonly employee = signal<AppUser | null>(null);
+
+  readonly intervalOptions = [
+    { label: '1 minute',    value: 60   },
+    { label: '5 minutes',   value: 300  },
+    { label: '15 minutes',  value: 900  },
+    { label: '30 minutes',  value: 1800 },
+    { label: '1 hour',      value: 3600 },
+    { label: 'Disabled',    value: 0   },
+  ];
+
+  readonly savingInterval = signal(false);
 
   constructor() {
     effect(() => {
@@ -67,6 +80,27 @@ export class Detail {
       this.employee.set({ ...emp, active: false });
     } catch {
       // Could show toast
+    }
+  }
+
+  async onIntervalChange(seconds: number): Promise<void> {
+    if (!this.employee()?.uid) return;
+    this.savingInterval.set(true);
+    try {
+      await this.employeeService.updateScreenshotInterval(
+        this.employee()!.uid,
+        seconds
+      );
+      this.toastService.show('Screenshot interval updated.', 'success');
+      // Update the local employee object
+      const emp = this.employee();
+      if (emp) {
+        this.employee.set({ ...emp, screenshotIntervalSeconds: seconds });
+      }
+    } catch {
+      this.toastService.show('Failed to update interval.', 'error');
+    } finally {
+      this.savingInterval.set(false);
     }
   }
 }
