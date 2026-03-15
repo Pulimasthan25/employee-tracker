@@ -1,8 +1,12 @@
 <div class="shell">
   <aside class="shell__sidebar">
     <div class="shell__brand">
-      <span class="shell__logo"></span>
-      <span class="shell__name">PulseTrack</span>
+      <span class="shell__logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 21h-1l1-7H6l7-12h1l-1 7h5l-7 12z"/>
+        </svg>
+      </span>
+      <span class="shell__name">Pulse</span>
     </div>
     <nav class="shell__nav">
       @for (item of visibleNav(); track item.path) {
@@ -60,7 +64,7 @@
           <div class="shell__avatar">{{ avatarLetter() }}</div>
           <div class="shell__user-info">
             <span class="shell__user-name">{{ displayName() }}</span>
-            <span class="shell__user-email">{{ userEmail() }}</span>
+            <!-- <span class="shell__user-email">{{ userEmail() }}</span> -->
           </div>
           <button
             type="button"

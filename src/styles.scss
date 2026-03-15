@@ -1,4 +1,4 @@
-/* Design system — PulseTrack */
+/* Design system — Pulse */
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap');
 
 :root {
@@ -151,4 +151,17 @@ body {
 .badge--info {
   background: rgba(80, 88, 112, 0.3);
   color: #505870;
+}
+// styles.scss
+.shell__main-wrap .shell__content {
+
+  select {
+    appearance: none;
+  -webkit-appearance: none;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
 }

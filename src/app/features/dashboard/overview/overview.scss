@@ -21,7 +21,7 @@
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
 
-  &:hover {
+  &:hover:not(.overview__pill--active) {
     background: var(--bg-hover);
     color: var(--text-primary);
   }

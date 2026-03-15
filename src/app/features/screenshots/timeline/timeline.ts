@@ -7,7 +7,6 @@ import {
   untracked,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScreenshotService, Screenshot } from '../../../core/services/screenshot.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -16,7 +15,7 @@ import type { AppUser } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-timeline',
-  imports: [DatePipe, FormsModule],
+  imports: [FormsModule],
   templateUrl: './timeline.html',
   styleUrl: './timeline.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

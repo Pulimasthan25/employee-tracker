@@ -16,24 +16,27 @@
   margin-bottom: 24px;
 }
 .reports-layout__tab {
-  padding: 8px 16px;
-  color: var(--text-muted);
-  font-size: 14px;
+  padding: var(--space-sm) var(--space-lg);
+  font-family: inherit;
+  font-size: 0.9375rem;
   font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 999px;
+  cursor: pointer;
   text-decoration: none;
-  border: 1px solid transparent;
-  transition: all 0.2s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 
-  &:hover {
-    color: var(--text-primary);
+  &:hover:not(.reports-layout__tab--active) {
     background: var(--bg-hover);
+    color: var(--text-primary);
   }
 
   &--active {
-    color: var(--text-primary);
+    background: var(--accent);
+    color: white;
     border-color: var(--accent);
-    background: rgba(52, 201, 138, 0.1); 
   }
 }
 .reports-layout__content {
