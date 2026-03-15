@@ -1,35 +1,58 @@
 <div class="overview">
-  <!-- range selector row -->
-  <div class="overview__range">
-    <button
-      type="button"
-      class="overview__pill"
-      [class.overview__pill--active]="selectedRange() === 'today'"
-      (click)="setRange('today')"
-    >
-      Today
-    </button>
-    <button
-      type="button"
-      class="overview__pill"
-      [class.overview__pill--active]="selectedRange() === '7d'"
-      (click)="setRange('7d')"
-    >
-      7 days
-    </button>
-    <button
-      type="button"
-      class="overview__pill"
-      [class.overview__pill--active]="selectedRange() === '30d'"
-      (click)="setRange('30d')"
-    >
-      30 days
-    </button>
-    @if (!loading() && logs().length > 0) {
-      <span class="live-indicator">
-        <span class="live-dot"></span>
-        Live
-      </span>
+  <!-- header row: range + employee filter -->
+  <div class="overview__header">
+    <div class="overview__range">
+      <button
+        type="button"
+        class="overview__pill"
+        [class.overview__pill--active]="selectedRange() === 'today'"
+        (click)="setRange('today')"
+      >
+        Today
+      </button>
+      <button
+        type="button"
+        class="overview__pill"
+        [class.overview__pill--active]="selectedRange() === '7d'"
+        (click)="setRange('7d')"
+      >
+        7 days
+      </button>
+      <button
+        type="button"
+        class="overview__pill"
+        [class.overview__pill--active]="selectedRange() === '30d'"
+        (click)="setRange('30d')"
+      >
+        30 days
+      </button>
+      @if (!loading() && logs().length > 0) {
+        <span class="live-indicator">
+          <span class="live-dot"></span>
+          Live
+        </span>
+      }
+    </div>
+
+    @if (isAdmin()) {
+      <div class="overview__employee-filter">
+        <label for="employee-select" class="overview__select-label">
+          Employee
+        </label>
+        <select
+          id="employee-select"
+          class="overview__select"
+          [value]="selectedEmployeeId()"
+          (change)="setSelectedEmployee($any($event.target).value)"
+        >
+          <option value="all">All employees</option>
+          @for (emp of employees(); track emp.uid) {
+            <option [value]="emp.uid">
+              {{ emp.displayName || emp.email }}
+            </option>
+          }
+        </select>
+      </div>
     }
   </div>
 

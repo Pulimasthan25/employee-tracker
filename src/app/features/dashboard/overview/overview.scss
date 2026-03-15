@@ -7,6 +7,8 @@
 .overview__range {
   display: flex;
   gap: var(--space-sm);
+  align-items: center;
+  flex: 1;
 }
 
 .overview__pill {
@@ -214,4 +216,45 @@
 @keyframes live-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.4; transform: scale(0.8); }
+}
+
+.overview__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.overview__employee-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.overview__select-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.overview__select {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  height: 36px;
+  width: 172px;
+  cursor: pointer;
+  color-scheme: dark;
+  outline: none;
+  transition: border-color var(--transition-fast);
+
+  &:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
 }

@@ -13,7 +13,8 @@ import {
 import Chart from 'chart.js/auto';
 import type { ActivityLog } from '../../../core/services/activity.service';
 import { ActivityService } from '../../../core/services/activity.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService, type AppUser } from '../../../core/services/auth.service';
+import { EmployeeService } from '../../../core/services/employee.service';
 
 function formatDuration(seconds: number): string {
   if (seconds < 60) return '0m';
@@ -50,11 +51,17 @@ export class Overview implements OnDestroy {
   private activityService = inject(ActivityService);
   private authService = inject(AuthService);
   private injector = inject(Injector);
+  private employeeService = inject(EmployeeService);
+
+  readonly isAdmin = this.authService.isAdmin;
 
   logs = signal<ActivityLog[]>([]);
+  private allLogs = signal<ActivityLog[]>([]);
+  employees = signal<AppUser[]>([]);
   loading = signal(true);
   connectionError = signal(false);
   selectedRange = signal<'today' | '7d' | '30d'>('today');
+  selectedEmployeeId = signal<'all' | string>('all');
 
   private unsubscribe: (() => void) | null = null;
 
@@ -83,22 +90,31 @@ export class Overview implements OnDestroy {
   totalSeconds = computed(() =>
     this.logs().reduce((s, l) => s + l.durationSeconds, 0)
   );
-  formattedActiveTime = computed(() =>
-    formatDuration(this.totalSeconds())
-  );
+  formattedActiveTime = computed(() => formatDuration(this.totalSeconds()));
 
   private productivityChart: Chart<'doughnut'> | null = null;
   private hourlyChart: Chart<'bar'> | null = null;
 
   constructor() {
+    // Reload data when range changes
     effect(() => {
       const ready = this.authService.authReady();
-      const range = this.selectedRange();
+      const _range = this.selectedRange(); // tracked
       if (!ready) return;
       untracked(() => this.loadData());
     });
+
+    // Load employees once
+    effect(() => {
+      const ready = this.authService.authReady();
+      if (!ready) return;
+      untracked(() => this.loadEmployees());
+    });
+
+    // Create charts after loading completes (canvas exists in DOM)
     effect(() => {
       if (this.loading()) return;
+      if (this.logs().length === 0) return;
       afterNextRender(
         () => {
           this.destroyCharts();
@@ -107,6 +123,15 @@ export class Overview implements OnDestroy {
         },
         { injector: this.injector }
       );
+    });
+
+    // Update charts in-place when employee filter changes logs
+    // (loading stays false so canvas is already mounted)
+    effect(() => {
+      const _logs = this.logs(); // tracked — fires when employee filter applied
+      if (this.loading()) return;
+      if (!this.productivityChart || !this.hourlyChart) return;
+      untracked(() => this.updateCharts());
     });
   }
 
@@ -117,21 +142,23 @@ export class Overview implements OnDestroy {
   }
 
   private loadData(): void {
-    // Cancel the previous listener before setting up a new one
     this.unsubscribe?.();
     this.unsubscribe = null;
+
+    // ❌ removed: this.selectedEmployeeId.set('all');
 
     this.loading.set(true);
     this.connectionError.set(false);
     const { from, to } = getDateRange(this.selectedRange());
 
     try {
-      if (this.authService.isAdmin()) {
+      if (this.isAdmin()) {
         this.unsubscribe = this.activityService.listenTeamActivity(
           from,
           to,
           (logs) => {
-            this.logs.set(logs);
+            this.allLogs.set(logs);
+            this.applyEmployeeFilter(); // preserves current selectedEmployeeId
             this.loading.set(false);
           }
         );
@@ -160,6 +187,30 @@ export class Overview implements OnDestroy {
     }
   }
 
+  private async loadEmployees(): Promise<void> {
+    if (!this.isAdmin()) return;
+    if (this.employees().length > 0) return;
+    try {
+      const all = await this.employeeService.getAll();
+      this.employees.set(all);
+    } catch {
+      // non-fatal
+    }
+  }
+
+  setSelectedEmployee(id: string): void {
+    this.selectedEmployeeId.set(id === 'all' ? 'all' : id);
+    this.applyEmployeeFilter();
+  }
+
+  private applyEmployeeFilter(): void {
+    const all = this.allLogs();
+    const selected = this.selectedEmployeeId();
+    this.logs.set(
+      selected === 'all' ? all : all.filter((log) => log.userId === selected)
+    );
+  }
+
   setRange(range: 'today' | '7d' | '30d'): void {
     this.selectedRange.set(range);
   }
@@ -171,6 +222,26 @@ export class Overview implements OnDestroy {
   getAppPercent(seconds: number): number {
     const total = this.totalSeconds();
     return total === 0 ? 0 : Math.round((seconds / total) * 100);
+  }
+
+  private updateCharts(): void {
+    if (this.productivityChart) {
+      const { productive, unproductive, neutral } = this.categoryMinutes();
+      const total = productive + unproductive + neutral;
+      this.productivityChart.data.datasets[0].data =
+        total > 0 ? [productive, unproductive, neutral] : [1];
+      this.productivityChart.options.plugins!.legend!.display = total > 0;
+      this.productivityChart.update();
+    }
+
+    if (this.hourlyChart) {
+      const hourly = this.hourlyData();
+      this.hourlyChart.data.labels = hourly.map((h) => `${h.hour}:00`);
+      this.hourlyChart.data.datasets[0].data = hourly.map(
+        (h) => h.productiveSeconds
+      );
+      this.hourlyChart.update();
+    }
   }
 
   private renderProductivityChart(): void {
@@ -203,11 +274,8 @@ export class Overview implements OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: total > 0,
-          },
+          legend: { display: total > 0 },
         },
-        scales: total > 0 ? {} : undefined,
       },
     });
   }
@@ -242,16 +310,10 @@ export class Overview implements OnDestroy {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-        },
+        plugins: { legend: { display: false } },
         scales: {
-          x: {
-            grid: { display: false },
-          },
-          y: {
-            beginAtZero: true,
-          },
+          x: { grid: { display: false } },
+          y: { beginAtZero: true },
         },
       },
     });
