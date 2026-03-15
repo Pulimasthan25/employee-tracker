@@ -27,7 +27,7 @@ function toAppUser(id: string, data: Record<string, unknown>): AppUser {
     role: (data['role'] as 'admin' | 'employee') ?? 'employee',
     teamId: data['teamId'] as string | undefined,
     active: (data['active'] as boolean) ?? true,
-    screenshotIntervalSeconds: (data['screenshotIntervalSeconds'] as number) ?? 30,
+    screenshotIntervalSeconds: (data['screenshotIntervalSeconds'] as number) ?? 1800,
     createdAt: toDate(data['createdAt']),
   };
 }
@@ -50,14 +50,17 @@ export class EmployeeService {
     email: string;
     displayName: string;
     teamId?: string;
+    screenshotIntervalSeconds: number;
+    role: 'admin' | 'employee';
   }): Promise<void> {
     const col = collection(db, 'users');
     await addDoc(col, {
       email: data.email,
       displayName: data.displayName,
       teamId: data.teamId ?? null,
-      role: 'employee',
+      role: data.role,
       active: true,
+      screenshotIntervalSeconds: data.screenshotIntervalSeconds,
       createdAt: Timestamp.fromDate(new Date()),
     });
   }

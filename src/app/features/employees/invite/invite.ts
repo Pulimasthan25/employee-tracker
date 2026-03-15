@@ -26,6 +26,22 @@ export class Invite {
   email = '';
   displayName = '';
   teamId = '';
+  intervalSeconds = 1800;
+  role: 'admin' | 'employee' = 'employee';
+
+  readonly intervalOptions = [
+    { label: '1 minute',    value: 60   },
+    { label: '5 minutes',   value: 300  },
+    { label: '15 minutes',  value: 900  },
+    { label: '30 minutes',  value: 1800 },
+    { label: '1 hour',      value: 3600 },
+    { label: 'Disabled',    value: 0   },
+  ];
+
+  readonly roleOptions = [
+    { label: 'Admin', value: 'admin' as const },
+    { label: 'Employee', value: 'employee' as const },
+  ];
 
   async submit(): Promise<void> {
     const email = this.email.trim();
@@ -41,6 +57,8 @@ export class Invite {
         email,
         displayName,
         teamId: this.teamId.trim() || undefined,
+        screenshotIntervalSeconds: this.intervalSeconds,
+        role: this.role,
       });
       this.success.set(true);
       setTimeout(() => this.router.navigate(['/employees']), 1500);

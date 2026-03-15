@@ -50,23 +50,26 @@
         </a>
       }
     </nav>
-    <div class="shell__user">
-      <div class="shell__avatar">{{ avatarLetter() }}</div>
-      <div class="shell__user-info">
-        <span class="shell__user-name">{{ displayName() }}</span>
-        <span class="shell__user-email">{{ userEmail() }}</span>
-      </div>
-      <button type="button" class="btn btn--ghost shell__logout" (click)="logout()">
-        Log out
-      </button>
-    </div>
   </aside>
   <div class="shell__main-wrap">
     <header class="shell__topbar">
       <h1 class="shell__title">{{ pageTitle() }}</h1>
       <div class="shell__topbar-right">
         <span class="badge">Live</span>
-        <span class="shell__topbar-email">{{ userEmail() }}</span>
+        <div class="shell__topbar-user">
+          <div class="shell__avatar">{{ avatarLetter() }}</div>
+          <div class="shell__user-info">
+            <span class="shell__user-name">{{ displayName() }}</span>
+            <span class="shell__user-email">{{ userEmail() }}</span>
+          </div>
+          <button
+            type="button"
+            class="btn btn--ghost shell__logout"
+            (click)="logout()"
+          >
+            Log out
+          </button>
+        </div>
       </div>
     </header>
     <main class="shell__content">

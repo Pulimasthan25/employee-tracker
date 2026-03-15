@@ -4,7 +4,11 @@
     <app-date-range (rangeChange)="onRangeChange($event)" />
     
     @if (isAdmin()) {
-      <select class="form-select" [ngModel]="selectedEmployee()" (ngModelChange)="selectedEmployee.set($event)" style="margin-left: auto; max-width: 200px;">
+      <select
+        class="form-select report__employee-select"
+        [ngModel]="selectedEmployee()"
+        (ngModelChange)="selectedEmployee.set($event)"
+      >
         <option value="all">All employees</option>
         @for (emp of employees(); track emp.uid) {
           <option [value]="emp.uid">{{ emp.displayName }}</option>

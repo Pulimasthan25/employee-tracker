@@ -46,6 +46,20 @@
       </div>
 
       <div class="invite__field">
+        <label for="invite-role" class="invite__label">Role</label>
+        <select
+          id="invite-role"
+          class="invite__input"
+          [(ngModel)]="role"
+          name="role"
+        >
+          @for (opt of roleOptions; track opt.value) {
+            <option [ngValue]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="invite__field">
         <label for="invite-teamId" class="invite__label">Team ID <span class="invite__optional">(optional)</span></label>
         <input
           id="invite-teamId"
@@ -55,6 +69,20 @@
           name="teamId"
           placeholder="e.g. sales, engineering"
         />
+      </div>
+
+      <div class="invite__field">
+        <label for="invite-interval" class="invite__label">Screenshot interval</label>
+        <select
+          id="invite-interval"
+          class="invite__input"
+          [(ngModel)]="intervalSeconds"
+          name="intervalSeconds"
+        >
+          @for (opt of intervalOptions; track opt.value) {
+            <option [ngValue]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
       </div>
 
       <div class="invite__actions">

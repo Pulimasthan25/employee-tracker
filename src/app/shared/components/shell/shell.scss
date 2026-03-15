@@ -157,6 +157,12 @@
   gap: var(--space-lg);
 }
 
+.shell__topbar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
 .shell__topbar-email {
   font-size: 0.875rem;
   color: var(--text-muted);
