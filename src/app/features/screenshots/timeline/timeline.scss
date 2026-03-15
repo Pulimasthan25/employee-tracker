@@ -507,3 +507,84 @@
       opacity: 1;
     }
   }
+
+.timeline__thumb-emp {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: hsl(var(--emp-hue, 220), 65%, 45%);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0;
+  border: 1.5px solid rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.timeline__thumb-emp-tooltip {
+  position: absolute;
+  top: 6px;
+  left: 34px;
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 3;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Show tooltip when hovering the thumb button
+.timeline__thumb-btn:hover .timeline__thumb-emp-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+// ── Lightbox employee chip ────────────────────────────────────────────────────
+
+.lightbox__emp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 3px 10px 3px 4px;
+}
+
+.lightbox__emp-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: hsl(var(--emp-hue, 220), 65%, 45%);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lightbox__emp-name {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
