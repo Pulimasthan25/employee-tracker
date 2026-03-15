@@ -56,13 +56,11 @@
     }
   </div>
 
-
   @if (connectionError()) {
     <div class="connection-error">
       Unable to reach the database. If you have an ad blocker, please disable it for localhost and refresh.
     </div>
   } @else if (loading()) {
-    <!-- skeleton cards -->
     <div class="overview__stats">
       @for (i of [1,2,3,4]; track i) {
         <div class="overview__card overview__card--skeleton"></div>
@@ -114,7 +112,10 @@
         <canvas id="productivity-chart"></canvas>
       </div>
       <div class="overview__chart overview__chart--bar">
-        <canvas id="hourly-chart"></canvas>
+        <div class="overview__chart-header">
+          <span class="overview__chart-title">{{ chartTitle() }}</span>
+        </div>
+        <canvas id="activity-chart"></canvas>
       </div>
     </div>
 

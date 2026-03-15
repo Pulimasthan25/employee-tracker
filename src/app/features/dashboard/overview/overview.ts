@@ -24,6 +24,13 @@ function formatDuration(seconds: number): string {
   return `${h}h ${m}m`;
 }
 
+function formatHours(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h === 0) return `${m}m`;
+  return `${h}h ${m > 0 ? m + 'm' : ''}`;
+}
+
 function getDateRange(range: 'today' | '7d' | '30d'): { from: Date; to: Date } {
   const to = new Date();
   to.setHours(23, 59, 59, 999);
@@ -69,9 +76,41 @@ export class Overview implements OnDestroy {
     this.activityService.getDailyProductivityScore(this.logs())
   );
   topApps = computed(() => this.activityService.groupByApp(this.logs()));
+
+  /** Hourly buckets — only meaningful for 'today' */
   hourlyData = computed(() =>
     this.activityService.groupByHour(this.logs(), new Date())
   );
+
+  /** Daily buckets — used for 7d / 30d */
+  dailyData = computed(() => {
+    const range = this.selectedRange();
+    if (range === 'today') return [];
+    const { from, to } = getDateRange(range);
+    return this.activityService.groupByDay(this.logs(), from, to);
+  });
+
+  /** Chart x-labels and values derived from the active range */
+  chartLabels = computed(() => {
+    if (this.selectedRange() === 'today') {
+      return this.hourlyData().map(h => `${h.hour}:00`);
+    }
+    return this.dailyData().map(d => d.label);
+  });
+
+  chartValues = computed(() => {
+    if (this.selectedRange() === 'today') {
+      return this.hourlyData().map(h => h.productiveSeconds);
+    }
+    return this.dailyData().map(d => d.productiveSeconds);
+  });
+
+  chartTitle = computed(() => {
+    const r = this.selectedRange();
+    if (r === 'today') return 'Productive time by hour';
+    if (r === '7d') return 'Productive time — last 7 days';
+    return 'Productive time — last 30 days';
+  });
 
   categoryMinutes = computed(() => {
     const list = this.logs();
@@ -93,7 +132,7 @@ export class Overview implements OnDestroy {
   formattedActiveTime = computed(() => formatDuration(this.totalSeconds()));
 
   private productivityChart: Chart<'doughnut'> | null = null;
-  private hourlyChart: Chart<'bar'> | null = null;
+  private activityChart: Chart<'bar'> | null = null;
 
   constructor() {
     // Reload data when range changes
@@ -119,18 +158,18 @@ export class Overview implements OnDestroy {
         () => {
           this.destroyCharts();
           this.renderProductivityChart();
-          this.renderHourlyChart();
+          this.renderActivityChart();
         },
         { injector: this.injector }
       );
     });
 
-    // Update charts in-place when employee filter changes logs
-    // (loading stays false so canvas is already mounted)
+    // Update charts in-place when logs or range changes
     effect(() => {
-      const _logs = this.logs(); // tracked — fires when employee filter applied
+      const _logs = this.logs();      // tracked — employee filter or realtime
+      const _range = this.selectedRange(); // tracked — range switch
       if (this.loading()) return;
-      if (!this.productivityChart || !this.hourlyChart) return;
+      if (!this.productivityChart || !this.activityChart) return;
       untracked(() => this.updateCharts());
     });
   }
@@ -145,8 +184,6 @@ export class Overview implements OnDestroy {
     this.unsubscribe?.();
     this.unsubscribe = null;
 
-    // ❌ removed: this.selectedEmployeeId.set('all');
-
     this.loading.set(true);
     this.connectionError.set(false);
     const { from, to } = getDateRange(this.selectedRange());
@@ -158,7 +195,7 @@ export class Overview implements OnDestroy {
           to,
           (logs) => {
             this.allLogs.set(logs);
-            this.applyEmployeeFilter(); // preserves current selectedEmployeeId
+            this.applyEmployeeFilter();
             this.loading.set(false);
           }
         );
@@ -234,13 +271,22 @@ export class Overview implements OnDestroy {
       this.productivityChart.update();
     }
 
-    if (this.hourlyChart) {
-      const hourly = this.hourlyData();
-      this.hourlyChart.data.labels = hourly.map((h) => `${h.hour}:00`);
-      this.hourlyChart.data.datasets[0].data = hourly.map(
-        (h) => h.productiveSeconds
-      );
-      this.hourlyChart.update();
+    if (this.activityChart) {
+      this.activityChart.data.labels = this.chartLabels();
+      this.activityChart.data.datasets[0].data = this.chartValues();
+      // Adjust tick formatter based on range
+      const isToday = this.selectedRange() === 'today';
+      this.activityChart.options.scales!['y']!.ticks = {
+        color: '#8c97b2',
+        callback: (val: unknown) => formatHours(Number(val)),
+      };
+      // Rotate x labels for 30d so they don't crowd
+      this.activityChart.options.scales!['x']!.ticks = {
+        color: '#8c97b2',
+        maxRotation: isToday ? 0 : 45,
+        minRotation: isToday ? 0 : 45,
+      };
+      this.activityChart.update();
     }
   }
 
@@ -280,40 +326,62 @@ export class Overview implements OnDestroy {
     });
   }
 
-  private renderHourlyChart(): void {
+  private renderActivityChart(): void {
     const canvas = document.getElementById(
-      'hourly-chart'
+      'activity-chart'
     ) as HTMLCanvasElement | null;
     if (!canvas) return;
 
-    const hourly = this.hourlyData();
-    const labels = hourly.map((h) => `${h.hour}:00`);
-    const data = hourly.map((h) => h.productiveSeconds);
+    const isToday = this.selectedRange() === 'today';
+    const labels = this.chartLabels();
+    const data = this.chartValues();
 
     Chart.defaults.color = '#8892aa';
     Chart.defaults.borderColor = '#2a3147';
 
-    this.hourlyChart = new Chart(canvas, {
+    this.activityChart = new Chart(canvas, {
       type: 'bar',
       data: {
         labels,
         datasets: [
           {
-            label: 'Productive seconds',
+            label: 'Productive time',
             data,
             backgroundColor: 'rgba(79, 142, 247, 0.6)',
             borderColor: '#4f8ef7',
             borderWidth: 1,
+            borderRadius: 3,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => formatHours(ctx.raw as number),
+            },
+          },
+        },
         scales: {
-          x: { grid: { display: false } },
-          y: { beginAtZero: true },
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#8c97b2',
+              maxRotation: isToday ? 0 : 45,
+              minRotation: isToday ? 0 : 45,
+            },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: {
+              color: '#8c97b2',
+              callback: (val) => formatHours(Number(val)),
+            },
+          },
         },
       },
     });
@@ -322,7 +390,7 @@ export class Overview implements OnDestroy {
   private destroyCharts(): void {
     this.productivityChart?.destroy();
     this.productivityChart = null;
-    this.hourlyChart?.destroy();
-    this.hourlyChart = null;
+    this.activityChart?.destroy();
+    this.activityChart = null;
   }
 }

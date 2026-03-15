@@ -67,6 +67,9 @@
   font-weight: 600;
   color: var(--text-primary);
   font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .connection-error {
@@ -156,6 +159,10 @@
 }
 
 .overview__table-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
   &--bar {
     display: flex;
     align-items: center;
@@ -257,4 +264,18 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent-glow);
   }
+}
+
+.overview__chart-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.overview__chart-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }

@@ -290,6 +290,39 @@ export class ActivityService {
     }
     return buckets;
   }
+  /**
+   * Aggregates logs into daily buckets between `from` and `to` (inclusive).
+   * Returns one entry per day with productive/total seconds.
+   */
+  groupByDay(
+    logs: ActivityLog[],
+    from: Date,
+    to: Date
+  ): { date: Date; label: string; productiveSeconds: number; totalSeconds: number }[] {
+    // Build a bucket for each calendar day in the range
+    const buckets: { date: Date; label: string; productiveSeconds: number; totalSeconds: number }[] = [];
+    const cursor = new Date(from);
+    cursor.setHours(0, 0, 0, 0);
+    const end = new Date(to);
+    end.setHours(0, 0, 0, 0);
+
+    while (cursor <= end) {
+      const label = cursor.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      buckets.push({ date: new Date(cursor), label, productiveSeconds: 0, totalSeconds: 0 });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    for (const log of logs) {
+      const dayKey = new Date(log.startTime);
+      dayKey.setHours(0, 0, 0, 0);
+      const bucket = buckets.find(b => b.date.getTime() === dayKey.getTime());
+      if (!bucket) continue;
+      bucket.totalSeconds += log.durationSeconds;
+      if (log.category === 'productive') bucket.productiveSeconds += log.durationSeconds;
+    }
+
+    return buckets;
+  }
 }
 
 export async function seedFakeActivities(userId: string): Promise<void> {
