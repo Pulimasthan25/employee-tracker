@@ -97,7 +97,7 @@
       <div class="overview__card">
         <div class="overview__card-label">Top app</div>
         <div class="overview__card-value">
-          {{ topApps().length > 0 ? topApps()[0].appName : '—' }}
+          {{ displayRows().length > 0 ? displayRows()[0].appName : '—' }}
         </div>
       </div>
       <div class="overview__card">
@@ -124,39 +124,100 @@
       <h3 class="overview__table-title">Top apps</h3>
       <div class="overview__table">
         <div class="overview__table-header">
-          <span class="overview__table-cell">App name</span>
+          <span class="overview__table-cell">App / Site</span>
           <span class="overview__table-cell">Time</span>
           <span class="overview__table-cell">Category</span>
-          <span class="overview__table-cell overview__table-cell--bar">% of total</span>
+          <span class="overview__table-cell overview__table-cell--bar">
+            % of total
+          </span>
         </div>
-        @for (app of topApps(); track app.appName) {
-          <div class="overview__table-row">
-            <span class="overview__table-cell">{{ app.appName }}</span>
-            <span class="overview__table-cell">{{
-              formatAppTime(app.totalSeconds)
-            }}</span>
+
+        @for (row of displayRows(); track row.appName) {
+          <div
+            class="overview__table-row"
+            [class.overview__table-row--clickable]="row.type === 'browser' && row.children.length > 0"
+            [class.overview__table-row--expanded]="isExpanded(row.appName)"
+            (click)="row.type === 'browser' && row.children.length > 0 && toggleBrowser(row.appName)"
+          >
+            <span class="overview__table-cell overview__table-cell--name">
+              @if (row.type === 'browser' && row.children.length > 0) {
+                <span
+                  class="overview__expand-icon"
+                  [class.overview__expand-icon--open]="isExpanded(row.appName)"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </span>
+              }
+              {{ row.appName }}
+              @if (row.type === 'browser' && row.siteCount > 0) {
+                <span class="overview__site-count">
+                  {{ row.siteCount }} site{{ row.siteCount === 1 ? '' : 's' }}
+                </span>
+              }
+            </span>
+            <span class="overview__table-cell">
+              {{ formatAppTime(row.totalSeconds) }}
+            </span>
             <span class="overview__table-cell">
               <span
                 class="badge"
-                [class.badge--success]="app.category === 'productive'"
-                [class.badge--danger]="app.category === 'unproductive'"
-                [class.badge--info]="app.category === 'neutral'"
+                [class.badge--success]="row.category === 'productive'"
+                [class.badge--danger]="row.category === 'unproductive'"
+                [class.badge--info]="row.category === 'neutral'"
               >
-                {{ app.category }}
+                {{ row.category }}
               </span>
             </span>
             <span class="overview__table-cell overview__table-cell--bar">
               <div class="overview__progress-wrap">
                 <div
                   class="overview__progress-fill"
-                  [style.width.%]="getAppPercent(app.totalSeconds)"
+                  [style.width.%]="getAppPercent(row.totalSeconds)"
                 ></div>
               </div>
-              <span class="overview__progress-label">{{
-                getAppPercent(app.totalSeconds)
-              }}%</span>
+              <span class="overview__progress-label">
+                {{ getAppPercent(row.totalSeconds) }}%
+              </span>
             </span>
           </div>
+
+          @if (row.type === 'browser' && isExpanded(row.appName)) {
+            @for (child of row.children; track child.appName) {
+              <div class="overview__table-row overview__table-row--child">
+                <span class="overview__table-cell overview__table-cell--name overview__table-cell--child">
+                  <span class="overview__child-indent"></span>
+                  {{ child.appName }}
+                </span>
+                <span class="overview__table-cell">
+                  {{ formatAppTime(child.totalSeconds) }}
+                </span>
+                <span class="overview__table-cell">
+                  <span
+                    class="badge"
+                    [class.badge--success]="child.category === 'productive'"
+                    [class.badge--danger]="child.category === 'unproductive'"
+                    [class.badge--info]="child.category === 'neutral'"
+                  >
+                    {{ child.category }}
+                  </span>
+                </span>
+                <span class="overview__table-cell overview__table-cell--bar">
+                  <div class="overview__progress-wrap">
+                    <div
+                      class="overview__progress-fill overview__progress-fill--child"
+                      [style.width.%]="child.percentOfBrowser"
+                    ></div>
+                  </div>
+                  <span class="overview__progress-label">
+                    {{ child.percentOfBrowser }}%
+                  </span>
+                </span>
+              </div>
+            }
+          }
         }
       </div>
     </div>

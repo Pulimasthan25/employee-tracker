@@ -1,12 +1,14 @@
-import { Component, ChangeDetectionStrategy, signal, inject, effect, untracked, ElementRef, viewChild, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, effect, untracked, ElementRef, viewChild, OnDestroy } from '@angular/core';
 import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AuthService, AppUser } from '../../../core/services/auth.service';
-import { ActivityService } from '../../../core/services/activity.service';
+import { ActivityService, type ActivityLog, type DisplayRow } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { FormsModule } from '@angular/forms';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 
 Chart.register(...registerables);
+
+type ChartRow = { appName: string; totalSeconds: number; category: 'productive' | 'unproductive' | 'neutral' };
 
 function formatDuration(seconds: number): string {
   if (!seconds) return '0h 0m';
@@ -30,11 +32,32 @@ export class AppUsage implements OnDestroy {
   readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chartInstance: Chart | null = null;
 
-  readonly data = signal<{ appName: string; totalSeconds: number; category: 'productive' | 'unproductive' | 'neutral' }[]>([]);
+  readonly displayRows = signal<DisplayRow[]>([]);
+  readonly chartData = computed(() =>
+    this.displayRows()
+      .flatMap((row) =>
+        row.type === 'browser' && row.children.length > 0
+          ? row.children.map((c) => ({
+              appName: c.appName,
+              totalSeconds: c.totalSeconds,
+              category: c.category,
+            }))
+          : [
+              {
+                appName: row.appName,
+                totalSeconds: row.totalSeconds,
+                category: row.category,
+              },
+            ]
+      )
+      .sort((a, b) => b.totalSeconds - a.totalSeconds)
+      .slice(0, 10)
+  );
   readonly loading = signal(true);
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
   readonly selectedEmployee = signal<string>('all');
   readonly employees = signal<AppUser[]>([]);
+  readonly expandedBrowsers = signal<Set<string>>(new Set());
 
   readonly isAdmin = this.auth.isAdmin;
 
@@ -52,7 +75,7 @@ export class AppUsage implements OnDestroy {
     });
 
     effect(() => {
-      const d = this.data();
+      const d = this.chartData();
       const canvasRef = this.chartCanvas();
       untracked(() => {
         if (canvasRef) {
@@ -71,7 +94,7 @@ export class AppUsage implements OnDestroy {
       }
 
       const range = this.dateRange()!;
-      let logs: any[] = [];
+      let logs: ActivityLog[] = [];
       const isAdm = this.auth.isAdmin();
       const sel = this.selectedEmployee();
 
@@ -88,8 +111,8 @@ export class AppUsage implements OnDestroy {
         }
       }
 
-      const grouped = this.activity.groupByApp(logs);
-      this.data.set(grouped);
+      const grouped = this.activity.groupForDisplay(logs);
+      this.displayRows.set(grouped);
     } finally {
       this.loading.set(false);
     }
@@ -103,7 +126,20 @@ export class AppUsage implements OnDestroy {
     return formatDuration(seconds);
   }
 
-  private renderChart(data: any[], canvas: HTMLCanvasElement) {
+  toggleBrowser(browserName: string): void {
+    this.expandedBrowsers.update((set) => {
+      const next = new Set(set);
+      if (next.has(browserName)) next.delete(browserName);
+      else next.add(browserName);
+      return next;
+    });
+  }
+
+  isExpanded(browserName: string): boolean {
+    return this.expandedBrowsers().has(browserName);
+  }
+
+  private renderChart(data: ChartRow[], canvas: HTMLCanvasElement) {
     if (this.chartInstance) {
       this.chartInstance.destroy();
       this.chartInstance = null;
@@ -176,7 +212,7 @@ export class AppUsage implements OnDestroy {
   }
 
   getTotalSeconds() {
-    return this.data().reduce((acc, curr) => acc + curr.totalSeconds, 0);
+    return this.displayRows().reduce((acc, curr) => acc + curr.totalSeconds, 0);
   }
 
   getPercentage(seconds: number): string {

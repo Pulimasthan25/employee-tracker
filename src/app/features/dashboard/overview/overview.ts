@@ -75,7 +75,8 @@ export class Overview implements OnDestroy {
   productivityScore = computed(() =>
     this.activityService.getDailyProductivityScore(this.logs())
   );
-  topApps = computed(() => this.activityService.groupByApp(this.logs()));
+  displayRows = computed(() => this.activityService.groupForDisplay(this.logs()));
+  expandedBrowsers = signal<Set<string>>(new Set());
 
   /** Hourly buckets — only meaningful for 'today' */
   hourlyData = computed(() =>
@@ -254,6 +255,19 @@ export class Overview implements OnDestroy {
 
   formatAppTime(seconds: number): string {
     return formatDuration(seconds);
+  }
+
+  toggleBrowser(browserName: string): void {
+    this.expandedBrowsers.update((set) => {
+      const next = new Set(set);
+      if (next.has(browserName)) next.delete(browserName);
+      else next.add(browserName);
+      return next;
+    });
+  }
+
+  isExpanded(browserName: string): boolean {
+    return this.expandedBrowsers().has(browserName);
   }
 
   getAppPercent(seconds: number): number {

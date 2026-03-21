@@ -23,7 +23,7 @@
         <div class="chart-placeholder loading">
           <span>Loading chart...</span>
         </div>
-      } @else if (data().length === 0) {
+      } @else if (chartData().length === 0) {
         <div class="chart-placeholder">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M3 3v18h18" />
@@ -41,7 +41,7 @@
     <table class="report__table">
       <thead>
         <tr>
-          <th>App name</th>
+          <th>App / Site</th>
           <th>Category</th>
           <th>Total time</th>
           <th>% of total</th>
@@ -53,15 +53,43 @@
           <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
           <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
         } @else {
-          @for (item of data(); track item.appName) {
-            <tr>
-              <td style="font-weight: 500;">{{ item.appName }}</td>
-              <td>
-                <span class="badge badge--{{ item.category }}">{{ item.category }}</span>
+          @for (row of displayRows(); track row.appName) {
+            <tr
+              [class.report__row--clickable]="row.type === 'browser' && row.children.length > 0"
+              (click)="row.type === 'browser' && row.children.length > 0 && toggleBrowser(row.appName)"
+            >
+              <td style="font-weight: 500;">
+                @if (row.type === 'browser' && row.children.length > 0) {
+                  <span class="report__expand-icon" [class.report__expand-icon--open]="isExpanded(row.appName)">▶</span>
+                }
+                {{ row.appName }}
+                @if (row.type === 'browser' && row.siteCount > 0) {
+                  <span class="report__site-count">
+                    {{ row.siteCount }} site{{ row.siteCount === 1 ? '' : 's' }}
+                  </span>
+                }
               </td>
-              <td>{{ formatDurationStr(item.totalSeconds) }}</td>
-              <td>{{ getPercentage(item.totalSeconds) }}</td>
+              <td>
+                <span class="badge badge--{{ row.category }}">{{ row.category }}</span>
+              </td>
+              <td>{{ formatDurationStr(row.totalSeconds) }}</td>
+              <td>{{ getPercentage(row.totalSeconds) }}</td>
             </tr>
+
+            @if (row.type === 'browser' && isExpanded(row.appName)) {
+              @for (child of row.children; track child.appName) {
+                <tr class="report__row--child">
+                  <td class="report__child-name">
+                    <span class="report__child-indent"></span>{{ child.appName }}
+                  </td>
+                  <td>
+                    <span class="badge badge--{{ child.category }}">{{ child.category }}</span>
+                  </td>
+                  <td>{{ formatDurationStr(child.totalSeconds) }}</td>
+                  <td>{{ child.percentOfBrowser }}%</td>
+                </tr>
+              }
+            }
           } @empty {
             <tr>
               <td colspan="4" class="empty-state-cell">
