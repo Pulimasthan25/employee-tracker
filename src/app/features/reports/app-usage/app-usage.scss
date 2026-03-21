@@ -18,55 +18,58 @@
   width: 200px;
 }
 
-.report__row--clickable {
+.report__table-row--browser {
   cursor: pointer;
-  user-select: none;
-
-  &:hover {
-    background: var(--bg-hover);
-  }
+  &:hover td { background: var(--bg-hover); }
 }
 
-.report__row--child {
+.report__table-row--child td {
   background: var(--bg-surface);
 }
 
-.report__expand-icon {
-  display: inline-block;
-  margin-right: 8px;
+.report__chevron {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
   color: var(--text-muted);
-  transition: transform var(--transition-fast);
+  transition: transform 0.15s ease;
+  &--open { transform: rotate(90deg); }
+}
 
-  &--open {
-    transform: rotate(90deg);
+.report__chevron-placeholder {
+  display: inline-block;
+  width: 17px;
+}
+
+.report__group-line {
+  display: inline-block;
+  width: 28px;
+  flex-shrink: 0;
+  position: relative;
+  align-self: stretch;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 14px; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    left: 14px; top: 50%;
+    width: 8px; height: 1px;
+    background: var(--border);
   }
 }
 
 .report__site-count {
   margin-left: var(--space-sm);
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  padding: 1px 6px;
+  background: var(--bg-hover);
+  border-radius: 999px;
+  font-size: 0.6875rem;
   font-family: 'DM Mono', monospace;
-}
-
-.report__child-name {
-  display: flex;
-  align-items: center;
-}
-
-.report__child-indent {
-  display: inline-block;
-  width: 20px;
-  flex-shrink: 0;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    width: 8px;
-    height: 1px;
-    background: var(--border);
-  }
+  color: var(--text-muted);
 }

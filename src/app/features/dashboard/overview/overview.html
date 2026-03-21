@@ -135,26 +135,28 @@
         @for (row of displayRows(); track row.appName) {
           <div
             class="overview__table-row"
-            [class.overview__table-row--clickable]="row.type === 'browser' && row.children.length > 0"
+            [class.overview__table-row--browser]="row.type === 'browser'"
             [class.overview__table-row--expanded]="isExpanded(row.appName)"
-            (click)="row.type === 'browser' && row.children.length > 0 && toggleBrowser(row.appName)"
+            (click)="row.type === 'browser' && row.children.length > 0
+                      ? toggleBrowser(row.appName) : null"
           >
             <span class="overview__table-cell overview__table-cell--name">
               @if (row.type === 'browser' && row.children.length > 0) {
-                <span
-                  class="overview__expand-icon"
-                  [class.overview__expand-icon--open]="isExpanded(row.appName)"
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2.5">
+                <span class="overview__chevron"
+                  [class.overview__chevron--open]="isExpanded(row.appName)">
+                  <svg width="11" height="11" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 18 15 12 9 6"/>
                   </svg>
                 </span>
+              } @else {
+                <span class="overview__chevron-placeholder"></span>
               }
               {{ row.appName }}
               @if (row.type === 'browser' && row.siteCount > 0) {
                 <span class="overview__site-count">
-                  {{ row.siteCount }} site{{ row.siteCount === 1 ? '' : 's' }}
+                  {{ row.siteCount }}
                 </span>
               }
             </span>
@@ -187,8 +189,9 @@
           @if (row.type === 'browser' && isExpanded(row.appName)) {
             @for (child of row.children; track child.appName) {
               <div class="overview__table-row overview__table-row--child">
-                <span class="overview__table-cell overview__table-cell--name overview__table-cell--child">
-                  <span class="overview__child-indent"></span>
+                <span class="overview__table-cell overview__table-cell--name
+                             overview__table-cell--indented">
+                  <span class="overview__group-line"></span>
                   {{ child.appName }}
                 </span>
                 <span class="overview__table-cell">
@@ -208,11 +211,11 @@
                   <div class="overview__progress-wrap">
                     <div
                       class="overview__progress-fill overview__progress-fill--child"
-                      [style.width.%]="child.percentOfBrowser"
+                      [style.width.%]="child.percentOfTotal"
                     ></div>
                   </div>
                   <span class="overview__progress-label">
-                    {{ child.percentOfBrowser }}%
+                    {{ child.percentOfTotal }}%
                   </span>
                 </span>
               </div>

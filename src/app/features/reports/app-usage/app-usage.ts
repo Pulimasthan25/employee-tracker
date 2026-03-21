@@ -32,9 +32,9 @@ export class AppUsage implements OnDestroy {
   readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chartInstance: Chart | null = null;
 
-  readonly displayRows = signal<DisplayRow[]>([]);
-  readonly chartData = computed(() =>
-    this.displayRows()
+  readonly data = signal<DisplayRow[]>([]);
+  readonly chartRows = computed(() =>
+    this.data()
       .flatMap((row) =>
         row.type === 'browser' && row.children.length > 0
           ? row.children.map((c) => ({
@@ -75,7 +75,7 @@ export class AppUsage implements OnDestroy {
     });
 
     effect(() => {
-      const d = this.chartData();
+      const d = this.chartRows();
       const canvasRef = this.chartCanvas();
       untracked(() => {
         if (canvasRef) {
@@ -111,8 +111,7 @@ export class AppUsage implements OnDestroy {
         }
       }
 
-      const grouped = this.activity.groupForDisplay(logs);
-      this.displayRows.set(grouped);
+      this.data.set(this.activity.groupForDisplay(logs));
     } finally {
       this.loading.set(false);
     }
@@ -211,8 +210,8 @@ export class AppUsage implements OnDestroy {
     }
   }
 
-  getTotalSeconds() {
-    return this.displayRows().reduce((acc, curr) => acc + curr.totalSeconds, 0);
+  getTotalSeconds(): number {
+    return this.data().reduce((acc, r) => acc + r.totalSeconds, 0);
   }
 
   getPercentage(seconds: number): string {

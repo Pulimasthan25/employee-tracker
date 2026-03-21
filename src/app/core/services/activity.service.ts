@@ -13,6 +13,48 @@ import type { Unsubscribe } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { AppUser } from './auth.service';
 
+const KNOWN_BROWSERS = [
+  'microsoft edge',
+  'google chrome',
+  'brave',
+  'brave browser',
+  'firefox',
+  'mozilla firefox',
+  'safari',
+  'opera',
+  'arc',
+  'vivaldi',
+  'chromium',
+];
+
+/**
+ * Extracts the browser name from a window title.
+ * Browser name is always the last " - " or " — " segment.
+ * Returns undefined if no known browser is found.
+ */
+function extractBrowserFromTitle(windowTitle: string): string | undefined {
+  if (!windowTitle) return undefined;
+  const parts = windowTitle.split(/\s[-–—]\s/);
+  if (parts.length < 2) return undefined;
+  const last = parts[parts.length - 1].trim().toLowerCase();
+  const match = KNOWN_BROWSERS.find((b) => last.includes(b));
+  if (!match) return undefined;
+  const caseMap: Record<string, string> = {
+    'microsoft edge': 'Microsoft Edge',
+    'google chrome': 'Google Chrome',
+    brave: 'Brave',
+    'brave browser': 'Brave',
+    firefox: 'Firefox',
+    'mozilla firefox': 'Firefox',
+    safari: 'Safari',
+    opera: 'Opera',
+    arc: 'Arc',
+    vivaldi: 'Vivaldi',
+    chromium: 'Chromium',
+  };
+  return caseMap[match];
+}
+
 export interface ActivityLog {
   id?: string;
   userId: string;
@@ -30,7 +72,7 @@ export interface ChildRow {
   appName: string;
   totalSeconds: number;
   category: 'productive' | 'unproductive' | 'neutral';
-  percentOfBrowser: number;
+  percentOfTotal: number;
 }
 
 export interface DisplayRow {
@@ -69,12 +111,14 @@ export class ActivityService {
     const snap = await getDocs(q);
     return snap.docs.map((d) => {
       const data = d.data();
+      const windowTitle = data['windowTitle'] ?? '';
+      const browserName = data['browserName'] ?? extractBrowserFromTitle(windowTitle);
       return {
         id: d.id,
         userId: data['userId'],
         appName: data['appName'] ?? '',
-        browserName: data['browserName'] ?? undefined,
-        windowTitle: data['windowTitle'] ?? '',
+        windowTitle,
+        browserName,
         url: data['url'],
         category: data['category'] ?? 'neutral',
         startTime: toDate(data['startTime']),
@@ -96,12 +140,14 @@ export class ActivityService {
     const snap = await getDocs(q);
     return snap.docs.map((d) => {
       const data = d.data();
+      const windowTitle = data['windowTitle'] ?? '';
+      const browserName = data['browserName'] ?? extractBrowserFromTitle(windowTitle);
       return {
         id: d.id,
         userId: data['userId'],
         appName: data['appName'] ?? '',
-        browserName: data['browserName'] ?? undefined,
-        windowTitle: data['windowTitle'] ?? '',
+        windowTitle,
+        browserName,
         url: data['url'],
         category: data['category'] ?? 'neutral',
         startTime: toDate(data['startTime']),
@@ -128,12 +174,14 @@ export class ActivityService {
     return onSnapshot(q, (snap) => {
       const logs = snap.docs.map((d) => {
         const data = d.data();
+        const windowTitle = data['windowTitle'] ?? '';
+        const browserName = data['browserName'] ?? extractBrowserFromTitle(windowTitle);
         return {
           id: d.id,
           userId: data['userId'],
           appName: data['appName'] ?? '',
-          browserName: data['browserName'] ?? undefined,
-          windowTitle: data['windowTitle'] ?? '',
+          windowTitle,
+          browserName,
           url: data['url'],
           category: data['category'] ?? 'neutral',
           startTime: toDate(data['startTime']),
@@ -160,12 +208,14 @@ export class ActivityService {
     return onSnapshot(q, (snap) => {
       const logs = snap.docs.map((d) => {
         const data = d.data();
+        const windowTitle = data['windowTitle'] ?? '';
+        const browserName = data['browserName'] ?? extractBrowserFromTitle(windowTitle);
         return {
           id: d.id,
           userId: data['userId'],
           appName: data['appName'] ?? '',
-          browserName: data['browserName'] ?? undefined,
-          windowTitle: data['windowTitle'] ?? '',
+          windowTitle,
+          browserName,
           url: data['url'],
           category: data['category'] ?? 'neutral',
           startTime: toDate(data['startTime']),
@@ -226,27 +276,16 @@ export class ActivityService {
       .slice(0, 10);
   }
 
-  /**
-   * Groups logs into flat app entries and browser->site grouped entries.
-   * Handles both old data (no browserName) and new browser-attributed data.
-   */
   groupForDisplay(logs: ActivityLog[]): DisplayRow[] {
-    const BROWSER_NAMES = [
-      'google chrome', 'microsoft edge', 'brave', 'brave browser',
-      'firefox', 'safari', 'opera', 'arc', 'vivaldi', 'chromium',
-    ];
-
-    const isBrowserName = (name: string): boolean =>
-      BROWSER_NAMES.some((b) => name.toLowerCase().includes(b));
+    const totalAll = logs.reduce((s, l) => s + l.durationSeconds, 0);
 
     const browserMap = new Map<string, {
       totalSeconds: number;
+      categoryMap: { productive: number; unproductive: number; neutral: number };
       sites: Map<string, {
-        appName: string;
         totalSeconds: number;
         categoryMap: { productive: number; unproductive: number; neutral: number };
       }>;
-      categoryMap: { productive: number; unproductive: number; neutral: number };
     }>();
 
     const appMap = new Map<string, {
@@ -255,81 +294,61 @@ export class ActivityService {
     }>();
 
     for (const log of logs) {
-      const hasBrowserName = !!log.browserName;
-      const isOldBrowserEntry = !hasBrowserName && isBrowserName(log.appName || '');
-
-      if (hasBrowserName) {
-        const browser = log.browserName!;
-        if (!browserMap.has(browser)) {
-          browserMap.set(browser, {
+      if (log.browserName) {
+        if (!browserMap.has(log.browserName)) {
+          browserMap.set(log.browserName, {
             totalSeconds: 0,
+            categoryMap: { productive: 0, unproductive: 0, neutral: 0 },
             sites: new Map(),
-            categoryMap: { productive: 0, unproductive: 0, neutral: 0 },
           });
         }
-        const browserEntry = browserMap.get(browser)!;
-        browserEntry.totalSeconds += log.durationSeconds;
-        browserEntry.categoryMap[log.category] += log.durationSeconds;
+        const b = browserMap.get(log.browserName)!;
+        b.totalSeconds += log.durationSeconds;
+        b.categoryMap[log.category] += log.durationSeconds;
 
-        const site = log.appName || 'Unknown';
-        if (!browserEntry.sites.has(site)) {
-          browserEntry.sites.set(site, {
-            appName: site,
+        const siteName = log.appName;
+        if (!b.sites.has(siteName)) {
+          b.sites.set(siteName, {
             totalSeconds: 0,
             categoryMap: { productive: 0, unproductive: 0, neutral: 0 },
           });
         }
-        const siteEntry = browserEntry.sites.get(site)!;
-        siteEntry.totalSeconds += log.durationSeconds;
-        siteEntry.categoryMap[log.category] += log.durationSeconds;
-      } else if (isOldBrowserEntry) {
-        const browser = log.appName || 'Unknown Browser';
-        if (!browserMap.has(browser)) {
-          browserMap.set(browser, {
-            totalSeconds: 0,
-            sites: new Map(),
-            categoryMap: { productive: 0, unproductive: 0, neutral: 0 },
-          });
-        }
-        const browserEntry = browserMap.get(browser)!;
-        browserEntry.totalSeconds += log.durationSeconds;
-        browserEntry.categoryMap[log.category] += log.durationSeconds;
+        const s = b.sites.get(siteName)!;
+        s.totalSeconds += log.durationSeconds;
+        s.categoryMap[log.category] += log.durationSeconds;
       } else {
-        const appName = log.appName || 'Unknown';
-        if (!appMap.has(appName)) {
-          appMap.set(appName, {
+        if (!appMap.has(log.appName)) {
+          appMap.set(log.appName, {
             totalSeconds: 0,
             categoryMap: { productive: 0, unproductive: 0, neutral: 0 },
           });
         }
-        const appEntry = appMap.get(appName)!;
-        appEntry.totalSeconds += log.durationSeconds;
-        appEntry.categoryMap[log.category] += log.durationSeconds;
+        const a = appMap.get(log.appName)!;
+        a.totalSeconds += log.durationSeconds;
+        a.categoryMap[log.category] += log.durationSeconds;
       }
     }
 
-    const getDominantCategory = (cat: {
-      productive: number;
-      unproductive: number;
-      neutral: number;
-    }): ActivityLog['category'] => {
-      if (cat.productive >= cat.unproductive && cat.productive >= cat.neutral) return 'productive';
-      if (cat.unproductive >= cat.neutral) return 'unproductive';
+    function dominantCategory(
+      map: { productive: number; unproductive: number; neutral: number }
+    ): 'productive' | 'unproductive' | 'neutral' {
+      if (map.productive >= map.unproductive &&
+          map.productive >= map.neutral) return 'productive';
+      if (map.unproductive >= map.neutral) return 'unproductive';
       return 'neutral';
-    };
+    }
 
     const rows: DisplayRow[] = [];
 
     for (const [browserName, data] of browserMap.entries()) {
-      const children: ChildRow[] = Array.from(data.sites.values())
-        .map((s) => ({
-          appName: s.appName,
+      const children: ChildRow[] = Array.from(data.sites.entries())
+        .map(([siteName, s]) => ({
+          appName: siteName,
           totalSeconds: s.totalSeconds,
-          category: getDominantCategory(s.categoryMap),
-          percentOfBrowser:
-            data.totalSeconds > 0
-              ? Math.round((s.totalSeconds / data.totalSeconds) * 100)
-              : 0,
+          category: dominantCategory(s.categoryMap),
+          percentOfTotal: totalAll > 0
+            ? Math.round((s.totalSeconds / totalAll) * 100)
+            : 0,
         }))
         .sort((a, b) => b.totalSeconds - a.totalSeconds);
 
@@ -337,7 +356,7 @@ export class ActivityService {
         type: 'browser',
         appName: browserName,
         totalSeconds: data.totalSeconds,
-        category: getDominantCategory(data.categoryMap),
+        category: dominantCategory(data.categoryMap),
         siteCount: data.sites.size,
         children,
       });
@@ -348,7 +367,7 @@ export class ActivityService {
         type: 'app',
         appName,
         totalSeconds: data.totalSeconds,
-        category: getDominantCategory(data.categoryMap),
+        category: dominantCategory(data.categoryMap),
         siteCount: 0,
         children: [],
       });

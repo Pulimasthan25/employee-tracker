@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import Chart from 'chart.js/auto';
 import type { ActivityLog } from '../../../core/services/activity.service';
+import type { DisplayRow } from '../../../core/services/activity.service';
 import { ActivityService } from '../../../core/services/activity.service';
 import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
@@ -75,8 +76,10 @@ export class Overview implements OnDestroy {
   productivityScore = computed(() =>
     this.activityService.getDailyProductivityScore(this.logs())
   );
-  displayRows = computed(() => this.activityService.groupForDisplay(this.logs()));
-  expandedBrowsers = signal<Set<string>>(new Set());
+  displayRows = computed<DisplayRow[]>(() =>
+    this.activityService.groupForDisplay(this.logs())
+  );
+  readonly expandedBrowsers = signal<Set<string>>(new Set());
 
   /** Hourly buckets — only meaningful for 'today' */
   hourlyData = computed(() =>
