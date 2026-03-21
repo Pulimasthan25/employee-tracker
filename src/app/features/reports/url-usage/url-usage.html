@@ -31,7 +31,7 @@
         } @else {
           @for (item of data(); track item.domain) {
             <tr>
-              <td style="font-weight: 500;">{{ item.domain }}</td>
+              <td style="font-weight: 500;">{{ formatDomain(item.domain) }}</td>
               <td>
                 <span class="badge badge--{{ item.category }}">{{ item.category }}</span>
               </td>

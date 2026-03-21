@@ -86,4 +86,8 @@ export class UrlUsage {
   formatDurationStr(seconds: number): string {
     return formatDuration(seconds);
   }
+
+  formatDomain(domain: string): string {
+    return domain.replace(/\.tracked\/?$/, '');
+  }
 }
