@@ -16,6 +16,7 @@ import type { DisplayRow } from '../../../core/services/activity.service';
 import { ActivityService } from '../../../core/services/activity.service';
 import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
 
 function formatDuration(seconds: number): string {
   if (seconds < 60) return '0m';
@@ -60,6 +61,7 @@ export class Overview implements OnDestroy {
   private authService = inject(AuthService);
   private injector = inject(Injector);
   private employeeService = inject(EmployeeService);
+  private shiftService = inject(ShiftService);
 
   readonly isAdmin = this.authService.isAdmin;
 
@@ -70,6 +72,7 @@ export class Overview implements OnDestroy {
   connectionError = signal(false);
   selectedRange = signal<'today' | '7d' | '30d'>('today');
   selectedEmployeeId = signal<'all' | string>('all');
+  readonly activeShift = signal<ShiftSession | null>(null);
 
   private unsubscribe: (() => void) | null = null;
 
@@ -151,7 +154,10 @@ export class Overview implements OnDestroy {
     effect(() => {
       const ready = this.authService.authReady();
       if (!ready) return;
-      untracked(() => this.loadEmployees());
+      untracked(() => {
+        void this.loadEmployees();
+        void this.loadActiveShift();
+      });
     });
 
     // Create charts after loading completes (canvas exists in DOM)
@@ -237,6 +243,31 @@ export class Overview implements OnDestroy {
     } catch {
       // non-fatal
     }
+  }
+
+  private async loadActiveShift(): Promise<void> {
+    if (this.isAdmin()) {
+      this.activeShift.set(null);
+      return;
+    }
+
+    const uid = this.authService.firebaseUser()?.uid;
+    if (!uid) {
+      this.activeShift.set(null);
+      return;
+    }
+
+    try {
+      const shift = await this.shiftService.getActiveShift(uid);
+      this.activeShift.set(shift);
+    } catch (e) {
+      console.error('[Overview] Failed to load active shift:', e);
+      this.activeShift.set(null);
+    }
+  }
+
+  formatTime(d: Date): string {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   setSelectedEmployee(id: string): void {

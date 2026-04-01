@@ -37,7 +37,7 @@
 
 .overview__stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: var(--space-lg);
 }
 
@@ -70,6 +70,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.overview__card-value--sm {
+  font-size: 1.25rem;
 }
 
 .connection-error {

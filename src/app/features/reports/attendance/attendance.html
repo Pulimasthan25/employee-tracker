@@ -1,0 +1,86 @@
+<div class="report">
+  <div class="report__header">
+    <h2>Attendance report</h2>
+    <app-date-range (rangeChange)="onRangeChange($event)" />
+
+    @if (isAdmin()) {
+      <select
+        class="attendance__select"
+        [value]="selectedEmployee()"
+        (change)="selectedEmployee.set($any($event.target).value)"
+      >
+        <option value="all">All employees</option>
+        @for (emp of employees(); track emp.uid) {
+          <option [value]="emp.uid">{{ emp.displayName || emp.email }}</option>
+        }
+      </select>
+    }
+
+    <button class="export-btn" (click)="exportCsv()" [disabled]="loading()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Export CSV
+    </button>
+  </div>
+
+  <div class="report__card">
+    <table class="report__table">
+      <thead>
+        <tr>
+          <th>Shift Date</th>
+          @if (isAdmin()) { <th>Employee</th> }
+          <th>Login Time</th>
+          <th>Logout Time</th>
+          <th>Active Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          @for (i of [1,2,3,4,5]; track i) {
+            <tr>
+              <td [attr.colspan]="isAdmin() ? 6 : 5">
+                <div class="skeleton-row"></div>
+              </td>
+            </tr>
+          }
+        } @else {
+          @for (s of shifts(); track s.id) {
+            <tr>
+              <td>{{ s.shiftStart | date:'EEE, MMM d' }}</td>
+              @if (isAdmin()) {
+                <td class="attendance__employee">
+                  {{ employees().find(e => e.uid === s.userId)?.displayName || employees().find(e => e.uid === s.userId)?.email || s.userId }}
+                </td>
+              }
+              <td>{{ formatTime(s.loginTime) }}</td>
+              <td>{{ formatTime(s.logoutTime) }}</td>
+              <td>{{ formatDuration(s.totalActiveSeconds) }}</td>
+              <td>
+                <span class="badge attendance__badge" [style.color]="getStatusColor(s.status)" [style.borderColor]="getStatusColor(s.status)">
+                  {{ s.status }}
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="isAdmin() ? 6 : 5" class="empty-state-cell">
+                <div class="empty-state">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M8 7V3m8 4V3M4 11h16"/>
+                    <rect x="4" y="5" width="16" height="16" rx="2"/>
+                  </svg>
+                  <p>No shifts found for this period.</p>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+

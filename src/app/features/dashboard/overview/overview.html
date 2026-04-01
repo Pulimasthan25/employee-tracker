@@ -100,10 +100,19 @@
           {{ displayRows().length > 0 ? displayRows()[0].appName : '—' }}
         </div>
       </div>
-      <div class="overview__card">
-        <div class="overview__card-label">Sessions</div>
-        <div class="overview__card-value">{{ logs().length }}</div>
-      </div>
+      @if (!isAdmin() && activeShift()) {
+        <div class="overview__card">
+          <div class="overview__card-label">Shift login</div>
+          <div class="overview__card-value overview__card-value--sm">
+            {{ formatTime(activeShift()!.loginTime) }}
+          </div>
+        </div>
+      } @else {
+        <div class="overview__card">
+          <div class="overview__card-label">Sessions</div>
+          <div class="overview__card-value">{{ logs().length }}</div>
+        </div>
+      }
     </div>
 
     <!-- charts row -->
