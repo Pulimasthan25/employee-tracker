@@ -24,6 +24,7 @@ export class Invite {
   readonly success = signal(false);
 
   email = '';
+  password = '';
   displayName = '';
   teamId = '';
   intervalSeconds = 1800;
@@ -46,8 +47,9 @@ export class Invite {
   async submit(): Promise<void> {
     const email = this.email.trim();
     const displayName = this.displayName.trim();
-    if (!email || !displayName) {
-      this.error.set('Email and display name are required.');
+    const password = this.password.trim();
+    if (!email || !displayName || !password) {
+      this.error.set('Email, password, and display name are required.');
       return;
     }
     this.error.set(null);
@@ -59,6 +61,7 @@ export class Invite {
         teamId: this.teamId.trim() || undefined,
         screenshotIntervalSeconds: this.intervalSeconds,
         role: this.role,
+        password,
       });
       this.success.set(true);
       setTimeout(() => this.router.navigate(['/employees']), 1500);

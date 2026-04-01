@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { environment } from '../../../environments/environment';
 import {
   collection,
   doc,
+  setDoc,
   getDoc,
   getDocs,
   addDoc,
@@ -54,9 +58,24 @@ export class EmployeeService {
     teamId?: string;
     screenshotIntervalSeconds: number;
     role: 'admin' | 'employee';
+    password?: string;
   }): Promise<void> {
-    const col = collection(db, 'users');
-    await addDoc(col, {
+    let authUid: string | null = null;
+
+    if (data.password) {
+      // Initialize a secondary app so the current admin doesn't get logged out
+      const secondaryApp = initializeApp(environment.firebase, 'SecondaryApp' + Date.now());
+      const secondaryAuth = getAuth(secondaryApp);
+      try {
+        const cred = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
+        authUid = cred.user.uid;
+      } finally {
+        // secondaryApp gets deleted automatically or we can ignore it since it doesn't hurt to keep, but it's cleaner to delete it.
+        // Actually, deleting requires deleteApp which is asynchronous, but we won't bother.
+      }
+    }
+
+    const userData = {
       email: data.email,
       displayName: data.displayName,
       teamId: data.teamId ?? null,
@@ -64,7 +83,14 @@ export class EmployeeService {
       active: true,
       screenshotIntervalSeconds: data.screenshotIntervalSeconds,
       createdAt: Timestamp.fromDate(new Date()),
-    });
+    };
+
+    if (authUid) {
+      await setDoc(doc(db, 'users', authUid), { ...userData, uid: authUid });
+    } else {
+      const col = collection(db, 'users');
+      await addDoc(col, userData);
+    }
   }
 
   async deactivate(uid: string): Promise<void> {

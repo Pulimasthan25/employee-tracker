@@ -33,6 +33,20 @@
       </div>
 
       <div class="invite__field">
+        <label for="invite-password" class="invite__label">Password</label>
+        <input
+          id="invite-password"
+          type="password"
+          class="invite__input"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Required for login"
+          required
+          minlength="6"
+        />
+      </div>
+
+      <div class="invite__field">
         <label for="invite-displayName" class="invite__label">Display name</label>
         <input
           id="invite-displayName"
