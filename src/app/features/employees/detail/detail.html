@@ -92,6 +92,65 @@
             }
           </div>
         </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Shift hours</span>
+            <span class="setting-desc">
+              Sets the shift window for this employee (cross-midnight).
+              Example: 20:00 → 04:00.
+            </span>
+          </div>
+          <div class="setting-control">
+            @if (savingShiftHours()) {
+              <span class="saving-text">Saving…</span>
+            } @else {
+              <div class="detail__shift-hours">
+                <!-- Custom Start Hour Dropdown -->
+                <div class="custom-select-container" tabindex="0" (blur)="openStart = false">
+                  <div class="custom-select-trigger" (click)="openStart = !openStart">
+                    {{ formatShiftHour(emp.shiftStartHour ?? 20) }}
+                  </div>
+                  @if (openStart) {
+                    <div class="custom-select-dropdown">
+                      @for (opt of shiftHourOptions; track opt.value) {
+                        <div
+                          class="custom-select-option"
+                          [class.custom-select-option--active]="(emp.shiftStartHour ?? 20) === opt.value"
+                          (click)="onShiftHoursChange(opt.value, emp.shiftEndHour ?? 4); openStart = false"
+                        >
+                          {{ opt.label }}
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                
+                <span class="detail__shift-sep">→</span>
+                
+                <!-- Custom End Hour Dropdown -->
+                <div class="custom-select-container" tabindex="0" (blur)="openEnd = false">
+                  <div class="custom-select-trigger" (click)="openEnd = !openEnd">
+                    {{ formatShiftHour(emp.shiftEndHour ?? 4) }}
+                  </div>
+                  @if (openEnd) {
+                    <div class="custom-select-dropdown">
+                      @for (opt of shiftHourOptions; track opt.value) {
+                        <div
+                          class="custom-select-option"
+                          [class.custom-select-option--active]="(emp.shiftEndHour ?? 4) === opt.value"
+                          (click)="onShiftHoursChange(emp.shiftStartHour ?? 20, opt.value); openEnd = false"
+                        >
+                          {{ opt.label }}
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
       </div>
 
       @if (emp.active) {

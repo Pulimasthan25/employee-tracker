@@ -45,6 +45,19 @@ export class Detail {
   ];
 
   readonly savingInterval = signal(false);
+  readonly savingShiftHours = signal(false);
+
+  readonly shiftHourOptions = Array.from({ length: 24 }, (_, h) => ({
+    label: `${String(h).padStart(2, '0')}:00`,
+    value: h,
+  }));
+
+  openStart = false;
+  openEnd = false;
+
+  formatShiftHour(h: number): string {
+    return `${String(h).padStart(2, '0')}:00`;
+  }
 
   constructor() {
     effect(() => {
@@ -101,6 +114,27 @@ export class Detail {
       this.toastService.show('Failed to update interval.', 'error');
     } finally {
       this.savingInterval.set(false);
+    }
+  }
+
+  async onShiftHoursChange(startHour: number, endHour: number): Promise<void> {
+    if (!this.employee()?.uid) return;
+    this.savingShiftHours.set(true);
+    try {
+      await this.employeeService.updateShiftHours(
+        this.employee()!.uid,
+        startHour,
+        endHour
+      );
+      this.toastService.show('Shift hours updated.', 'success');
+      const emp = this.employee();
+      if (emp) {
+        this.employee.set({ ...emp, shiftStartHour: startHour, shiftEndHour: endHour });
+      }
+    } catch {
+      this.toastService.show('Failed to update shift hours.', 'error');
+    } finally {
+      this.savingShiftHours.set(false);
     }
   }
 }

@@ -38,6 +38,7 @@ export class Attendance {
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
   readonly selectedEmployee = signal<string>('all');
   readonly isAdmin = this.auth.isAdmin;
+  private loadSeq = 0;
 
   constructor() {
     effect(() => {
@@ -53,6 +54,16 @@ export class Attendance {
 
   onRangeChange(range: { from: Date; to: Date }): void {
     this.dateRange.set(range);
+  }
+
+  onEmployeeChange(uid: string): void {
+    this.selectedEmployee.set(uid);
+    untracked(() => { void this.loadData(); });
+  }
+
+  getEmployeeName(uid: string): string {
+    const e = this.employees().find(x => x.uid === uid);
+    return e?.displayName || e?.email || uid;
   }
 
   formatTime(d: Date): string {
@@ -72,6 +83,7 @@ export class Attendance {
   }
 
   async loadData(): Promise<void> {
+    const seq = ++this.loadSeq;
     this.loading.set(true);
     try {
       if (this.auth.isAdmin() && this.employees().length === 0) {
@@ -100,9 +112,14 @@ export class Attendance {
         shifts = await this.shiftsApi.getShiftsForUser(uid, range.from, range.to);
       }
 
-      this.shifts.set(shifts);
+      // Prevent stale async loads from overwriting latest selection/range.
+      if (seq === this.loadSeq) {
+        this.shifts.set(shifts);
+      }
     } finally {
-      this.loading.set(false);
+      if (seq === this.loadSeq) {
+        this.loading.set(false);
+      }
     }
   }
 

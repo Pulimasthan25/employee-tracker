@@ -28,6 +28,8 @@ function toAppUser(id: string, data: Record<string, unknown>): AppUser {
     teamId: data['teamId'] as string | undefined,
     active: (data['active'] as boolean) ?? true,
     screenshotIntervalSeconds: (data['screenshotIntervalSeconds'] as number) ?? 1800,
+    shiftStartHour: typeof data['shiftStartHour'] === 'number' ? (data['shiftStartHour'] as number) : undefined,
+    shiftEndHour: typeof data['shiftEndHour'] === 'number' ? (data['shiftEndHour'] as number) : undefined,
     createdAt: toDate(data['createdAt']),
   };
 }
@@ -72,6 +74,13 @@ export class EmployeeService {
   async updateScreenshotInterval(uid: string, intervalSeconds: number): Promise<void> {
     await updateDoc(doc(db, 'users', uid), {
       screenshotIntervalSeconds: intervalSeconds
+    });
+  }
+
+  async updateShiftHours(uid: string, shiftStartHour: number, shiftEndHour: number): Promise<void> {
+    await updateDoc(doc(db, 'users', uid), {
+      shiftStartHour,
+      shiftEndHour,
     });
   }
 }

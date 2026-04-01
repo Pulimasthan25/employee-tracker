@@ -476,6 +476,7 @@ export class ActivityService {
     cursor.setHours(0, 0, 0, 0);
     const end = new Date(to);
     end.setHours(0, 0, 0, 0);
+    const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
     while (cursor <= end) {
       const label = cursor.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -484,9 +485,8 @@ export class ActivityService {
     }
 
     for (const log of logs) {
-      const dayKey = new Date(log.startTime);
-      dayKey.setHours(0, 0, 0, 0);
-      const bucket = buckets.find(b => b.date.getTime() === dayKey.getTime());
+      const dayStr = fmt(log.startTime);
+      const bucket = buckets.find(b => fmt(b.date) === dayStr);
       if (!bucket) continue;
       bucket.totalSeconds += log.durationSeconds;
       if (log.category === 'productive') bucket.productiveSeconds += log.durationSeconds;

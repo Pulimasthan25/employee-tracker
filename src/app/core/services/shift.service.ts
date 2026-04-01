@@ -125,5 +125,18 @@ export class ShiftService {
     const d = snap.docs[0]!;
     return this.toShiftSession(d.id, d.data() as Record<string, unknown>);
   }
+
+  async getLatestShiftForUser(userId: string): Promise<ShiftSession | null> {
+    const q = query(
+      collection(db, 'shifts'),
+      where('userId', '==', userId),
+      orderBy('shiftDate', 'desc'),
+      limit(1)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    const d = snap.docs[0]!;
+    return this.toShiftSession(d.id, d.data() as Record<string, unknown>);
+  }
 }
 

@@ -33,7 +33,12 @@ function formatHours(seconds: number): string {
   return `${h}h ${m > 0 ? m + 'm' : ''}`;
 }
 
-function getDateRange(range: 'today' | '7d' | '30d'): { from: Date; to: Date } {
+function getDateRange(range: 'today' | '7d' | '30d' | 'custom', customStart?: string, customEnd?: string): { from: Date; to: Date } {
+  if (range === 'custom' && customStart && customEnd) {
+    const from = new Date(customStart + 'T00:00:00');
+    const to = new Date(customEnd + 'T23:59:59.999');
+    return { from, to };
+  }
   const to = new Date();
   to.setHours(23, 59, 59, 999);
   const from = new Date(to);
@@ -70,7 +75,9 @@ export class Overview implements OnDestroy {
   employees = signal<AppUser[]>([]);
   loading = signal(true);
   connectionError = signal(false);
-  selectedRange = signal<'today' | '7d' | '30d'>('today');
+  selectedRange = signal<'today' | '7d' | '30d' | 'custom'>('today');
+  customStart = signal<string>(new Date().toISOString().split('T')[0]);
+  customEnd = signal<string>(new Date().toISOString().split('T')[0]);
   selectedEmployeeId = signal<'all' | string>('all');
   readonly activeShift = signal<ShiftSession | null>(null);
 
@@ -89,11 +96,11 @@ export class Overview implements OnDestroy {
     this.activityService.groupByHour(this.logs(), new Date())
   );
 
-  /** Daily buckets — used for 7d / 30d */
+  /** Daily buckets — used for 7d / 30d / custom */
   dailyData = computed(() => {
     const range = this.selectedRange();
     if (range === 'today') return [];
-    const { from, to } = getDateRange(range);
+    const { from, to } = getDateRange(range, this.customStart(), this.customEnd());
     return this.activityService.groupByDay(this.logs(), from, to);
   });
 
@@ -137,6 +144,15 @@ export class Overview implements OnDestroy {
     this.logs().reduce((s, l) => s + l.durationSeconds, 0)
   );
   formattedActiveTime = computed(() => formatDuration(this.totalSeconds()));
+
+  productiveSeconds = computed(() =>
+    this.logs()
+      .filter((l) => l.category === 'productive')
+      .reduce((s, l) => s + l.durationSeconds, 0)
+  );
+  formattedProductiveTime = computed(() =>
+    formatDuration(this.productiveSeconds())
+  );
 
   private productivityChart: Chart<'doughnut'> | null = null;
   private activityChart: Chart<'bar'> | null = null;
@@ -196,7 +212,7 @@ export class Overview implements OnDestroy {
 
     this.loading.set(true);
     this.connectionError.set(false);
-    const { from, to } = getDateRange(this.selectedRange());
+    const { from, to } = getDateRange(this.selectedRange(), this.customStart(), this.customEnd());
 
     try {
       if (this.isAdmin()) {
@@ -246,8 +262,21 @@ export class Overview implements OnDestroy {
   }
 
   private async loadActiveShift(): Promise<void> {
-    if (this.isAdmin()) {
-      this.activeShift.set(null);
+    const isAdm = this.isAdmin();
+    const selected = this.selectedEmployeeId();
+
+    if (isAdm) {
+      if (selected === 'all') {
+        this.activeShift.set(null);
+        return;
+      }
+      try {
+        const s = await this.shiftService.getActiveShift(selected);
+        this.activeShift.set(s ?? await this.shiftService.getLatestShiftForUser(selected));
+      } catch (e) {
+        console.error('[Overview] Failed to load active shift for employee:', e);
+        this.activeShift.set(null);
+      }
       return;
     }
 
@@ -258,8 +287,8 @@ export class Overview implements OnDestroy {
     }
 
     try {
-      const shift = await this.shiftService.getActiveShift(uid);
-      this.activeShift.set(shift);
+      const s = await this.shiftService.getActiveShift(uid);
+      this.activeShift.set(s ?? await this.shiftService.getLatestShiftForUser(uid));
     } catch (e) {
       console.error('[Overview] Failed to load active shift:', e);
       this.activeShift.set(null);
@@ -273,6 +302,7 @@ export class Overview implements OnDestroy {
   setSelectedEmployee(id: string): void {
     this.selectedEmployeeId.set(id === 'all' ? 'all' : id);
     this.applyEmployeeFilter();
+    untracked(() => { void this.loadActiveShift(); });
   }
 
   private applyEmployeeFilter(): void {
@@ -283,8 +313,22 @@ export class Overview implements OnDestroy {
     );
   }
 
-  setRange(range: 'today' | '7d' | '30d'): void {
+  setRange(range: 'today' | '7d' | '30d' | 'custom'): void {
     this.selectedRange.set(range);
+  }
+
+  setCustomStart(val: string): void {
+    this.customStart.set(val);
+    if (this.selectedRange() === 'custom') {
+      untracked(() => this.loadData());
+    }
+  }
+
+  setCustomEnd(val: string): void {
+    this.customEnd.set(val);
+    if (this.selectedRange() === 'custom') {
+      untracked(() => this.loadData());
+    }
   }
 
   formatAppTime(seconds: number): string {

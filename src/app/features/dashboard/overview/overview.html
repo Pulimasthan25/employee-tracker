@@ -26,6 +26,19 @@
       >
         30 days
       </button>
+      <button
+        type="button"
+        class="overview__pill"
+        [class.overview__pill--active]="selectedRange() === 'custom'"
+        (click)="setRange('custom')"
+      >
+        Custom
+      </button>
+      @if (selectedRange() === 'custom') {
+        <input type="date" class="overview__pill overview__pill--date" [value]="customStart()" (change)="setCustomStart($any($event.target).value)">
+        <span class="overview__date-sep">to</span>
+        <input type="date" class="overview__pill overview__pill--date" [value]="customEnd()" (change)="setCustomEnd($any($event.target).value)">
+      }
       @if (!loading() && logs().length > 0) {
         <span class="live-indicator">
           <span class="live-dot"></span>
@@ -36,9 +49,9 @@
 
     @if (isAdmin()) {
       <div class="overview__employee-filter">
-        <label for="employee-select" class="overview__select-label">
+        <!-- <label for="employee-select" class="overview__select-label">
           Employee
-        </label>
+        </label> -->
         <select
           id="employee-select"
           class="overview__select"
@@ -77,17 +90,20 @@
     <div class="overview__stats">
       <div class="overview__card">
         <div class="overview__card-label">Productivity score</div>
-        <div
-          class="overview__card-value"
-          [style.color]="
-            productivityScore() > 70
-              ? '#34c98a'
-              : productivityScore() >= 40
-                ? '#f5a623'
-                : '#f05252'
-          "
-        >
-          {{ productivityScore() }}%
+        <div class="overview__card-value-row">
+          <div
+            class="overview__card-value"
+            [style.color]="
+              productivityScore() > 70
+                ? '#34c98a'
+                : productivityScore() >= 40
+                  ? '#f5a623'
+                  : '#f05252'
+            "
+          >
+            {{ productivityScore() }}%
+          </div>
+          <div class="overview__card-subvalue">{{ formattedProductiveTime() }}</div>
         </div>
       </div>
       <div class="overview__card">
@@ -100,17 +116,17 @@
           {{ displayRows().length > 0 ? displayRows()[0].appName : '—' }}
         </div>
       </div>
-      @if (!isAdmin() && activeShift()) {
+      @if (!isAdmin() || (isAdmin() && selectedEmployeeId() !== 'all')) {
         <div class="overview__card">
           <div class="overview__card-label">Shift login</div>
           <div class="overview__card-value overview__card-value--sm">
-            {{ formatTime(activeShift()!.loginTime) }}
+            {{ activeShift() ? formatTime(activeShift()!.loginTime) : '—' }}
           </div>
         </div>
       } @else {
         <div class="overview__card">
-          <div class="overview__card-label">Sessions</div>
-          <div class="overview__card-value">{{ logs().length }}</div>
+          <div class="overview__card-label">Employees</div>
+          <div class="overview__card-value">{{ employees().length }}</div>
         </div>
       }
     </div>

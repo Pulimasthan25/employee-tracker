@@ -7,7 +7,7 @@
       <select
         class="attendance__select"
         [value]="selectedEmployee()"
-        (change)="selectedEmployee.set($any($event.target).value)"
+        (change)="onEmployeeChange($any($event.target).value)"
       >
         <option value="all">All employees</option>
         @for (emp of employees(); track emp.uid) {
@@ -53,7 +53,7 @@
               <td>{{ s.shiftStart | date:'EEE, MMM d' }}</td>
               @if (isAdmin()) {
                 <td class="attendance__employee">
-                  {{ employees().find(e => e.uid === s.userId)?.displayName || employees().find(e => e.uid === s.userId)?.email || s.userId }}
+                  {{ getEmployeeName(s.userId) }}
                 </td>
               }
               <td>{{ formatTime(s.loginTime) }}</td>

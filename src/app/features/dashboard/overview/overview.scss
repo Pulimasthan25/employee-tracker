@@ -33,6 +33,19 @@
     color: white;
     border-color: var(--accent);
   }
+
+  &--date {
+    background: var(--bg-surface);
+    color-scheme: dark;
+    height: 38px;
+  }
+}
+
+.overview__date-sep {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-transform: uppercase;
 }
 
 .overview__stats {
@@ -74,6 +87,21 @@
 
 .overview__card-value--sm {
   font-size: 1.25rem;
+}
+
+.overview__card-value-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.overview__card-subvalue {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
 }
 
 .connection-error {
