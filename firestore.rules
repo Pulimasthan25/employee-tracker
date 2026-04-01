@@ -35,5 +35,16 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow delete: if isAdmin();
     }
+
+    match /shifts/{docId} {
+      // Admins can read all shifts
+      allow read: if request.auth != null && isAdmin();
+      // Employee can read their own shifts
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Agent can create/update only its own shift docs
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
   }
 }

@@ -9,13 +9,6 @@
       ]
     },
     {
-      "collectionGroup": "activities",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "startTime", "order": "DESCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "screenshots",
       "queryScope": "COLLECTION",
       "fields": [
@@ -24,10 +17,20 @@
       ]
     },
     {
-      "collectionGroup": "screenshots",
+      "collectionGroup": "shifts",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "capturedAt", "order": "ASCENDING" }
+        { "fieldPath": "userId",    "order": "ASCENDING" },
+        { "fieldPath": "shiftDate", "order": "DESCENDING" },
+        { "fieldPath": "status",    "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "shifts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "shiftDate", "order": "DESCENDING" },
+        { "fieldPath": "status",    "order": "ASCENDING" }
       ]
     }
   ],
