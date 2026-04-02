@@ -4,11 +4,10 @@ import {
   query,
   where,
   orderBy,
-  limit,
-  getDocs,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getDocsAllPages } from '../firestore/paginated-query';
 
 export interface IdleSession {
   id: string;
@@ -27,6 +26,13 @@ function toDate(val: unknown): Date {
   return new Date(val as number);
 }
 
+const DEFAULT_IDLE_REPORT_THRESHOLD = 300;
+
+export interface BreakTotalOptions {
+  thresholdSeconds?: number;
+  perUserThreshold?: Map<string, number>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class IdleService {
   async getIdleSessionsForUser(
@@ -34,16 +40,15 @@ export class IdleService {
     from: Date,
     to: Date
   ): Promise<IdleSession[]> {
-    const q = query(
-      collection(db, 'idle_sessions'),
+    const col = collection(db, 'idle_sessions');
+    const baseConstraints = [
       where('userId', '==', userId),
       where('startTime', '>=', Timestamp.fromDate(from)),
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
-      limit(200)
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => {
+    ];
+    const docs = await getDocsAllPages(col, baseConstraints);
+    return docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,
@@ -57,15 +62,14 @@ export class IdleService {
   }
 
   async getAllIdleSessions(from: Date, to: Date): Promise<IdleSession[]> {
-    const q = query(
-      collection(db, 'idle_sessions'),
+    const col = collection(db, 'idle_sessions');
+    const baseConstraints = [
       where('startTime', '>=', Timestamp.fromDate(from)),
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
-      limit(500)
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => {
+    ];
+    const docs = await getDocsAllPages(col, baseConstraints);
+    return docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,
@@ -78,8 +82,16 @@ export class IdleService {
     });
   }
 
-  getTotalBreakSeconds(sessions: IdleSession[]): number {
-    return sessions.reduce((s, i) => s + i.durationSeconds, 0);
+  getTotalBreakSeconds(sessions: IdleSession[], options?: BreakTotalOptions): number {
+    const perUser = options?.perUserThreshold;
+    const single = options?.thresholdSeconds ?? DEFAULT_IDLE_REPORT_THRESHOLD;
+    let sum = 0;
+    for (const s of sessions) {
+      const t = perUser?.get(s.userId) ?? single;
+      if (s.durationSeconds >= t) {
+        sum += s.durationSeconds;
+      }
+    }
+    return sum;
   }
 }
-

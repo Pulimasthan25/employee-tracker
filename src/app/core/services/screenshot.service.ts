@@ -4,11 +4,10 @@ import {
   query,
   where,
   orderBy,
-  limit,
-  getDocs,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getDocsAllPages } from '../firestore/paginated-query';
 
 export interface Screenshot {
   id: string;
@@ -41,16 +40,14 @@ export class ScreenshotService {
     to: Date
   ): Promise<Screenshot[]> {
     const col = collection(db, 'screenshots');
-    const q = query(
-      col,
+    const baseConstraints = [
       where('userId', '==', userId),
       where('capturedAt', '>=', Timestamp.fromDate(from)),
       where('capturedAt', '<=', Timestamp.fromDate(to)),
       orderBy('capturedAt', 'asc'),
-      limit(500)
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => {
+    ];
+    const docs = await getDocsAllPages(col, baseConstraints);
+    return docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,
@@ -66,15 +63,13 @@ export class ScreenshotService {
 
   async getScreenshotsForTeam(from: Date, to: Date): Promise<Screenshot[]> {
     const col = collection(db, 'screenshots');
-    const q = query(
-      col,
+    const baseConstraints = [
       where('capturedAt', '>=', Timestamp.fromDate(from)),
       where('capturedAt', '<=', Timestamp.fromDate(to)),
       orderBy('capturedAt', 'asc'),
-      limit(1000)
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => {
+    ];
+    const docs = await getDocsAllPages(col, baseConstraints);
+    return docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,

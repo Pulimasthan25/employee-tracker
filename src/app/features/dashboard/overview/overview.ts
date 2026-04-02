@@ -157,9 +157,24 @@ export class Overview implements OnDestroy {
     formatDuration(this.productiveSeconds())
   );
 
-  readonly totalBreakSeconds = computed(() =>
-    this.idleService.getTotalBreakSeconds(this.idleSessions())
-  );
+  readonly totalBreakSeconds = computed(() => {
+    const sessions = this.idleSessions();
+    const employees = this.employees();
+    if (!this.isAdmin()) {
+      const ts = this.authService.appUser()?.idleThresholdSeconds ?? 300;
+      return this.idleService.getTotalBreakSeconds(sessions, { thresholdSeconds: ts });
+    }
+    const selected = this.selectedEmployeeId();
+    if (selected === 'all') {
+      const perUserThreshold = new Map(
+        employees.map((e) => [e.uid, e.idleThresholdSeconds ?? 300] as const)
+      );
+      return this.idleService.getTotalBreakSeconds(sessions, { perUserThreshold });
+    }
+    const ts =
+      employees.find((e) => e.uid === selected)?.idleThresholdSeconds ?? 300;
+    return this.idleService.getTotalBreakSeconds(sessions, { thresholdSeconds: ts });
+  });
   readonly formattedBreakTime = computed(() =>
     formatDuration(this.totalBreakSeconds())
   );

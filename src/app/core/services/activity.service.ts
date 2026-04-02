@@ -4,13 +4,12 @@ import {
   query,
   where,
   orderBy,
-  limit,
-  getDocs,
   onSnapshot,
   Timestamp,
 } from 'firebase/firestore';
 import type { Unsubscribe } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getDocsAllPages } from '../firestore/paginated-query';
 import type { AppUser } from './auth.service';
 
 const KNOWN_BROWSERS = [
@@ -100,16 +99,14 @@ export class ActivityService {
     to: Date
   ): Promise<ActivityLog[]> {
     const col = collection(db, 'activities');
-    const q = query(
-      col,
+    const baseConstraints = [
       where('userId', '==', userId),
       where('startTime', '>=', Timestamp.fromDate(from)),
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
-      limit(500)
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => {
+    ];
+    const docs = await getDocsAllPages(col, baseConstraints);
+    return docs.map((d) => {
       const data = d.data();
       const windowTitle = data['windowTitle'] ?? '';
       const browserName = data['browserName'] ?? extractBrowserFromTitle(windowTitle);
@@ -130,15 +127,13 @@ export class ActivityService {
 
   async getTeamActivitySummary(from: Date, to: Date): Promise<ActivityLog[]> {
     const col = collection(db, 'activities');
-    const q = query(
-      col,
+    const baseConstraints = [
       where('startTime', '>=', Timestamp.fromDate(from)),
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
-      limit(1000)
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => {
+    ];
+    const docs = await getDocsAllPages(col, baseConstraints);
+    return docs.map((d) => {
       const data = d.data();
       const windowTitle = data['windowTitle'] ?? '';
       const browserName = data['browserName'] ?? extractBrowserFromTitle(windowTitle);
@@ -168,8 +163,7 @@ export class ActivityService {
       where('userId', '==', userId),
       where('startTime', '>=', Timestamp.fromDate(from)),
       where('startTime', '<=', Timestamp.fromDate(to)),
-      orderBy('startTime', 'desc'),
-      limit(500)
+      orderBy('startTime', 'desc')
     );
     return onSnapshot(q, (snap) => {
       const logs = snap.docs.map((d) => {
@@ -202,8 +196,7 @@ export class ActivityService {
       collection(db, 'activities'),
       where('startTime', '>=', Timestamp.fromDate(from)),
       where('startTime', '<=', Timestamp.fromDate(to)),
-      orderBy('startTime', 'desc'),
-      limit(1000)
+      orderBy('startTime', 'desc')
     );
     return onSnapshot(q, (snap) => {
       const logs = snap.docs.map((d) => {

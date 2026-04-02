@@ -61,8 +61,8 @@
               <td>{{ formatTime(s.loginTime) }}</td>
               <td>{{ formatTime(s.logoutTime) }}</td>
               <td>{{ formatDuration(s.totalActiveSeconds) }}</td>
-              <td>{{ getTotalBreakTime(isAdmin() ? s.userId : undefined) }}</td>
-              <td>{{ getTotalProductiveTime(isAdmin() ? s.userId : undefined) }}</td>
+              <td>{{ getTotalBreakTime(isAdmin() ? s.userId : sessionUid()) }}</td>
+              <td>{{ getTotalProductiveTime(isAdmin() ? s.userId : sessionUid()) }}</td>
               <td>
                 <span class="badge attendance__badge" [style.color]="getStatusColor(s.status)" [style.borderColor]="getStatusColor(s.status)">
                   {{ s.status }}

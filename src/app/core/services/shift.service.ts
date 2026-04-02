@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import type { Unsubscribe } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getDocsAllPages } from '../firestore/paginated-query';
 
 export interface ShiftSession {
   id: string;
@@ -63,31 +64,27 @@ export class ShiftService {
     const col = collection(db, 'shifts');
     const fromStr = toDateStr(from);
     const toStr = toDateStr(to);
-    const q = query(
-      col,
+    const baseConstraints = [
       where('userId', '==', userId),
       where('shiftDate', '>=', fromStr),
       where('shiftDate', '<=', toStr),
       orderBy('shiftDate', 'desc'),
-      limit(30)
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
+    ];
+    const docs = await getDocsAllPages(col, baseConstraints);
+    return docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
   }
 
   async getAllShifts(from: Date, to: Date): Promise<ShiftSession[]> {
     const col = collection(db, 'shifts');
     const fromStr = toDateStr(from);
     const toStr = toDateStr(to);
-    const q = query(
-      col,
+    const baseConstraints = [
       where('shiftDate', '>=', fromStr),
       where('shiftDate', '<=', toStr),
       orderBy('shiftDate', 'desc'),
-      limit(200)
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
+    ];
+    const docs = await getDocsAllPages(col, baseConstraints);
+    return docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
   }
 
   listenShiftsForUser(
@@ -103,8 +100,7 @@ export class ShiftService {
       where('userId', '==', userId),
       where('shiftDate', '>=', fromStr),
       where('shiftDate', '<=', toStr),
-      orderBy('shiftDate', 'desc'),
-      limit(30)
+      orderBy('shiftDate', 'desc')
     );
     return onSnapshot(q, (snap) => {
       const shifts = snap.docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));

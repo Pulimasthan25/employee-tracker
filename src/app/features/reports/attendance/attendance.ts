@@ -5,6 +5,7 @@ import {
   inject,
   effect,
   untracked,
+  computed,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -44,6 +45,8 @@ export class Attendance {
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
   readonly selectedEmployee = signal<string>('all');
   readonly isAdmin = this.auth.isAdmin;
+  /** Explicit session uid for non-admin rows (break/productive totals). */
+  readonly sessionUid = computed(() => this.auth.firebaseUser()?.uid);
   private loadSeq = 0;
 
   constructor() {
@@ -84,17 +87,29 @@ export class Attendance {
     return formatDuration(seconds);
   }
 
+  private idleThresholdForUid(uid: string): number {
+    if (!this.auth.isAdmin()) {
+      return this.auth.appUser()?.idleThresholdSeconds ?? 300;
+    }
+    return this.employees().find((e) => e.uid === uid)?.idleThresholdSeconds ?? 300;
+  }
+
   getTotalBreakTime(userId?: string): string {
-    const sessions = userId
-      ? this.idleSessions().filter((s) => s.userId === userId)
+    const uid = userId ?? this.auth.firebaseUser()?.uid;
+    const sessions = uid
+      ? this.idleSessions().filter((s) => s.userId === uid)
       : this.idleSessions();
-    const total = sessions.reduce((s, i) => s + i.durationSeconds, 0);
+    const threshold = uid ? this.idleThresholdForUid(uid) : 300;
+    const total = this.idleService.getTotalBreakSeconds(sessions, {
+      thresholdSeconds: threshold,
+    });
     return formatDuration(total);
   }
 
   getTotalProductiveTime(userId?: string): string {
-    const logs = userId
-      ? this.activityLogs().filter((l) => l.userId === userId)
+    const uid = userId ?? this.auth.firebaseUser()?.uid;
+    const logs = uid
+      ? this.activityLogs().filter((l) => l.userId === uid)
       : this.activityLogs();
     const total = logs
       .filter((l) => l.category === 'productive')
@@ -180,8 +195,8 @@ export class Attendance {
       const login = this.formatTime(s.loginTime);
       const logout = this.formatTime(s.logoutTime);
       const active = this.formatDuration(s.totalActiveSeconds);
-      const breakTime = this.getTotalBreakTime(isAdm ? s.userId : undefined);
-      const productiveTime = this.getTotalProductiveTime(isAdm ? s.userId : undefined);
+      const breakTime = this.getTotalBreakTime(isAdm ? s.userId : this.sessionUid() ?? undefined);
+      const productiveTime = this.getTotalProductiveTime(isAdm ? s.userId : this.sessionUid() ?? undefined);
       const status = s.status;
 
       if (!isAdm) return [shiftDate, login, logout, active, breakTime, productiveTime, status];
