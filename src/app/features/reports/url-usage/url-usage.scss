@@ -7,7 +7,8 @@
   border-radius: var(--radius-md, 8px);
   font-size: 13px;
   outline: none;
-  
+  width: 20rem;
+
   &:focus {
     border-color: var(--accent);
   }

@@ -36,6 +36,7 @@
           <th>Logout Time</th>
           <th>Active Time</th>
           <th>Break Time</th>
+          <th>Productive Time</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -43,7 +44,7 @@
         @if (loading()) {
           @for (i of [1,2,3,4,5]; track i) {
             <tr>
-              <td [attr.colspan]="isAdmin() ? 7 : 6">
+              <td [attr.colspan]="isAdmin() ? 8 : 7">
                 <div class="skeleton-row"></div>
               </td>
             </tr>
@@ -61,6 +62,7 @@
               <td>{{ formatTime(s.logoutTime) }}</td>
               <td>{{ formatDuration(s.totalActiveSeconds) }}</td>
               <td>{{ getTotalBreakTime(isAdmin() ? s.userId : undefined) }}</td>
+              <td>{{ getTotalProductiveTime(isAdmin() ? s.userId : undefined) }}</td>
               <td>
                 <span class="badge attendance__badge" [style.color]="getStatusColor(s.status)" [style.borderColor]="getStatusColor(s.status)">
                   {{ s.status }}
@@ -69,7 +71,7 @@
             </tr>
           } @empty {
             <tr>
-              <td [attr.colspan]="isAdmin() ? 7 : 6" class="empty-state-cell">
+              <td [attr.colspan]="isAdmin() ? 8 : 7" class="empty-state-cell">
                 <div class="empty-state">
                   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M8 7V3m8 4V3M4 11h16"/>

@@ -57,5 +57,16 @@ service cloud.firestore {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
+
+    // AGENT STATUS collection (desktop agent metadata like version/lastSeen)
+    // - Admins can read all
+    // - Users can read their own
+    // - Agent/user can create/update their own status doc
+    // - Only admins can delete
+    match /agent_status/{uid} {
+      allow read: if request.auth != null && (isAdmin() || request.auth.uid == uid);
+      allow create, update: if request.auth != null && request.auth.uid == uid;
+      allow delete: if isAdmin();
+    }
   }
 }

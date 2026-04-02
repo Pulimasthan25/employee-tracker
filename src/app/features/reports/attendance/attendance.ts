@@ -10,6 +10,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AuthService, type AppUser } from '../../../core/services/auth.service';
+import { ActivityService, type ActivityLog } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
@@ -33,10 +34,12 @@ export class Attendance {
   private readonly shiftsApi = inject(ShiftService);
   private readonly employeeApi = inject(EmployeeService);
   private readonly idleService = inject(IdleService);
+  private readonly activityService = inject(ActivityService);
 
   readonly loading = signal(true);
   readonly shifts = signal<ShiftSession[]>([]);
   readonly idleSessions = signal<IdleSession[]>([]);
+  readonly activityLogs = signal<ActivityLog[]>([]);
   readonly employees = signal<AppUser[]>([]);
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
   readonly selectedEmployee = signal<string>('all');
@@ -89,6 +92,16 @@ export class Attendance {
     return formatDuration(total);
   }
 
+  getTotalProductiveTime(userId?: string): string {
+    const logs = userId
+      ? this.activityLogs().filter((l) => l.userId === userId)
+      : this.activityLogs();
+    const total = logs
+      .filter((l) => l.category === 'productive')
+      .reduce((s, l) => s + l.durationSeconds, 0);
+    return formatDuration(total);
+  }
+
   getStatusColor(status: string): string {
     return status === 'active' ? '#4f8ef7' : '#8c97b2';
   }
@@ -132,10 +145,20 @@ export class Attendance {
         idleData = uid ? await this.idleService.getIdleSessionsForUser(uid, range.from, range.to) : [];
       }
 
+      // Load activities (for productive time) for the same range and user filter
+      let activityData: ActivityLog[];
+      if (isAdm && sel === 'all') {
+        activityData = await this.activityService.getTeamActivitySummary(range.from, range.to);
+      } else {
+        const uid = isAdm ? sel : this.auth.firebaseUser()?.uid;
+        activityData = uid ? await this.activityService.getActivityForUser(uid, range.from, range.to) : [];
+      }
+
       // Prevent stale async loads from overwriting latest selection/range.
       if (seq === this.loadSeq) {
         this.shifts.set(shifts);
         this.idleSessions.set(idleData);
+        this.activityLogs.set(activityData);
       }
     } finally {
       if (seq === this.loadSeq) {
@@ -149,8 +172,8 @@ export class Attendance {
     const empMap = new Map(this.employees().map((e) => [e.uid, e]));
 
     const headers = isAdm
-      ? ['Shift Date', 'Employee', 'Login Time', 'Logout Time', 'Active Time', 'Break Time', 'Status']
-      : ['Shift Date', 'Login Time', 'Logout Time', 'Active Time', 'Break Time', 'Status'];
+      ? ['Shift Date', 'Employee', 'Login Time', 'Logout Time', 'Active Time', 'Break Time', 'Productive Time', 'Status']
+      : ['Shift Date', 'Login Time', 'Logout Time', 'Active Time', 'Break Time', 'Productive Time', 'Status'];
 
     const rows = this.shifts().map((s) => {
       const shiftDate = s.shiftDate;
@@ -158,13 +181,14 @@ export class Attendance {
       const logout = this.formatTime(s.logoutTime);
       const active = this.formatDuration(s.totalActiveSeconds);
       const breakTime = this.getTotalBreakTime(isAdm ? s.userId : undefined);
+      const productiveTime = this.getTotalProductiveTime(isAdm ? s.userId : undefined);
       const status = s.status;
 
-      if (!isAdm) return [shiftDate, login, logout, active, breakTime, status];
+      if (!isAdm) return [shiftDate, login, logout, active, breakTime, productiveTime, status];
 
       const emp = empMap.get(s.userId);
       const empName = emp?.displayName || emp?.email || s.userId;
-      return [shiftDate, empName, login, logout, active, breakTime, status];
+      return [shiftDate, empName, login, logout, active, breakTime, productiveTime, status];
     });
 
     const csv = [headers, ...rows]

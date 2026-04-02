@@ -268,7 +268,11 @@ export class Overview implements OnDestroy {
   private async loadIdleSessions(from: Date, to: Date): Promise<void> {
     try {
       if (this.isAdmin()) {
-        const data = await this.idleService.getAllIdleSessions(from, to);
+        const selected = this.selectedEmployeeId();
+        const data =
+          selected === 'all'
+            ? await this.idleService.getAllIdleSessions(from, to)
+            : await this.idleService.getIdleSessionsForUser(selected, from, to);
         this.idleSessions.set(data);
         return;
       }
@@ -338,7 +342,11 @@ export class Overview implements OnDestroy {
   setSelectedEmployee(id: string): void {
     this.selectedEmployeeId.set(id === 'all' ? 'all' : id);
     this.applyEmployeeFilter();
-    untracked(() => { void this.loadActiveShift(); });
+    untracked(() => {
+      void this.loadActiveShift();
+      const { from, to } = getDateRange(this.selectedRange(), this.customStart(), this.customEnd());
+      void this.loadIdleSessions(from, to);
+    });
   }
 
   private applyEmployeeFilter(): void {
