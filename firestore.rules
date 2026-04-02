@@ -46,5 +46,16 @@ service cloud.firestore {
       allow update: if request.auth != null && resource.data.userId == request.auth.uid;
       allow delete: if isAdmin();
     }
+
+    // IDLE SESSIONS collection (break/idle time)
+    // - Admins can read everything
+    // - Employees can only read their own sessions
+    // - Agent can create only for itself
+    // - Only admins can update or delete
+    match /idle_sessions/{docId} {
+      allow read: if request.auth != null && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
   }
 }
