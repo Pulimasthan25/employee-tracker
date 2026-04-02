@@ -95,6 +95,36 @@
 
         <div class="setting-row">
           <div class="setting-info">
+            <span class="setting-label">Idle threshold</span>
+            <span class="setting-desc">
+              How long the user must be inactive before it counts as break time.
+              Idle periods are excluded from productive time.
+            </span>
+          </div>
+          <div class="setting-control">
+            @if (savingIdleThreshold()) {
+              <span class="saving-text">Saving…</span>
+            } @else {
+              <select
+                [value]="emp.idleThresholdSeconds ?? 300"
+                (change)="onIdleThresholdChange(+$any($event.target).value)"
+                class="interval-select"
+              >
+                @for (opt of idleThresholdOptions; track opt.value) {
+                  <option
+                    [value]="opt.value"
+                    [selected]="(emp.idleThresholdSeconds ?? 300) === opt.value"
+                  >
+                    {{ opt.label }}
+                  </option>
+                }
+              </select>
+            }
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
             <span class="setting-label">Shift hours</span>
             <span class="setting-desc">
               Sets the shift window for this employee (cross-midnight).

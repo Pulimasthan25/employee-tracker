@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
 
 function formatDuration(seconds: number): string {
@@ -31,9 +32,11 @@ export class Attendance {
   private readonly auth = inject(AuthService);
   private readonly shiftsApi = inject(ShiftService);
   private readonly employeeApi = inject(EmployeeService);
+  private readonly idleService = inject(IdleService);
 
   readonly loading = signal(true);
   readonly shifts = signal<ShiftSession[]>([]);
+  readonly idleSessions = signal<IdleSession[]>([]);
   readonly employees = signal<AppUser[]>([]);
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
   readonly selectedEmployee = signal<string>('all');
@@ -78,6 +81,14 @@ export class Attendance {
     return formatDuration(seconds);
   }
 
+  getTotalBreakTime(userId?: string): string {
+    const sessions = userId
+      ? this.idleSessions().filter((s) => s.userId === userId)
+      : this.idleSessions();
+    const total = sessions.reduce((s, i) => s + i.durationSeconds, 0);
+    return formatDuration(total);
+  }
+
   getStatusColor(status: string): string {
     return status === 'active' ? '#4f8ef7' : '#8c97b2';
   }
@@ -112,9 +123,19 @@ export class Attendance {
         shifts = await this.shiftsApi.getShiftsForUser(uid, range.from, range.to);
       }
 
+      // Load idle/break sessions for the same range and user filter
+      let idleData: IdleSession[];
+      if (isAdm && sel === 'all') {
+        idleData = await this.idleService.getAllIdleSessions(range.from, range.to);
+      } else {
+        const uid = isAdm ? sel : this.auth.firebaseUser()?.uid;
+        idleData = uid ? await this.idleService.getIdleSessionsForUser(uid, range.from, range.to) : [];
+      }
+
       // Prevent stale async loads from overwriting latest selection/range.
       if (seq === this.loadSeq) {
         this.shifts.set(shifts);
+        this.idleSessions.set(idleData);
       }
     } finally {
       if (seq === this.loadSeq) {
@@ -128,21 +149,22 @@ export class Attendance {
     const empMap = new Map(this.employees().map((e) => [e.uid, e]));
 
     const headers = isAdm
-      ? ['Shift Date', 'Employee', 'Login Time', 'Logout Time', 'Active Time', 'Status']
-      : ['Shift Date', 'Login Time', 'Logout Time', 'Active Time', 'Status'];
+      ? ['Shift Date', 'Employee', 'Login Time', 'Logout Time', 'Active Time', 'Break Time', 'Status']
+      : ['Shift Date', 'Login Time', 'Logout Time', 'Active Time', 'Break Time', 'Status'];
 
     const rows = this.shifts().map((s) => {
       const shiftDate = s.shiftDate;
       const login = this.formatTime(s.loginTime);
       const logout = this.formatTime(s.logoutTime);
       const active = this.formatDuration(s.totalActiveSeconds);
+      const breakTime = this.getTotalBreakTime(isAdm ? s.userId : undefined);
       const status = s.status;
 
-      if (!isAdm) return [shiftDate, login, logout, active, status];
+      if (!isAdm) return [shiftDate, login, logout, active, breakTime, status];
 
       const emp = empMap.get(s.userId);
       const empName = emp?.displayName || emp?.email || s.userId;
-      return [shiftDate, empName, login, logout, active, status];
+      return [shiftDate, empName, login, logout, active, breakTime, status];
     });
 
     const csv = [headers, ...rows]

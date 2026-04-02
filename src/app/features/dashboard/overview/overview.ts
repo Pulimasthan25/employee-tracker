@@ -16,6 +16,7 @@ import type { DisplayRow } from '../../../core/services/activity.service';
 import { ActivityService } from '../../../core/services/activity.service';
 import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
 
 function formatDuration(seconds: number): string {
@@ -66,6 +67,7 @@ export class Overview implements OnDestroy {
   private authService = inject(AuthService);
   private injector = inject(Injector);
   private employeeService = inject(EmployeeService);
+  private idleService = inject(IdleService);
   private shiftService = inject(ShiftService);
 
   readonly isAdmin = this.authService.isAdmin;
@@ -80,6 +82,7 @@ export class Overview implements OnDestroy {
   customEnd = signal<string>(new Date().toISOString().split('T')[0]);
   selectedEmployeeId = signal<'all' | string>('all');
   readonly activeShift = signal<ShiftSession | null>(null);
+  readonly idleSessions = signal<IdleSession[]>([]);
 
   private unsubscribe: (() => void) | null = null;
 
@@ -154,6 +157,13 @@ export class Overview implements OnDestroy {
     formatDuration(this.productiveSeconds())
   );
 
+  readonly totalBreakSeconds = computed(() =>
+    this.idleService.getTotalBreakSeconds(this.idleSessions())
+  );
+  readonly formattedBreakTime = computed(() =>
+    formatDuration(this.totalBreakSeconds())
+  );
+
   private productivityChart: Chart<'doughnut'> | null = null;
   private activityChart: Chart<'bar'> | null = null;
 
@@ -212,6 +222,7 @@ export class Overview implements OnDestroy {
 
     this.loading.set(true);
     this.connectionError.set(false);
+    this.idleSessions.set([]);
     const { from, to } = getDateRange(this.selectedRange(), this.customStart(), this.customEnd());
 
     try {
@@ -223,12 +234,14 @@ export class Overview implements OnDestroy {
             this.allLogs.set(logs);
             this.applyEmployeeFilter();
             this.loading.set(false);
+            void this.loadIdleSessions(from, to);
           }
         );
       } else {
         const uid = this.authService.firebaseUser()?.uid;
         if (!uid) {
           this.logs.set([]);
+          this.idleSessions.set([]);
           this.loading.set(false);
           return;
         }
@@ -239,6 +252,7 @@ export class Overview implements OnDestroy {
           (logs) => {
             this.logs.set(logs);
             this.loading.set(false);
+            void this.loadIdleSessions(from, to);
           }
         );
       }
@@ -246,7 +260,29 @@ export class Overview implements OnDestroy {
       console.error('Failed to set up activity listener:', e);
       this.connectionError.set(true);
       this.logs.set([]);
+      this.idleSessions.set([]);
       this.loading.set(false);
+    }
+  }
+
+  private async loadIdleSessions(from: Date, to: Date): Promise<void> {
+    try {
+      if (this.isAdmin()) {
+        const data = await this.idleService.getAllIdleSessions(from, to);
+        this.idleSessions.set(data);
+        return;
+      }
+
+      const uid = this.authService.firebaseUser()?.uid;
+      if (!uid) {
+        this.idleSessions.set([]);
+        return;
+      }
+      const data = await this.idleService.getIdleSessionsForUser(uid, from, to);
+      this.idleSessions.set(data);
+    } catch (e) {
+      console.error('[Overview] Failed to load idle sessions:', e);
+      this.idleSessions.set([]);
     }
   }
 

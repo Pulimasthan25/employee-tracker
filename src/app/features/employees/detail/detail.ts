@@ -44,7 +44,17 @@ export class Detail {
     { label: 'Disabled',    value: 0   },
   ];
 
+  readonly idleThresholdOptions = [
+    { label: '1 minute', value: 60 },
+    { label: '2 minutes', value: 120 },
+    { label: '3 minutes', value: 180 },
+    { label: '5 minutes', value: 300 },
+    { label: '10 minutes', value: 600 },
+    { label: '15 minutes', value: 900 },
+  ];
+
   readonly savingInterval = signal(false);
+  readonly savingIdleThreshold = signal(false);
   readonly savingShiftHours = signal(false);
 
   readonly shiftHourOptions = Array.from({ length: 24 }, (_, h) => ({
@@ -114,6 +124,21 @@ export class Detail {
       this.toastService.show('Failed to update interval.', 'error');
     } finally {
       this.savingInterval.set(false);
+    }
+  }
+
+  async onIdleThresholdChange(seconds: number): Promise<void> {
+    if (!this.employee()?.uid) return;
+    this.savingIdleThreshold.set(true);
+    try {
+      await this.employeeService.updateIdleThreshold(this.employee()!.uid, seconds);
+      this.toastService.show('Idle threshold updated.', 'success');
+      const emp = this.employee();
+      if (emp) this.employee.set({ ...emp, idleThresholdSeconds: seconds });
+    } catch {
+      this.toastService.show('Failed to update idle threshold.', 'error');
+    } finally {
+      this.savingIdleThreshold.set(false);
     }
   }
 

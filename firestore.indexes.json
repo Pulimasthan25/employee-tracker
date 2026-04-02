@@ -9,6 +9,14 @@
       ]
     },
     {
+      "collectionGroup": "idle_sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "startTime", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "screenshots",
       "queryScope": "COLLECTION",
       "fields": [

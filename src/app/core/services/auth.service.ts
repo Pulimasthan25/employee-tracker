@@ -18,6 +18,7 @@ export interface AppUser {
   teamId?: string;
   active: boolean;
   screenshotIntervalSeconds: number;
+  idleThresholdSeconds?: number;
   shiftStartHour?: number;
   shiftEndHour?: number;
   createdAt: Date;
