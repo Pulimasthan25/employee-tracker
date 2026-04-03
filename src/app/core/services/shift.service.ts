@@ -83,7 +83,7 @@ export class ShiftService {
       where('shiftDate', '<=', toStr),
       orderBy('shiftDate', 'desc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints);
+    const docs = await getDocsAllPages(col, baseConstraints, 50);
     return docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
   }
 

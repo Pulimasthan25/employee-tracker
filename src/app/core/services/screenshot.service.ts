@@ -68,7 +68,7 @@ export class ScreenshotService {
       where('capturedAt', '<=', Timestamp.fromDate(to)),
       orderBy('capturedAt', 'asc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints);
+    const docs = await getDocsAllPages(col, baseConstraints, 200);
     return docs.map((d) => {
       const data = d.data();
       return {

@@ -84,7 +84,7 @@ export class Overview implements OnDestroy {
   readonly activeShift = signal<ShiftSession | null>(null);
   readonly idleSessions = signal<IdleSession[]>([]);
 
-  private unsubscribe: (() => void) | null = null;
+  lastUpdated = signal('');
 
   productivityScore = computed(() =>
     this.activityService.getDailyProductivityScore(this.logs())
@@ -226,14 +226,14 @@ export class Overview implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.unsubscribe?.();
-    this.unsubscribe = null;
     this.destroyCharts();
   }
 
-  private loadData(): void {
-    this.unsubscribe?.();
-    this.unsubscribe = null;
+  refreshData(): void {
+    untracked(() => this.loadData());
+  }
+
+  private async loadData(): Promise<void> {
 
     this.loading.set(true);
     this.connectionError.set(false);
@@ -242,16 +242,12 @@ export class Overview implements OnDestroy {
 
     try {
       if (this.isAdmin()) {
-        this.unsubscribe = this.activityService.listenTeamActivity(
-          from,
-          to,
-          (logs) => {
-            this.allLogs.set(logs);
-            this.applyEmployeeFilter();
-            this.loading.set(false);
-            void this.loadIdleSessions(from, to);
-          }
-        );
+        const logs = await this.activityService.getTeamActivitySummary(from, to);
+        this.allLogs.set(logs);
+        this.applyEmployeeFilter();
+        this.loading.set(false);
+        this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        void this.loadIdleSessions(from, to);
       } else {
         const uid = this.authService.firebaseUser()?.uid;
         if (!uid) {
@@ -260,19 +256,14 @@ export class Overview implements OnDestroy {
           this.loading.set(false);
           return;
         }
-        this.unsubscribe = this.activityService.listenActivityForUser(
-          uid,
-          from,
-          to,
-          (logs) => {
-            this.logs.set(logs);
-            this.loading.set(false);
-            void this.loadIdleSessions(from, to);
-          }
-        );
+        const logs = await this.activityService.getActivityForUser(uid, from, to);
+        this.logs.set(logs);
+        this.loading.set(false);
+        this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        void this.loadIdleSessions(from, to);
       }
     } catch (e) {
-      console.error('Failed to set up activity listener:', e);
+      console.error('Failed to load activity:', e);
       this.connectionError.set(true);
       this.logs.set([]);
       this.idleSessions.set([]);

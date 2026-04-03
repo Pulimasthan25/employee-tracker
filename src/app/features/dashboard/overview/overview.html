@@ -39,12 +39,14 @@
         <span class="overview__date-sep">to</span>
         <input type="date" class="overview__pill overview__pill--date" [value]="customEnd()" (change)="setCustomEnd($any($event.target).value)">
       }
-      @if (!loading() && logs().length > 0) {
-        <span class="live-indicator">
-          <span class="live-dot"></span>
-          Live
-        </span>
-      }
+      <div class="overview__refresh-group" style="display: flex; flex-direction: column; align-items: center; margin-left: auto;">
+        <button type="button" class="overview__pill overview__pill--refresh" (click)="refreshData()">
+          Refresh
+        </button>
+        @if (lastUpdated()) {
+          <span class="overview__last-updated" style="font-size: 0.7rem; color: #8c97b2; margin-top: 4px;">Last updated: {{ lastUpdated() }}</span>
+        }
+      </div>
     </div>
 
     @if (isAdmin()) {

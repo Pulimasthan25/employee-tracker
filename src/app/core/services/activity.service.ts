@@ -4,7 +4,7 @@ import {
   query,
   where,
   orderBy,
-  onSnapshot,
+  getDocs,
   Timestamp,
 } from 'firebase/firestore';
 import type { Unsubscribe } from 'firebase/firestore';
@@ -93,11 +93,21 @@ function toDate(val: unknown): Date {
 
 @Injectable({ providedIn: 'root' })
 export class ActivityService {
+  private cache = new Map<string, { data: ActivityLog[]; ts: number }>();
+
   async getActivityForUser(
     userId: string,
     from: Date,
     to: Date
   ): Promise<ActivityLog[]> {
+    const key = `${userId}|${from.toISOString()}|${to.toISOString()}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+    this.cache.clear();
+
     const col = collection(db, 'activities');
     const baseConstraints = [
       where('userId', '==', userId),
@@ -105,8 +115,8 @@ export class ActivityService {
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints);
-    return docs.map((d) => {
+    const docs = await getDocsAllPages(col, baseConstraints, 200);
+    const mapped = docs.map((d) => {
       const data = d.data();
       const windowTitle = data['windowTitle'] ?? '';
       const browserName = data['browserName'] ?? extractBrowserFromTitle(windowTitle);
@@ -123,6 +133,9 @@ export class ActivityService {
         durationSeconds: data['durationSeconds'] ?? 0,
       } as ActivityLog;
     });
+
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   async getTeamActivitySummary(from: Date, to: Date): Promise<ActivityLog[]> {
@@ -132,7 +145,7 @@ export class ActivityService {
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints);
+    const docs = await getDocsAllPages(col, baseConstraints, 300);
     return docs.map((d) => {
       const data = d.data();
       const windowTitle = data['windowTitle'] ?? '';
@@ -165,7 +178,7 @@ export class ActivityService {
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc')
     );
-    return onSnapshot(q, (snap) => {
+    getDocs(q).then((snap) => {
       const logs = snap.docs.map((d) => {
         const data = d.data();
         const windowTitle = data['windowTitle'] ?? '';
@@ -185,6 +198,7 @@ export class ActivityService {
       });
       callback(logs);
     });
+    return () => {};
   }
 
   listenTeamActivity(
@@ -198,7 +212,7 @@ export class ActivityService {
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc')
     );
-    return onSnapshot(q, (snap) => {
+    getDocs(q).then((snap) => {
       const logs = snap.docs.map((d) => {
         const data = d.data();
         const windowTitle = data['windowTitle'] ?? '';
@@ -218,6 +232,7 @@ export class ActivityService {
       });
       callback(logs);
     });
+    return () => {};
   }
 
   getDailyProductivityScore(logs: ActivityLog[]): number {
