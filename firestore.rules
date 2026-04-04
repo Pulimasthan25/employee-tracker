@@ -4,7 +4,9 @@ service cloud.firestore {
 
     // Helper: checks if the logged-in user is an admin
     function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return (request.auth != null && 'role' in request.auth.token && request.auth.token.role == 'admin') ||
+             (request.auth != null && 
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
 
     // USERS collection

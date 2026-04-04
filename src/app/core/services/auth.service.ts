@@ -52,7 +52,8 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    await signInWithEmailAndPassword(auth, email, password);
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    await cred.user.getIdToken(true); // force refresh to get latest claims
     this.router.navigate(['/dashboard']);
   }
 
