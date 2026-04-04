@@ -3,6 +3,7 @@ import {
   inject,
   signal,
   ChangeDetectionStrategy,
+  OnInit,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,13 +16,50 @@ import { EmployeeService } from '../../../core/services/employee.service';
   styleUrl: './invite.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Invite {
+export class Invite implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly router = inject(Router);
 
   readonly submitting = signal(false);
   readonly error = signal<string | null>(null);
   readonly success = signal(false);
+  readonly downloadUrl = signal<string | null>(null);
+  readonly linkCopied = signal(false);
+
+  ngOnInit() {
+    this.fetchLatestRelease();
+  }
+
+  async fetchLatestRelease() {
+    try {
+      const response = await fetch('https://api.github.com/repos/masthan-pm/pulsetrack-agent-releases/releases/latest');
+      if (response.ok) {
+        const data = await response.json();
+        const asset = data.assets?.find((a: any) => a.name.endsWith('.exe'));
+        if (asset) {
+          this.downloadUrl.set(asset.browser_download_url);
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch latest release', e);
+    }
+    // Fallback link if API fails or no exe found
+    this.downloadUrl.set('https://github.com/masthan-pm/pulsetrack-agent-releases/releases/latest');
+  }
+
+  async copyLink() {
+    const url = this.downloadUrl();
+    if (url) {
+      try {
+        await navigator.clipboard.writeText(url);
+        this.linkCopied.set(true);
+        setTimeout(() => this.linkCopied.set(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+      }
+    }
+  }
 
   email = '';
   password = '';
@@ -64,7 +102,6 @@ export class Invite {
         password,
       });
       this.success.set(true);
-      setTimeout(() => this.router.navigate(['/employees']), 1500);
     } catch (e) {
       this.error.set('Failed to invite. Please try again.');
       this.submitting.set(false);

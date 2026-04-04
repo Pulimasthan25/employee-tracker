@@ -57,12 +57,93 @@
 }
 
 .invite__success {
-  padding: var(--space-lg);
-  color: var(--success);
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: var(--space-xl);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   font-size: 0.9375rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(34, 197, 94, 0.05);
+
+  &-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-lg);
+  }
+
+  &-title {
+    margin: 0 0 var(--space-sm) 0;
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  &-text {
+    margin: 0 0 var(--space-xl) 0;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  &-box {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    margin-bottom: var(--space-xl);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  &-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: var(--space-sm) var(--space-md);
+    color: var(--text-primary);
+    font-family: monospace;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &-copy {
+    border: none;
+    border-radius: 0;
+    border-left: 1px solid var(--border);
+    margin: 0;
+    padding: 0 var(--space-md);
+    white-space: nowrap;
+
+    &:hover, &:focus {
+      background: rgba(255, 255, 255, 0.05); /* slightly light up */
+      color: var(--text-primary);
+    }
+  }
+
+  &-actions {
+    display: flex;
+    gap: var(--space-md);
+    width: 100%;
+
+    .btn {
+      flex: 1;
+    }
+  }
 }
 
 .invite__field {

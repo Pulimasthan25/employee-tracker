@@ -11,7 +11,47 @@
 
   @if (success()) {
     <div class="invite__success">
-      Employee invited successfully. Redirecting to list…
+      <div class="invite__success-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+
+      <h3 class="invite__success-title">Employee invited successfully</h3>
+      <p class="invite__success-text">
+        The employee has been added to your team. Please share the agent setup file with them so they can start tracking their time.
+      </p>
+
+      <div class="invite__success-box">
+        <input type="text" class="invite__input invite__success-input" [value]="downloadUrl() || 'Fetching latest version...'" readonly (click)="$any($event.target).select()" />
+        <button type="button" class="btn btn--secondary invite__success-copy" (click)="copyLink()">
+          @if (linkCopied()) {
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Copied
+          } @else {
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            Copy link
+          }
+        </button>
+      </div>
+
+      <div class="invite__success-actions">
+        <a [href]="downloadUrl()" class="btn btn--primary" target="_blank" download [class.disabled]="!downloadUrl()" style="flex: 1; justify-content: center;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download
+        </a>
+        <a routerLink="/employees" class="btn btn--ghost" style="flex: 1; justify-content: center;">Return to list</a>
+      </div>
     </div>
   } @else {
     <form class="invite__form" (ngSubmit)="submit()">
