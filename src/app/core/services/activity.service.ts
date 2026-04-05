@@ -114,7 +114,7 @@ export class ActivityService {
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints, 2000);
+    const docs = await getDocsAllPages(col, baseConstraints, 500);
     const mapped = docs.map((d) => {
       const data = d.data();
       const windowTitle = data['windowTitle'] ?? '';
@@ -151,7 +151,7 @@ export class ActivityService {
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints, 5000);
+    const docs = await getDocsAllPages(col, baseConstraints, 1000);
     const mapped = docs.map((d) => {
       const data = d.data();
       const windowTitle = data['windowTitle'] ?? '';

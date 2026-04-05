@@ -16,7 +16,7 @@ import {
 export async function getDocsAllPages(
   col: CollectionReference,
   baseConstraints: QueryConstraint[],
-  limitCount = 5000
+  limitCount = 500
 ): Promise<QueryDocumentSnapshot[]> {
   const q = query(col, ...baseConstraints, limit(limitCount));
   const snap = await getDocs(q);
