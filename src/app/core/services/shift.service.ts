@@ -46,6 +46,8 @@ function toDateStr(d: Date): string {
 
 @Injectable({ providedIn: 'root' })
 export class ShiftService {
+  private cache = new Map<string, { data: any; ts: number }>();
+
   private toShiftSession(id: string, data: Record<string, unknown>): ShiftSession {
     return {
       id,
@@ -61,9 +63,16 @@ export class ShiftService {
   }
 
   async getShiftsForUser(userId: string, from: Date, to: Date): Promise<ShiftSession[]> {
-    const col = collection(db, 'shifts');
     const fromStr = toDateStr(from);
     const toStr = toDateStr(to);
+    const key = `${userId}|${fromStr}|${toStr}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
+    const col = collection(db, 'shifts');
     const baseConstraints = [
       where('userId', '==', userId),
       where('shiftDate', '>=', fromStr),
@@ -71,20 +80,31 @@ export class ShiftService {
       orderBy('shiftDate', 'desc'),
     ];
     const docs = await getDocsAllPages(col, baseConstraints);
-    return docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
+    const mapped = docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   async getAllShifts(from: Date, to: Date): Promise<ShiftSession[]> {
-    const col = collection(db, 'shifts');
     const fromStr = toDateStr(from);
     const toStr = toDateStr(to);
+    const key = `TEAM|${fromStr}|${toStr}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
+    const col = collection(db, 'shifts');
     const baseConstraints = [
       where('shiftDate', '>=', fromStr),
       where('shiftDate', '<=', toStr),
       orderBy('shiftDate', 'desc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints, 50);
-    return docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
+    const docs = await getDocsAllPages(col, baseConstraints);
+    const mapped = docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   listenShiftsForUser(
@@ -109,6 +129,13 @@ export class ShiftService {
   }
 
   async getActiveShift(userId: string): Promise<ShiftSession | null> {
+    const key = `active|${userId}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
     const q = query(
       collection(db, 'shifts'),
       where('userId', '==', userId),
@@ -117,12 +144,24 @@ export class ShiftService {
       limit(1)
     );
     const snap = await getDocs(q);
-    if (snap.empty) return null;
+    if (snap.empty) {
+      this.cache.set(key, { data: null, ts: now });
+      return null;
+    }
     const d = snap.docs[0]!;
-    return this.toShiftSession(d.id, d.data() as Record<string, unknown>);
+    const mapped = this.toShiftSession(d.id, d.data() as Record<string, unknown>);
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   async getLatestShiftForUser(userId: string): Promise<ShiftSession | null> {
+    const key = `latest|${userId}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
     const q = query(
       collection(db, 'shifts'),
       where('userId', '==', userId),
@@ -130,9 +169,14 @@ export class ShiftService {
       limit(1)
     );
     const snap = await getDocs(q);
-    if (snap.empty) return null;
+    if (snap.empty) {
+      this.cache.set(key, { data: null, ts: now });
+      return null;
+    }
     const d = snap.docs[0]!;
-    return this.toShiftSession(d.id, d.data() as Record<string, unknown>);
+    const mapped = this.toShiftSession(d.id, d.data() as Record<string, unknown>);
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 }
 

@@ -35,11 +35,20 @@ export interface BreakTotalOptions {
 
 @Injectable({ providedIn: 'root' })
 export class IdleService {
+  private cache = new Map<string, { data: IdleSession[]; ts: number }>();
+
   async getIdleSessionsForUser(
     userId: string,
     from: Date,
     to: Date
   ): Promise<IdleSession[]> {
+    const key = `${userId}|${from.toISOString()}|${to.toISOString()}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
     const col = collection(db, 'idle_sessions');
     const baseConstraints = [
       where('userId', '==', userId),
@@ -48,7 +57,7 @@ export class IdleService {
       orderBy('startTime', 'desc'),
     ];
     const docs = await getDocsAllPages(col, baseConstraints);
-    return docs.map((d) => {
+    const mapped = docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,
@@ -59,9 +68,19 @@ export class IdleService {
         type: 'break',
       } as IdleSession;
     });
+
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   async getAllIdleSessions(from: Date, to: Date): Promise<IdleSession[]> {
+    const key = `TEAM|${from.toISOString()}|${to.toISOString()}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
     const col = collection(db, 'idle_sessions');
     const baseConstraints = [
       where('startTime', '>=', Timestamp.fromDate(from)),
@@ -69,7 +88,7 @@ export class IdleService {
       orderBy('startTime', 'desc'),
     ];
     const docs = await getDocsAllPages(col, baseConstraints);
-    return docs.map((d) => {
+    const mapped = docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,
@@ -80,6 +99,9 @@ export class IdleService {
         type: 'break',
       } as IdleSession;
     });
+
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   getTotalBreakSeconds(sessions: IdleSession[], options?: BreakTotalOptions): number {

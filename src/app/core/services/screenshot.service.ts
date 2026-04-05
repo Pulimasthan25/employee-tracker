@@ -34,11 +34,20 @@ function toDate(val: unknown): Date {
 
 @Injectable({ providedIn: 'root' })
 export class ScreenshotService {
+  private cache = new Map<string, { data: Screenshot[]; ts: number }>();
+
   async getScreenshotsForUser(
     userId: string,
     from: Date,
     to: Date
   ): Promise<Screenshot[]> {
+    const key = `${userId}|${from.toISOString()}|${to.toISOString()}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
     const col = collection(db, 'screenshots');
     const baseConstraints = [
       where('userId', '==', userId),
@@ -47,7 +56,7 @@ export class ScreenshotService {
       orderBy('capturedAt', 'asc'),
     ];
     const docs = await getDocsAllPages(col, baseConstraints);
-    return docs.map((d) => {
+    const mapped = docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,
@@ -59,17 +68,26 @@ export class ScreenshotService {
         windowTitle: data['windowTitle'] ?? '',
       } as Screenshot;
     });
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   async getScreenshotsForTeam(from: Date, to: Date): Promise<Screenshot[]> {
+    const key = `TEAM|${from.toISOString()}|${to.toISOString()}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
     const col = collection(db, 'screenshots');
     const baseConstraints = [
       where('capturedAt', '>=', Timestamp.fromDate(from)),
       where('capturedAt', '<=', Timestamp.fromDate(to)),
       orderBy('capturedAt', 'asc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints, 200);
-    return docs.map((d) => {
+    const docs = await getDocsAllPages(col, baseConstraints);
+    const mapped = docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,
@@ -81,6 +99,8 @@ export class ScreenshotService {
         windowTitle: data['windowTitle'] ?? '',
       } as Screenshot;
     });
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   groupByHour(screenshots: Screenshot[]): Map<number, Screenshot[]> {

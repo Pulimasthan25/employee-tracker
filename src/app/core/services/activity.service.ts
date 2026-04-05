@@ -106,7 +106,6 @@ export class ActivityService {
     if (cached && now - cached.ts < 5 * 60 * 1000) {
       return cached.data;
     }
-    this.cache.clear();
 
     const col = collection(db, 'activities');
     const baseConstraints = [
@@ -115,7 +114,7 @@ export class ActivityService {
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints, 200);
+    const docs = await getDocsAllPages(col, baseConstraints, 2000);
     const mapped = docs.map((d) => {
       const data = d.data();
       const windowTitle = data['windowTitle'] ?? '';
@@ -139,14 +138,21 @@ export class ActivityService {
   }
 
   async getTeamActivitySummary(from: Date, to: Date): Promise<ActivityLog[]> {
+    const key = `team|${from.toISOString()}|${to.toISOString()}`;
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
     const col = collection(db, 'activities');
     const baseConstraints = [
       where('startTime', '>=', Timestamp.fromDate(from)),
       where('startTime', '<=', Timestamp.fromDate(to)),
       orderBy('startTime', 'desc'),
     ];
-    const docs = await getDocsAllPages(col, baseConstraints, 300);
-    return docs.map((d) => {
+    const docs = await getDocsAllPages(col, baseConstraints, 5000);
+    const mapped = docs.map((d) => {
       const data = d.data();
       const windowTitle = data['windowTitle'] ?? '';
       const browserName = data['browserName'] ?? extractBrowserFromTitle(windowTitle);
@@ -163,6 +169,9 @@ export class ActivityService {
         durationSeconds: data['durationSeconds'] ?? 0,
       } as ActivityLog;
     });
+    
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   listenActivityForUser(

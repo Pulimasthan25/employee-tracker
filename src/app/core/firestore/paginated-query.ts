@@ -16,20 +16,9 @@ import {
 export async function getDocsAllPages(
   col: CollectionReference,
   baseConstraints: QueryConstraint[],
-  pageSize = 500
+  limitCount = 5000
 ): Promise<QueryDocumentSnapshot[]> {
-  const out: QueryDocumentSnapshot[] = [];
-  let last: QueryDocumentSnapshot | null = null;
-  for (;;) {
-    const pageConstraints: QueryConstraint[] = last
-      ? [...baseConstraints, startAfter(last), limit(pageSize)]
-      : [...baseConstraints, limit(pageSize)];
-    const q = query(col, ...pageConstraints);
-    const snap = await getDocs(q);
-    if (snap.empty) break;
-    out.push(...snap.docs);
-    if (snap.docs.length < pageSize) break;
-    last = snap.docs[snap.docs.length - 1]!;
-  }
-  return out;
+  const q = query(col, ...baseConstraints, limit(limitCount));
+  const snap = await getDocs(q);
+  return snap.docs;
 }

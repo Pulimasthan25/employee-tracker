@@ -44,10 +44,21 @@ function toAppUser(id: string, data: Record<string, unknown>): AppUser {
 
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
+  private cache = new Map<string, { data: AppUser[]; ts: number }>();
+
   async getAll(): Promise<AppUser[]> {
+    const key = 'all';
+    const now = Date.now();
+    const cached = this.cache.get(key);
+    if (cached && now - cached.ts < 5 * 60 * 1000) {
+      return cached.data;
+    }
+
     const col = collection(db, 'users');
     const snap = await getDocs(col);
-    return snap.docs.map((d) => toAppUser(d.id, d.data() as Record<string, unknown>));
+    const mapped = snap.docs.map((d) => toAppUser(d.id, d.data() as Record<string, unknown>));
+    this.cache.set(key, { data: mapped, ts: now });
+    return mapped;
   }
 
   async getById(uid: string): Promise<AppUser | null> {
