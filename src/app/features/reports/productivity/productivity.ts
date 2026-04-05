@@ -58,8 +58,28 @@ export class Productivity {
       let rows: EmployeeRow[] = [];
       if (this.auth.isAdmin()) {
         const users = await this.employee.getAll();
-        const promises = users.map(u => this.getEmployeeRow(u, range.from, range.to));
-        rows = await Promise.all(promises);
+        const allLogs = await this.activity.getTeamActivitySummary(range.from, range.to);
+        const logsByUser = new Map<string, typeof allLogs>();
+        for (const log of allLogs) {
+          const arr = logsByUser.get(log.userId);
+          if (arr) arr.push(log);
+          else logsByUser.set(log.userId, [log]);
+        }
+
+        rows = users.map(u => {
+          const userLogs = logsByUser.get(u.uid) || [];
+          const score = this.activity.getDailyProductivityScore(userLogs);
+          const activeSeconds = userLogs.reduce((acc, l) => acc + l.durationSeconds, 0);
+          const topApps = this.activity.groupByApp(userLogs);
+          const topApp = topApps.length > 0 ? topApps[0].appName : '-';
+          return {
+            user: u,
+            productivityScore: score,
+            activeSeconds,
+            topApp,
+            sessions: userLogs.length
+          };
+        });
       } else {
         const u = this.auth.appUser();
         if (u) {
