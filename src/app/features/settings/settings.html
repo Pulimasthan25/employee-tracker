@@ -1,0 +1,131 @@
+<div class="settings-page">
+  <div class="settings-container">
+    <header class="settings-header">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1 class="settings-header__title">Productivity Site Management</h1>
+          <p class="settings-header__desc">Manage categorization for websites. These rules sync instantly with all
+            employees' tracking agents.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          @if (rules().length === 0) {
+          <button class="btn btn--ghost" (click)="importDefaults()" [disabled]="isSeeding()">
+            {{ isSeeding() ? 'Importing...' : 'Pull Default List' }}
+          </button>
+          }
+          <button class="btn btn--primary" (click)="toggleForm()">
+            {{ showForm() ? 'Close Form' : 'Add Rule' }}
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Rule form (Add or Edit) -->
+    @if (showForm()) {
+    <div class="add-section">
+      <h3 class="add-section__title">{{ editingRuleId() ? 'Edit Rule' : 'Add New Rule' }}</h3>
+      <form class="add-form" (submit)="saveRule(); $event.preventDefault()">
+        <div class="add-form__grid">
+          <div class="form-group">
+            <label>Display Name</label>
+            <input type="text" [(ngModel)]="newDisplayName" name="displayName" placeholder="e.g. LinkedIn"
+              class="input" />
+          </div>
+          <div class="form-group">
+            <label>Keywords (comma-separated)</label>
+            <input type="text" [(ngModel)]="newKeywords" name="keywords" placeholder="linkedin, linkedin.com"
+              class="input" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select [(ngModel)]="newCategory" name="category" class="input">
+              <option value="productive">Productive</option>
+              <option value="unproductive">Unproductive</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </div>
+        </div>
+        <div class="add-form__actions">
+          <button type="button" class="btn btn--ghost" (click)="cancelEdit()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn--primary" [disabled]="!newDisplayName() || !newKeywords()">
+            {{ editingRuleId() ? 'Save Changes' : 'Add Rule' }}
+          </button>
+        </div>
+      </form>
+    </div>
+    }
+    <!-- Rule List -->
+    <div class="rule-list">
+      <div class="rule-card rule-card--header">
+        <span class="rule-card__col sortable" (click)="setSort('name')">
+          Site / Resource Name
+          <span class="sort-icon" [class.active]="sortBy() === 'name'">
+            @if (sortBy() === 'name') {
+              @if (sortDirection() === 'asc') {
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+              } @else {
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+              }
+            } @else {
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.4"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>
+            }
+          </span>
+        </span>
+        <span class="rule-card__col">Keywords (comma-separated)</span>
+        <span class="rule-card__col sortable" (click)="setSort('category')">
+          Classification
+          <span class="sort-icon" [class.active]="sortBy() === 'category'">
+            @if (sortBy() === 'category') {
+              @if (sortDirection() === 'asc') {
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+              } @else {
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+              }
+            } @else {
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.4"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>
+            }
+          </span>
+        </span>
+        <span class="rule-card__col">Actions</span>
+      </div>
+
+      @for (rule of sortedRules(); track rule.id) {
+      <div class="rule-card">
+        <div class="rule-card__col">
+          <span class="rule-card__label">Site</span>
+          <strong>{{ rule.displayName }}</strong>
+        </div>
+        <div class="rule-card__col">
+          <span class="rule-card__label">Keywords</span>
+          <code>{{ rule.keywords.join(', ') }}</code>
+        </div>
+        <div class="rule-card__col">
+          <span class="rule-card__label">Category</span>
+          <span class="badge" [ngClass]="getCategoryClass(rule.category)">
+            {{ rule.category }}
+          </span>
+        </div>
+        <div class="rule-card__col actions-cell">
+          <button class="btn btn--flat-secondary btn--icon btn--sm" (click)="startEdit(rule)" title="Edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </button>
+          <button class="btn btn--flat-danger btn--icon btn--sm" (click)="deleteRule(rule.id)" title="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      } @empty {
+      <div class="empty-state">
+        No custom rules yet. Add one below to customize tracking!
+      </div>
+      }
+    </div>
+  </div>
+</div>

@@ -24,9 +24,11 @@ const TITLE_MAP: Record<string, string> = {
   '/reports': 'Reports',
 };
 
+import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
+
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ConfirmDialog],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +42,7 @@ export class Shell {
     { label: 'Employees', path: '/employees', icon: 'users', adminOnly: true },
     { label: 'Screenshots', path: '/screenshots', icon: 'camera' },
     { label: 'Reports', path: '/reports', icon: 'chart' },
+    { label: 'Settings', path: '/settings', icon: 'settings', adminOnly: true },
   ];
 
   readonly visibleNav = computed(() =>
