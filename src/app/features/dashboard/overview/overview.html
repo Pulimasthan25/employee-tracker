@@ -109,7 +109,7 @@
         </div>
       </div>
       <div class="overview__card">
-        <div class="overview__card-label">Active time</div>
+        <div class="overview__card-label">Tracked usage</div>
         <div class="overview__card-value">{{ formattedActiveTime() }}</div>
       </div>
       <div class="overview__card">
@@ -120,7 +120,7 @@
       </div>
       @if (!isAdmin() || (isAdmin() && selectedEmployeeId() !== 'all')) {
         <div class="overview__card">
-          <div class="overview__card-label">Shift login</div>
+          <div class="overview__card-label">First login</div>
           <div class="overview__card-value overview__card-value--sm">
             {{ activeShift() ? formatTime(activeShift()!.loginTime) : '—' }}
           </div>

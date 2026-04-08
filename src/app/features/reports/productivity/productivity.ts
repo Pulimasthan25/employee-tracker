@@ -109,7 +109,7 @@ export class Productivity {
   }
 
   exportCsv() {
-    const headers = ['Name', 'Email', 'Score', 'Active time', 'Top app', 'Sessions'];
+    const headers = ['Name', 'Email', 'Score', 'Tracked usage', 'Top app', 'Sessions'];
     const rows = this.employees().map(e => [
       e.user.displayName,
       e.user.email,

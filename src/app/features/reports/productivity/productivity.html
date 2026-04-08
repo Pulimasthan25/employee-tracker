@@ -17,7 +17,7 @@
         <tr>
           <th>Employee</th>
           <th>Score</th>
-          <th>Active time</th>
+          <th>Tracked usage</th>
           <th>Top app</th>
           <th>Sessions</th>
         </tr>
@@ -58,5 +58,22 @@
         }
       </tbody>
     </table>
+  </div>
+
+  <div class="report__legend" style="margin-top: 2rem; padding: 1.5rem; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+    <div class="legend-item">
+      <h4 style="color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Tracked usage
+      </h4>
+      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">The actual time recorded by computer activity (mouse/keyboard). This excludes idle periods and breaks.</p>
+    </div>
+    <div class="legend-item">
+      <h4 style="color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Productivity Score
+      </h4>
+      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">The percentage of "Tracked usage" that was spent on applications and websites marked as "Productive" in settings.</p>
+    </div>
   </div>
 </div>
