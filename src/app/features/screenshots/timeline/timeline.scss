@@ -109,6 +109,28 @@
 
   .timeline__meta {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .timeline__privacy-toggle {
+    height: 32px;
+    padding: 0 var(--space-md);
+    font-size: 0.8125rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+
+    &:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--accent-dim);
+    }
+
+    svg {
+      opacity: 0.7;
+    }
   }
 
   .timeline__count {
@@ -289,6 +311,17 @@
       .timeline__thumb-time {
         opacity: 1;
       }
+
+      .timeline__thumb-img {
+        .timeline:not(.timeline--reveal) & {
+          filter: blur(4px);
+        }
+      }
+
+      .timeline__thumb-privacy-hint {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
     }
 
     &:focus-visible {
@@ -302,6 +335,12 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    filter: blur(12px);
+    transition: filter var(--transition-normal);
+
+    .timeline--reveal & {
+      filter: blur(0);
+    }
   }
 
   .timeline__thumb-time {
@@ -496,15 +535,28 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      filter: blur(6px);
+      transition: filter var(--transition-normal);
+
+      .timeline--reveal & {
+        filter: blur(0);
+      }
     }
 
     &:hover {
       opacity: 0.85;
+      img {
+        filter: blur(2px);
+      }
     }
 
     &--active {
       border-color: var(--accent);
       opacity: 1;
+
+      img {
+        filter: blur(0);
+      }
     }
   }
 
@@ -587,4 +639,35 @@
   font-weight: 500;
   color: var(--text-primary);
   white-space: nowrap;
+}
+
+.timeline__thumb-privacy-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+  pointer-events: none;
+  z-index: 2;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .timeline--reveal & {
+    opacity: 0;
+    visibility: hidden;
+  }
 }

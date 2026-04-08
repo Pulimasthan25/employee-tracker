@@ -36,6 +36,7 @@ export class Timeline {
   readonly selectedUserId = signal<string>('all');
   readonly lightboxShot = signal<Screenshot | null>(null);
   readonly lightboxIndex = signal<number>(0);
+  readonly privacyMode = signal(true);
 
   /** Quick-lookup map: userId → displayName */
   readonly employeeMap = computed(() => {
