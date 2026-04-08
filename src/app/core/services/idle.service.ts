@@ -8,6 +8,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getDocsAllPages } from '../firestore/paginated-query';
+import { sumUniqueTimeSeconds } from '../utils/time-utils';
 
 export interface IdleSession {
   id: string;
@@ -105,15 +106,34 @@ export class IdleService {
   }
 
   getTotalBreakSeconds(sessions: IdleSession[], options?: BreakTotalOptions): number {
+    if (sessions.length === 0) return 0;
+
     const perUser = options?.perUserThreshold;
     const single = options?.thresholdSeconds ?? DEFAULT_IDLE_REPORT_THRESHOLD;
-    let sum = 0;
+
+    // Separate sessions by user to merge overlaps correctly per user
+    const userMap = new Map<string, IdleSession[]>();
     for (const s of sessions) {
-      const t = perUser?.get(s.userId) ?? single;
-      if (s.durationSeconds >= t) {
-        sum += s.durationSeconds;
-      }
+      const arr = userMap.get(s.userId) ?? [];
+      arr.push(s);
+      userMap.set(s.userId, arr);
     }
-    return sum;
+
+    let totalSum = 0;
+
+    for (const [uid, userSessions] of userMap.entries()) {
+      const threshold = perUser?.get(uid) ?? single;
+      
+      const segments = userSessions
+        .filter(s => s.durationSeconds >= threshold)
+        .map(s => ({
+          start: s.startTime.getTime(),
+          end: s.endTime.getTime()
+        }));
+
+      totalSum += sumUniqueTimeSeconds(segments);
+    }
+
+    return totalSum;
   }
 }

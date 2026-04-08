@@ -15,6 +15,7 @@ import { ActivityService, type ActivityLog } from '../../../core/services/activi
 import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
+import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
 
 function formatDuration(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds || 0));
@@ -101,26 +102,57 @@ export class Attendance {
     return `${y}-${m}-${day}`;
   }
 
-  getTotalBreakTime(userId: string | undefined, shiftDateStr: string): string {
+  getTotalActiveTime(userId: string | undefined, start: Date, end: Date, status: string): string {
     const uid = userId ?? this.auth.firebaseUser()?.uid;
-    const sessions = uid
-      ? this.idleSessions().filter((s) => s.userId === uid && this.getShiftDateStr(s.startTime) === shiftDateStr)
-      : this.idleSessions();
-    const threshold = uid ? this.idleThresholdForUid(uid) : 300;
-    const total = this.idleService.getTotalBreakSeconds(sessions, {
-      thresholdSeconds: threshold,
-    });
+    if (!uid) return '0h 0m';
+
+    const endTime = status === 'active' ? new Date() : end;
+    
+    const segments = this.activityLogs()
+      .filter((l) => l.userId === uid && 
+                     l.startTime.getTime() >= start.getTime() && 
+                     l.startTime.getTime() <= endTime.getTime())
+      .map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
+      
+    const total = sumUniqueTimeSeconds(segments);
     return formatDuration(total);
   }
 
-  getTotalProductiveTime(userId: string | undefined, shiftDateStr: string): string {
+  getTotalBreakTime(userId: string | undefined, start: Date, end: Date, status: string): string {
     const uid = userId ?? this.auth.firebaseUser()?.uid;
-    const logs = uid
-      ? this.activityLogs().filter((l) => l.userId === uid && this.getShiftDateStr(l.startTime) === shiftDateStr)
-      : this.activityLogs();
-    const total = logs
-      .filter((l) => l.category === 'productive')
-      .reduce((s, l) => s + l.durationSeconds, 0);
+    if (!uid) return '0h 0m';
+
+    const endTime = status === 'active' ? new Date() : end;
+    const threshold = this.idleThresholdForUid(uid);
+    
+    const segments = this.idleSessions()
+      .filter((s) => s.userId === uid && 
+                     s.startTime.getTime() >= start.getTime() && 
+                     s.startTime.getTime() <= endTime.getTime() &&
+                     s.durationSeconds >= threshold)
+      .map(s => ({
+        start: s.startTime.getTime(),
+        end: s.endTime.getTime()
+      }));
+
+    const total = sumUniqueTimeSeconds(segments);
+    return formatDuration(total);
+  }
+
+  getTotalProductiveTime(userId: string | undefined, start: Date, end: Date, status: string): string {
+    const uid = userId ?? this.auth.firebaseUser()?.uid;
+    if (!uid) return '0h 0m';
+    
+    const endTime = status === 'active' ? new Date() : end;
+
+    const productiveSegments = this.activityLogs()
+      .filter((l) => l.userId === uid && 
+                     l.category === 'productive' &&
+                     l.startTime.getTime() >= start.getTime() && 
+                     l.startTime.getTime() <= endTime.getTime())
+      .map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
+      
+    const total = sumUniqueTimeSeconds(productiveSegments);
     return formatDuration(total);
   }
 
@@ -194,16 +226,16 @@ export class Attendance {
     const empMap = new Map(this.employees().map((e) => [e.uid, e]));
 
     const headers = isAdm
-      ? ['Shift Date', 'Employee', 'Login Time', 'Logout Time', 'Work Time', 'Break Time', 'Productive Time', 'Status']
-      : ['Shift Date', 'Login Time', 'Logout Time', 'Work Time', 'Break Time', 'Productive Time', 'Status'];
+      ? ['Shift Date', 'Employee', 'Login Time', 'Logout Time', 'Active Time', 'Break Time', 'Productive Time', 'Status']
+      : ['Shift Date', 'Login Time', 'Logout Time', 'Active Time', 'Break Time', 'Productive Time', 'Status'];
 
     const rows = this.shifts().map((s) => {
       const shiftDate = s.shiftDate;
       const login = this.formatTime(s.loginTime);
       const logout = this.formatTime(s.logoutTime);
-      const active = this.formatDuration(s.totalActiveSeconds);
-      const breakTime = this.getTotalBreakTime(isAdm ? s.userId : this.sessionUid() ?? undefined, shiftDate);
-      const productiveTime = this.getTotalProductiveTime(isAdm ? s.userId : this.sessionUid() ?? undefined, shiftDate);
+      const active = this.getTotalActiveTime(isAdm ? s.userId : this.sessionUid() ?? undefined, s.loginTime, s.logoutTime, s.status);
+      const breakTime = this.getTotalBreakTime(isAdm ? s.userId : this.sessionUid() ?? undefined, s.loginTime, s.logoutTime, s.status);
+      const productiveTime = this.getTotalProductiveTime(isAdm ? s.userId : this.sessionUid() ?? undefined, s.loginTime, s.logoutTime, s.status);
       const status = s.status;
 
       if (!isAdm) return [shiftDate, login, logout, active, breakTime, productiveTime, status];

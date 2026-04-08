@@ -3,6 +3,7 @@ import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AuthService, AppUser } from '../../../core/services/auth.service';
 import { ActivityService } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
 
 interface EmployeeRow {
   user: AppUser;
@@ -69,7 +70,9 @@ export class Productivity {
         rows = users.map(u => {
           const userLogs = logsByUser.get(u.uid) || [];
           const score = this.activity.getDailyProductivityScore(userLogs);
-          const activeSeconds = userLogs.reduce((acc, l) => acc + l.durationSeconds, 0);
+          const activeSeconds = sumUniqueTimeSeconds(
+            userLogs.map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
+          );
           const topApps = this.activity.groupByApp(userLogs);
           const topApp = topApps.length > 0 ? topApps[0].appName : '-';
           return {
@@ -96,7 +99,9 @@ export class Productivity {
   private async getEmployeeRow(user: AppUser, from: Date, to: Date): Promise<EmployeeRow> {
     const logs = await this.activity.getActivityForUser(user.uid, from, to);
     const score = this.activity.getDailyProductivityScore(logs);
-    const activeSeconds = logs.reduce((acc, l) => acc + l.durationSeconds, 0);
+    const activeSeconds = sumUniqueTimeSeconds(
+      logs.map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
+    );
     const topApps = this.activity.groupByApp(logs);
     const topApp = topApps.length > 0 ? topApps[0].appName : '-';
     return {

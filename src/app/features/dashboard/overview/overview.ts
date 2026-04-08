@@ -18,6 +18,7 @@ import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
+import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
 
 function formatDuration(seconds: number): string {
   if (seconds < 60) return '0m';
@@ -144,14 +145,18 @@ export class Overview implements OnDestroy {
   });
 
   totalSeconds = computed(() =>
-    this.logs().reduce((s, l) => s + l.durationSeconds, 0)
+    sumUniqueTimeSeconds(
+      this.logs().map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
+    )
   );
   formattedActiveTime = computed(() => formatDuration(this.totalSeconds()));
 
   productiveSeconds = computed(() =>
-    this.logs()
-      .filter((l) => l.category === 'productive')
-      .reduce((s, l) => s + l.durationSeconds, 0)
+    sumUniqueTimeSeconds(
+      this.logs()
+        .filter((l) => l.category === 'productive')
+        .map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
+    )
   );
   formattedProductiveTime = computed(() =>
     formatDuration(this.productiveSeconds())
