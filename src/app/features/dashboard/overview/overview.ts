@@ -78,14 +78,12 @@ export class Overview implements OnDestroy {
   employees = signal<AppUser[]>([]);
   loading = signal(true);
   connectionError = signal(false);
-  selectedRange = signal<'today' | '7d' | '30d' | 'custom'>('today');
-  customStart = signal<string>(new Date().toISOString().split('T')[0]);
-  customEnd = signal<string>(new Date().toISOString().split('T')[0]);
   selectedEmployeeId = signal<'all' | string>('all');
   readonly activeShift = signal<ShiftSession | null>(null);
   readonly idleSessions = signal<IdleSession[]>([]);
 
   lastUpdated = signal('');
+  readonly todayDate = signal(new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }));
 
   productivityScore = computed(() =>
     this.activityService.getDailyProductivityScore(this.logs())
@@ -100,35 +98,16 @@ export class Overview implements OnDestroy {
     this.activityService.groupByHour(this.logs(), new Date())
   );
 
-  /** Daily buckets — used for 7d / 30d / custom */
-  dailyData = computed(() => {
-    const range = this.selectedRange();
-    if (range === 'today') return [];
-    const { from, to } = getDateRange(range, this.customStart(), this.customEnd());
-    return this.activityService.groupByDay(this.logs(), from, to);
-  });
-
-  /** Chart x-labels and values derived from the active range */
+  /** Chart x-labels and values derived from today hourly data */
   chartLabels = computed(() => {
-    if (this.selectedRange() === 'today') {
-      return this.hourlyData().map(h => `${h.hour}:00`);
-    }
-    return this.dailyData().map(d => d.label);
+    return this.hourlyData().map(h => `${h.hour}:00`);
   });
 
   chartValues = computed(() => {
-    if (this.selectedRange() === 'today') {
-      return this.hourlyData().map(h => h.productiveSeconds);
-    }
-    return this.dailyData().map(d => d.productiveSeconds);
+    return this.hourlyData().map(h => h.productiveSeconds);
   });
 
-  chartTitle = computed(() => {
-    const r = this.selectedRange();
-    if (r === 'today') return 'Productive time by hour';
-    if (r === '7d') return 'Productive time — last 7 days';
-    return 'Productive time — last 30 days';
-  });
+  chartTitle = computed(() => 'Productive time by hour');
 
   categoryMinutes = computed(() => {
     const list = this.logs();
@@ -188,10 +167,9 @@ export class Overview implements OnDestroy {
   private activityChart: Chart<'bar'> | null = null;
 
   constructor() {
-    // Reload data when range changes
+    // Reload data when authentication is ready or initial load
     effect(() => {
       const ready = this.authService.authReady();
-      const _range = this.selectedRange(); // tracked
       if (!ready) return;
       untracked(() => this.loadData());
     });
@@ -206,27 +184,31 @@ export class Overview implements OnDestroy {
       });
     });
 
-    // Create charts after loading completes (canvas exists in DOM)
+    // Main chart effect: handles both initial render and updates
     effect(() => {
-      if (this.loading()) return;
-      if (this.logs().length === 0) return;
+      const logs = this.logs();
+      const isLoading = this.loading();
+
+      if (isLoading) {
+        untracked(() => this.destroyCharts());
+        return;
+      }
+
+      // Use afterNextRender to ensure canvas elements are available in the DOM
       afterNextRender(
         () => {
-          this.destroyCharts();
-          this.renderProductivityChart();
-          this.renderActivityChart();
+          if (!this.productivityChart || !this.activityChart) {
+            // Initial render
+            this.destroyCharts();
+            this.renderProductivityChart();
+            this.renderActivityChart();
+          } else {
+            // In-place update
+            this.updateCharts();
+          }
         },
         { injector: this.injector }
       );
-    });
-
-    // Update charts in-place when logs or range changes
-    effect(() => {
-      const _logs = this.logs();      // tracked — employee filter or realtime
-      const _range = this.selectedRange(); // tracked — range switch
-      if (this.loading()) return;
-      if (!this.productivityChart || !this.activityChart) return;
-      untracked(() => this.updateCharts());
     });
   }
 
@@ -239,11 +221,12 @@ export class Overview implements OnDestroy {
   }
 
   private async loadData(): Promise<void> {
-
     this.loading.set(true);
     this.connectionError.set(false);
     this.idleSessions.set([]);
-    const { from, to } = getDateRange(this.selectedRange(), this.customStart(), this.customEnd());
+
+    // Always use today
+    const { from, to } = getDateRange('today');
 
     try {
       if (this.isAdmin()) {
@@ -355,7 +338,7 @@ export class Overview implements OnDestroy {
     this.applyEmployeeFilter();
     untracked(() => {
       void this.loadActiveShift();
-      const { from, to } = getDateRange(this.selectedRange(), this.customStart(), this.customEnd());
+      const { from, to } = getDateRange('today');
       void this.loadIdleSessions(from, to);
     });
   }
@@ -366,24 +349,6 @@ export class Overview implements OnDestroy {
     this.logs.set(
       selected === 'all' ? all : all.filter((log) => log.userId === selected)
     );
-  }
-
-  setRange(range: 'today' | '7d' | '30d' | 'custom'): void {
-    this.selectedRange.set(range);
-  }
-
-  setCustomStart(val: string): void {
-    this.customStart.set(val);
-    if (this.selectedRange() === 'custom') {
-      untracked(() => this.loadData());
-    }
-  }
-
-  setCustomEnd(val: string): void {
-    this.customEnd.set(val);
-    if (this.selectedRange() === 'custom') {
-      untracked(() => this.loadData());
-    }
   }
 
   formatAppTime(seconds: number): string {
@@ -421,17 +386,14 @@ export class Overview implements OnDestroy {
     if (this.activityChart) {
       this.activityChart.data.labels = this.chartLabels();
       this.activityChart.data.datasets[0].data = this.chartValues();
-      // Adjust tick formatter based on range
-      const isToday = this.selectedRange() === 'today';
       this.activityChart.options.scales!['y']!.ticks = {
         color: '#8c97b2',
         callback: (val: unknown) => formatHours(Number(val)),
       };
-      // Rotate x labels for 30d so they don't crowd
       this.activityChart.options.scales!['x']!.ticks = {
         color: '#8c97b2',
-        maxRotation: isToday ? 0 : 45,
-        minRotation: isToday ? 0 : 45,
+        maxRotation: 0,
+        minRotation: 0,
       };
       this.activityChart.update();
     }
@@ -479,7 +441,6 @@ export class Overview implements OnDestroy {
     ) as HTMLCanvasElement | null;
     if (!canvas) return;
 
-    const isToday = this.selectedRange() === 'today';
     const labels = this.chartLabels();
     const data = this.chartValues();
 
@@ -517,8 +478,8 @@ export class Overview implements OnDestroy {
             grid: { display: false },
             ticks: {
               color: '#8c97b2',
-              maxRotation: isToday ? 0 : 45,
-              minRotation: isToday ? 0 : 45,
+              maxRotation: 0,
+              minRotation: 0,
             },
           },
           y: {
