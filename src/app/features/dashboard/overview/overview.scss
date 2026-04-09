@@ -62,10 +62,17 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  }
 
   &--skeleton {
     min-height: 80px;
     animation: overview-skeleton 1.2s ease-in-out infinite;
+    pointer-events: none;
   }
 }
 
@@ -136,9 +143,16 @@
   padding: var(--space-lg);
   position: relative;
   min-height: 260px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  }
 
   &--skeleton {
     animation: overview-skeleton 1.2s ease-in-out infinite;
+    pointer-events: none;
   }
 
   &--doughnut canvas,
@@ -259,9 +273,87 @@
 
 .overview__header {
   display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xs);
+}
+
+.overview__header-top {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: var(--space-xl);
   flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+
+.overview__title {
+  margin: 0 0 4px 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.overview__subtitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.overview__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.overview__refresh-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.overview__last-updated {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.overview__refresh-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
+
+  &.is-loading svg {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.overview__custom-date {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-left: var(--space-md);
 }
 
 .overview__employee-filter {

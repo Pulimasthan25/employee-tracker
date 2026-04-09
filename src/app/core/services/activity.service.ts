@@ -443,7 +443,7 @@ export class ActivityService {
   groupByHour(
     logs: ActivityLog[],
     date: Date
-  ): { hour: number; productiveSeconds: number; totalSeconds: number }[] {
+  ): { hour: number; productiveSeconds: number; unproductiveSeconds: number; neutralSeconds: number; totalSeconds: number }[] {
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(dayStart);
@@ -452,6 +452,8 @@ export class ActivityService {
     const buckets = Array.from({ length: 24 }, (_, hour) => ({
       hour,
       productiveSeconds: 0,
+      unproductiveSeconds: 0,
+      neutralSeconds: 0,
       totalSeconds: 0,
     }));
 
@@ -473,6 +475,8 @@ export class ActivityService {
           const secs = (overlapEnd - overlapStart) / 1000;
           buckets[h].totalSeconds += secs;
           if (log.category === 'productive') buckets[h].productiveSeconds += secs;
+          else if (log.category === 'unproductive') buckets[h].unproductiveSeconds += secs;
+          else buckets[h].neutralSeconds += secs;
         }
       }
     }
@@ -486,9 +490,9 @@ export class ActivityService {
     logs: ActivityLog[],
     from: Date,
     to: Date
-  ): { date: Date; label: string; productiveSeconds: number; totalSeconds: number }[] {
+  ): { date: Date; label: string; productiveSeconds: number; unproductiveSeconds: number; neutralSeconds: number; totalSeconds: number }[] {
     // Build a bucket for each calendar day in the range
-    const buckets: { date: Date; label: string; productiveSeconds: number; totalSeconds: number }[] = [];
+    const buckets: { date: Date; label: string; productiveSeconds: number; unproductiveSeconds: number; neutralSeconds: number; totalSeconds: number }[] = [];
     const cursor = new Date(from);
     cursor.setHours(0, 0, 0, 0);
     const end = new Date(to);
@@ -497,7 +501,7 @@ export class ActivityService {
 
     while (cursor <= end) {
       const label = cursor.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      buckets.push({ date: new Date(cursor), label, productiveSeconds: 0, totalSeconds: 0 });
+      buckets.push({ date: new Date(cursor), label, productiveSeconds: 0, unproductiveSeconds: 0, neutralSeconds: 0, totalSeconds: 0 });
       cursor.setDate(cursor.getDate() + 1);
     }
 
@@ -507,6 +511,8 @@ export class ActivityService {
       if (!bucket) continue;
       bucket.totalSeconds += log.durationSeconds;
       if (log.category === 'productive') bucket.productiveSeconds += log.durationSeconds;
+      else if (log.category === 'unproductive') bucket.unproductiveSeconds += log.durationSeconds;
+      else bucket.neutralSeconds += log.durationSeconds;
     }
 
     return buckets;

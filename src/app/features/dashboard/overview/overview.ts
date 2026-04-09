@@ -77,6 +77,7 @@ export class Overview implements OnDestroy {
   private allLogs = signal<ActivityLog[]>([]);
   employees = signal<AppUser[]>([]);
   loading = signal(true);
+  hasLoadedOnce = signal(false);
   connectionError = signal(false);
   selectedRange = signal<'today' | '7d' | '30d' | 'custom'>('today');
   customStart = signal<string>(new Date().toISOString().split('T')[0]);
@@ -116,18 +117,26 @@ export class Overview implements OnDestroy {
     return this.dailyData().map(d => d.label);
   });
 
-  chartValues = computed(() => {
+  chartData = computed(() => {
     if (this.selectedRange() === 'today') {
-      return this.hourlyData().map(h => h.productiveSeconds);
+      return {
+        productive: this.hourlyData().map(h => h.productiveSeconds),
+        unproductive: this.hourlyData().map(h => h.unproductiveSeconds),
+        neutral: this.hourlyData().map(h => h.neutralSeconds),
+      };
     }
-    return this.dailyData().map(d => d.productiveSeconds);
+    return {
+      productive: this.dailyData().map(d => d.productiveSeconds),
+      unproductive: this.dailyData().map(d => d.unproductiveSeconds),
+      neutral: this.dailyData().map(d => d.neutralSeconds),
+    };
   });
 
   chartTitle = computed(() => {
     const r = this.selectedRange();
-    if (r === 'today') return 'Productive time by hour';
-    if (r === '7d') return 'Productive time — last 7 days';
-    return 'Productive time — last 30 days';
+    if (r === 'today') return 'Activity by hour';
+    if (r === '7d') return 'Activity — last 7 days';
+    return 'Activity — last 30 days';
   });
 
   categoryMinutes = computed(() => {
@@ -161,6 +170,28 @@ export class Overview implements OnDestroy {
   formattedProductiveTime = computed(() =>
     formatDuration(this.productiveSeconds())
   );
+
+  customAdminMetricLabel = computed(() => {
+    if (this.isAdmin() && this.selectedEmployeeId() === 'all') {
+      return 'Active employees';
+    }
+    return this.selectedRange() === 'today' ? 'Active apps / sites' : 'Avg daily usage';
+  });
+
+  customAdminMetricValue = computed(() => {
+    if (this.isAdmin() && this.selectedEmployeeId() === 'all') {
+      const activeCount = new Set(this.logs().map(l => l.userId)).size;
+      const total = this.employees().length;
+      return total > 0 ? `${activeCount} / ${total}` : `${activeCount}`;
+    }
+    if (this.selectedRange() === 'today') {
+      const uniqueApps = new Set(this.logs().map(l => l.appName)).size;
+      return `${uniqueApps}`;
+    }
+    const days = this.selectedRange() === '7d' ? 7 : (this.selectedRange() === '30d' ? 30 : this.dailyData().length || 1);
+    const avgSeconds = this.totalSeconds() / days;
+    return formatDuration(avgSeconds);
+  });
 
   readonly totalBreakSeconds = computed(() => {
     const sessions = this.idleSessions();
@@ -208,8 +239,17 @@ export class Overview implements OnDestroy {
 
     // Create charts after loading completes (canvas exists in DOM)
     effect(() => {
-      if (this.loading()) return;
-      if (this.logs().length === 0) return;
+      if (this.loading() && !this.hasLoadedOnce()) return;
+      
+      // If there are no logs, the HTML removes the canvas entirely.
+      // We must destroy the ChartJS instances so they render anew when data returns.
+      if (this.logs().length === 0) {
+        untracked(() => this.destroyCharts());
+        return;
+      }
+
+      if (this.productivityChart && this.activityChart) return; // Don't recreate if they exist
+      
       afterNextRender(
         () => {
           this.destroyCharts();
@@ -224,7 +264,7 @@ export class Overview implements OnDestroy {
     effect(() => {
       const _logs = this.logs();      // tracked — employee filter or realtime
       const _range = this.selectedRange(); // tracked — range switch
-      if (this.loading()) return;
+      if (this.loading() && !this.hasLoadedOnce()) return;
       if (!this.productivityChart || !this.activityChart) return;
       untracked(() => this.updateCharts());
     });
@@ -251,6 +291,7 @@ export class Overview implements OnDestroy {
         this.allLogs.set(logs);
         this.applyEmployeeFilter();
         this.loading.set(false);
+        this.hasLoadedOnce.set(true);
         this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         void this.loadIdleSessions(from, to);
       } else {
@@ -264,6 +305,7 @@ export class Overview implements OnDestroy {
         const logs = await this.activityService.getActivityForUser(uid, from, to);
         this.logs.set(logs);
         this.loading.set(false);
+        this.hasLoadedOnce.set(true);
         this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         void this.loadIdleSessions(from, to);
       }
@@ -420,7 +462,10 @@ export class Overview implements OnDestroy {
 
     if (this.activityChart) {
       this.activityChart.data.labels = this.chartLabels();
-      this.activityChart.data.datasets[0].data = this.chartValues();
+      const data = this.chartData();
+      this.activityChart.data.datasets[0].data = data.productive;
+      this.activityChart.data.datasets[1].data = data.unproductive;
+      this.activityChart.data.datasets[2].data = data.neutral;
       // Adjust tick formatter based on range
       const isToday = this.selectedRange() === 'today';
       this.activityChart.options.scales!['y']!.ticks = {
@@ -481,7 +526,7 @@ export class Overview implements OnDestroy {
 
     const isToday = this.selectedRange() === 'today';
     const labels = this.chartLabels();
-    const data = this.chartValues();
+    const data = this.chartData();
 
     Chart.defaults.color = '#8892aa';
     Chart.defaults.borderColor = '#2a3147';
@@ -492,12 +537,25 @@ export class Overview implements OnDestroy {
         labels,
         datasets: [
           {
-            label: 'Productive time',
-            data,
-            backgroundColor: 'rgba(79, 142, 247, 0.6)',
-            borderColor: '#4f8ef7',
-            borderWidth: 1,
-            borderRadius: 3,
+            label: 'Productive',
+            data: data.productive,
+            backgroundColor: '#34c98a',
+            borderWidth: 0,
+            borderRadius: 2,
+          },
+          {
+            label: 'Unproductive',
+            data: data.unproductive,
+            backgroundColor: '#f05252',
+            borderWidth: 0,
+            borderRadius: 2,
+          },
+          {
+            label: 'Neutral',
+            data: data.neutral,
+            backgroundColor: '#505870',
+            borderWidth: 0,
+            borderRadius: 2,
           },
         ],
       },
@@ -505,15 +563,23 @@ export class Overview implements OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false },
+          legend: { 
+            display: true,
+            position: 'top',
+            labels: {
+              usePointStyle: true,
+              boxWidth: 8
+            }
+          },
           tooltip: {
             callbacks: {
-              label: (ctx) => formatHours(ctx.raw as number),
+              label: (ctx) => `${ctx.dataset.label}: ${formatHours(ctx.raw as number)}`,
             },
           },
         },
         scales: {
           x: {
+            stacked: true,
             grid: { display: false },
             ticks: {
               color: '#8c97b2',
@@ -522,6 +588,7 @@ export class Overview implements OnDestroy {
             },
           },
           y: {
+            stacked: true,
             beginAtZero: true,
             grid: { color: 'rgba(255,255,255,0.04)' },
             ticks: {
