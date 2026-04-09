@@ -205,6 +205,12 @@
   text-transform: uppercase;
 }
 
+.overview__timeline-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
 .overview__stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));

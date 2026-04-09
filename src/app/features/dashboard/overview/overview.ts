@@ -19,6 +19,7 @@ import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
+import { ActivityTimeline, TimelineRow, TimelineSegment } from './activity-timeline/activity-timeline.component';
 
 function formatDuration(seconds: number): string {
   if (seconds < 60) return '0m';
@@ -58,7 +59,7 @@ function getDateRange(range: 'today' | '7d' | '30d' | 'custom', customStart?: st
 
 @Component({
   selector: 'app-overview',
-  imports: [],
+  imports: [ActivityTimeline],
   templateUrl: './overview.html',
   styleUrl: './overview.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -95,7 +96,7 @@ export class Overview implements OnDestroy {
 
   /** Hourly buckets — only meaningful for 'today' */
   hourlyData = computed(() =>
-    this.activityService.groupByHour(this.logs(), new Date())
+    this.activityService.groupByHour(this.logs(), new Date(), this.idleSessions())
   );
 
   /** Chart x-labels and values derived from today hourly data */
@@ -103,11 +104,7 @@ export class Overview implements OnDestroy {
     return this.hourlyData().map(h => `${h.hour}:00`);
   });
 
-  chartValues = computed(() => {
-    return this.hourlyData().map(h => h.productiveSeconds);
-  });
-
-  chartTitle = computed(() => 'Productive time by hour');
+  chartTitle = computed(() => 'Activity Distribution by Hour');
 
   categoryMinutes = computed(() => {
     const list = this.logs();
@@ -162,6 +159,92 @@ export class Overview implements OnDestroy {
   readonly formattedBreakTime = computed(() =>
     formatDuration(this.totalBreakSeconds())
   );
+
+  readonly timelineRows = computed<TimelineRow[]>(() => {
+    const logs = this.logs();
+    const idle = this.idleSessions();
+    const selected = this.selectedEmployeeId();
+    const employees = this.employees();
+
+    if (selected === 'all' && this.isAdmin()) {
+      return employees.map((emp) => {
+        const userLogs = logs.filter((l) => l.userId === emp.uid);
+        const userIdle = idle.filter((i) => i.userId === emp.uid);
+        return {
+          userId: emp.uid,
+          userName: emp.displayName || emp.email,
+          segments: this.processToSegments(userLogs, userIdle),
+        };
+      });
+    } else {
+      const currentUid = selected === 'all' ? this.authService.firebaseUser()?.uid : selected;
+      if (!currentUid) return [];
+      const emp = employees.find((e) => e.uid === currentUid) || this.authService.appUser();
+      return [
+        {
+          userId: currentUid,
+          userName: emp?.displayName || emp?.email || 'User',
+          segments: this.processToSegments(logs, idle),
+        },
+      ];
+    }
+  });
+
+  private processToSegments(
+    logs: ActivityLog[],
+    idle: IdleSession[]
+  ): TimelineSegment[] {
+    const segments: TimelineSegment[] = [];
+
+    // Base date for today
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
+    // Add activity segments
+    for (const log of logs) {
+      const start = log.startTime;
+      const end = log.endTime;
+      
+      // Calculate minutes from midnight for start
+      // If start is before today, use 0
+      const startMins = start.toISOString().split('T')[0] < todayStr ? 0 : (start.getHours() * 60 + start.getMinutes());
+      
+      // If end is after today, use 1440
+      const endMins = end.toISOString().split('T')[0] > todayStr ? 1440 : (end.getHours() * 60 + end.getMinutes());
+
+      if (endMins > startMins) {
+        segments.push({
+          type: log.category,
+          startMinutes: startMins,
+          endMinutes: endMins,
+          appName: log.appName,
+        });
+      }
+    }
+
+    // Add idle segments
+    const threshold = this.authService.appUser()?.idleThresholdSeconds ?? 300;
+    for (const session of idle) {
+      if (session.durationSeconds < threshold) continue;
+      
+      const start = session.startTime;
+      const end = session.endTime;
+      
+      const startMins = start.toISOString().split('T')[0] < todayStr ? 0 : (start.getHours() * 60 + start.getMinutes());
+      const endMins = end.toISOString().split('T')[0] > todayStr ? 1440 : (end.getHours() * 60 + end.getMinutes());
+
+      if (endMins > startMins) {
+        segments.push({
+          type: 'break',
+          startMinutes: startMins,
+          endMinutes: endMins,
+        });
+      }
+    }
+
+    // Sort by start time
+    return segments.sort((a, b) => a.startMinutes - b.startMinutes);
+  }
 
   private productivityChart: Chart<'doughnut'> | null = null;
   private activityChart: Chart<'bar'> | null = null;
@@ -384,17 +467,12 @@ export class Overview implements OnDestroy {
     }
 
     if (this.activityChart) {
+      const data = this.hourlyData();
       this.activityChart.data.labels = this.chartLabels();
-      this.activityChart.data.datasets[0].data = this.chartValues();
-      this.activityChart.options.scales!['y']!.ticks = {
-        color: '#8c97b2',
-        callback: (val: unknown) => formatHours(Number(val)),
-      };
-      this.activityChart.options.scales!['x']!.ticks = {
-        color: '#8c97b2',
-        maxRotation: 0,
-        minRotation: 0,
-      };
+      this.activityChart.data.datasets[0].data = data.map(h => h.productive);
+      this.activityChart.data.datasets[1].data = data.map(h => h.unproductive);
+      this.activityChart.data.datasets[2].data = data.map(h => h.neutral);
+      this.activityChart.data.datasets[3].data = data.map(h => h.break);
       this.activityChart.update();
     }
   }
@@ -442,7 +520,7 @@ export class Overview implements OnDestroy {
     if (!canvas) return;
 
     const labels = this.chartLabels();
-    const data = this.chartValues();
+    const data = this.hourlyData();
 
     Chart.defaults.color = '#8892aa';
     Chart.defaults.borderColor = '#2a3147';
@@ -453,12 +531,28 @@ export class Overview implements OnDestroy {
         labels,
         datasets: [
           {
-            label: 'Productive time',
-            data,
-            backgroundColor: 'rgba(79, 142, 247, 0.6)',
-            borderColor: '#4f8ef7',
-            borderWidth: 1,
-            borderRadius: 3,
+            label: 'Productive',
+            data: data.map(h => h.productive),
+            backgroundColor: '#34c98a',
+            borderRadius: 2,
+          },
+          {
+            label: 'Unproductive',
+            data: data.map(h => h.unproductive),
+            backgroundColor: '#f05252',
+            borderRadius: 2,
+          },
+          {
+            label: 'Neutral',
+            data: data.map(h => h.neutral),
+            backgroundColor: '#505870',
+            borderRadius: 2,
+          },
+          {
+            label: 'Break',
+            data: data.map(h => h.break),
+            backgroundColor: '#f5a623',
+            borderRadius: 2,
           },
         ],
       },
@@ -466,23 +560,23 @@ export class Overview implements OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false },
+          legend: { display: true, position: 'bottom', labels: { boxWidth: 10, padding: 20 } },
           tooltip: {
+            mode: 'index',
+            intersect: false,
             callbacks: {
-              label: (ctx) => formatHours(ctx.raw as number),
+              label: (ctx) => `${ctx.dataset.label}: ${formatHours(ctx.raw as number)}`,
             },
           },
         },
         scales: {
           x: {
+            stacked: true,
             grid: { display: false },
-            ticks: {
-              color: '#8c97b2',
-              maxRotation: 0,
-              minRotation: 0,
-            },
+            ticks: { color: '#8c97b2' },
           },
           y: {
+            stacked: true,
             beginAtZero: true,
             grid: { color: 'rgba(255,255,255,0.04)' },
             ticks: {
