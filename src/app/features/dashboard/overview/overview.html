@@ -115,13 +115,6 @@
       </div>
       }
     </div>
-    
-    <div class="overview__timeline-section">
-      <div class="overview__chart-header" style="margin-bottom: 12px; border-bottom: none;">
-        <span class="overview__chart-title">Daily Activity Timeline</span>
-      </div>
-      <app-activity-timeline [rows]="timelineRows()"></app-activity-timeline>
-    </div>
 
     <!-- charts row -->
     <div class="overview__charts" [class.overview__charts--empty]="logs().length === 0">

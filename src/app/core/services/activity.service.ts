@@ -442,9 +442,8 @@ export class ActivityService {
 
   groupByHour(
     logs: ActivityLog[],
-    date: Date,
-    idle: { startTime: Date; endTime: Date }[] = []
-  ): { hour: number; productive: number; unproductive: number; neutral: number; break: number; total: number }[] {
+    date: Date
+  ): { hour: number; productiveSeconds: number; totalSeconds: number }[] {
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(dayStart);
@@ -452,14 +451,10 @@ export class ActivityService {
 
     const buckets = Array.from({ length: 24 }, (_, hour) => ({
       hour,
-      productive: 0,
-      unproductive: 0,
-      neutral: 0,
-      break: 0,
-      total: 0,
+      productiveSeconds: 0,
+      totalSeconds: 0,
     }));
 
-    // Process Activity Logs
     for (const log of logs) {
       const start = log.startTime.getTime();
       const end = log.endTime.getTime();
@@ -472,41 +467,15 @@ export class ActivityService {
         hourStart.setHours(h, 0, 0, 0);
         const hourEnd = new Date(hourStart);
         hourEnd.setHours(h + 1, 0, 0, 0);
-        
         const overlapStart = Math.max(start, hourStart.getTime());
         const overlapEnd = Math.min(end, hourEnd.getTime());
-        
         if (overlapStart < overlapEnd) {
           const secs = (overlapEnd - overlapStart) / 1000;
-          buckets[h].total += secs;
-          if (log.category === 'productive') buckets[h].productive += secs;
-          else if (log.category === 'unproductive') buckets[h].unproductive += secs;
-          else buckets[h].neutral += secs;
+          buckets[h].totalSeconds += secs;
+          if (log.category === 'productive') buckets[h].productiveSeconds += secs;
         }
       }
     }
-
-    // Process Idle Sessions (Breaks)
-    for (const session of idle) {
-      const start = session.startTime.getTime();
-      const end = session.endTime.getTime();
-      
-      for (let h = 0; h < 24; h++) {
-        const hourStart = new Date(dayStart);
-        hourStart.setHours(h, 0, 0, 0);
-        const hourEnd = new Date(hourStart);
-        hourEnd.setHours(h + 1, 0, 0, 0);
-        
-        const overlapStart = Math.max(start, hourStart.getTime());
-        const overlapEnd = Math.min(end, hourEnd.getTime());
-        
-        if (overlapStart < overlapEnd) {
-          const secs = (overlapEnd - overlapStart) / 1000;
-          buckets[h].break += secs;
-        }
-      }
-    }
-
     return buckets;
   }
   /**
