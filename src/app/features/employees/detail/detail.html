@@ -214,13 +214,22 @@
 
       <div class="detail__actions">
         @if (emp.active) {
-          <button
-            type="button"
-            class="btn detail__btn-danger"
-            (click)="deactivate()"
-          >
-            Deactivate
-          </button>
+          <div class="detail__action-group">
+            <button
+              type="button"
+              class="btn btn--secondary"
+              (click)="repairAgent()"
+            >
+              Repair Agent
+            </button>
+            <button
+              type="button"
+              class="btn detail__btn-danger"
+              (click)="deactivate()"
+            >
+              Deactivate
+            </button>
+          </div>
         } @else {
           <div class="detail__action-group">
             <button

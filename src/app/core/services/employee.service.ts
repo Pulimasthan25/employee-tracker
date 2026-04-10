@@ -113,6 +113,10 @@ export class EmployeeService {
     await updateDoc(doc(db, 'users', uid), { active: false });
   }
 
+  async repairAgent(uid: string): Promise<void> {
+    await updateDoc(doc(db, 'users', uid), { pendingCommand: 'repair' });
+  }
+
   async reactivate(uid: string): Promise<void> {
     await updateDoc(doc(db, 'users', uid), { active: true });
   }

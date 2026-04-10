@@ -122,6 +122,25 @@ export class Detail {
     });
   }
 
+  async repairAgent(): Promise<void> {
+    const emp = this.employee();
+    if (!emp?.active) return;
+
+    this.confirmService.confirm({
+      title: 'Repair Agent',
+      message: `This will remotely restart ${emp.displayName || emp.email}'s agent and re-initialize its tracking services. Use this if they are experiencing issues with screenshots or activity tracking.`,
+      confirmText: 'Repair Agent',
+      onConfirm: async () => {
+        try {
+          await this.employeeService.repairAgent(emp.uid);
+          this.toastService.show('Repair command sent to agent.', 'success');
+        } catch {
+          this.toastService.show('Failed to send repair command.', 'error');
+        }
+      }
+    });
+  }
+
   async reactivate(): Promise<void> {
     const emp = this.employee();
     if (!emp || emp.active) return;
