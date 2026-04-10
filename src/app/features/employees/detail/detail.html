@@ -183,8 +183,37 @@
         </div>
       </div>
 
-      @if (emp.active) {
-        <div class="detail__actions">
+      @if (showReactivationSuccess()) {
+        <div class="detail__success">
+          <div class="detail__success-icon">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <h3 class="detail__success-title">Reactivated successfully</h3>
+          <p class="detail__success-text">Share the agent setup file with the employee.</p>
+          
+          <div class="detail__success-box">
+            <input type="text" class="detail__success-input" [value]="downloadUrl() || 'Fetching latest version...'" readonly (click)="$any($event.target).select()" />
+            <button type="button" class="btn btn--secondary detail__success-copy" (click)="copyLink()">
+              @if (linkCopied()) {
+                Copied
+              } @else {
+                Copy link
+              }
+            </button>
+          </div>
+          
+          <a [href]="downloadUrl()" class="btn btn--primary detail__success-download" target="_blank" download [class.disabled]="!downloadUrl()">
+            Download Agent
+          </a>
+          <button type="button" class="btn btn--ghost" (click)="showReactivationSuccess.set(false)" style="margin-top: 8px;">Dismiss</button>
+        </div>
+      }
+
+      <div class="detail__actions">
+        @if (emp.active) {
           <button
             type="button"
             class="btn detail__btn-danger"
@@ -192,8 +221,25 @@
           >
             Deactivate
           </button>
-        </div>
-      }
+        } @else {
+          <div class="detail__action-group">
+            <button
+              type="button"
+              class="btn btn--primary"
+              (click)="reactivate()"
+            >
+              Reactivate
+            </button>
+            <button
+              type="button"
+              class="btn detail__btn-danger"
+              (click)="deleteRecord()"
+            >
+              Delete User Data
+            </button>
+          </div>
+        }
+      </div>
     </div>
   }
 </div>

@@ -110,6 +110,16 @@ body {
   background: var(--accent-dim);
 }
 
+.btn--secondary {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: var(--bg-surface);
+}
+
 .btn--ghost {
   background: transparent;
   color: var(--text-secondary);

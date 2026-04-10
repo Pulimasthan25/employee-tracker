@@ -10,6 +10,7 @@ import {
   getDocs,
   addDoc,
   updateDoc,
+  deleteDoc,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -110,6 +111,14 @@ export class EmployeeService {
 
   async deactivate(uid: string): Promise<void> {
     await updateDoc(doc(db, 'users', uid), { active: false });
+  }
+
+  async reactivate(uid: string): Promise<void> {
+    await updateDoc(doc(db, 'users', uid), { active: true });
+  }
+
+  async delete(uid: string): Promise<void> {
+    await deleteDoc(doc(db, 'users', uid));
   }
 
   async updateScreenshotInterval(uid: string, intervalSeconds: number): Promise<void> {
