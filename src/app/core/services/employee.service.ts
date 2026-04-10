@@ -11,6 +11,9 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  query,
+  where,
+  writeBatch,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -85,9 +88,13 @@ export class EmployeeService {
       try {
         const cred = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
         authUid = cred.user.uid;
+      } catch (e: any) {
+        if (e.code === 'auth/email-already-in-use') {
+          throw new Error('User already exists. If you previously deleted this user from the tracker, you must also delete their account from the Console before re-inviting.');
+        }
+        throw e;
       } finally {
-        // secondaryApp gets deleted automatically or we can ignore it since it doesn't hurt to keep, but it's cleaner to delete it.
-        // Actually, deleting requires deleteApp which is asynchronous, but we won't bother.
+        // We could delete the secondary app here if needed
       }
     }
 
@@ -122,7 +129,28 @@ export class EmployeeService {
   }
 
   async delete(uid: string): Promise<void> {
-    await deleteDoc(doc(db, 'users', uid));
+    const batch = writeBatch(db);
+
+    // 1. Delete activities
+    const activitiesQ = query(collection(db, 'activities'), where('userId', '==', uid));
+    const activitySnaps = await getDocs(activitiesQ);
+    activitySnaps.forEach((d) => batch.delete(d.ref));
+
+    // 2. Delete screenshots
+    const screenshotsQ = query(collection(db, 'screenshots'), where('userId', '==', uid));
+    const screenshotSnaps = await getDocs(screenshotsQ);
+    screenshotSnaps.forEach((d) => batch.delete(d.ref));
+
+    // 3. Delete shifts
+    const shiftsQ = query(collection(db, 'shifts'), where('userId', '==', uid));
+    const shiftSnaps = await getDocs(shiftsQ);
+    shiftSnaps.forEach((d) => batch.delete(d.ref));
+
+    // 4. Delete user document
+    batch.delete(doc(db, 'users', uid));
+
+    // Commit all deletions
+    await batch.commit();
   }
 
   async updateScreenshotInterval(uid: string, intervalSeconds: number): Promise<void> {

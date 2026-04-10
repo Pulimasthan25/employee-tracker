@@ -105,7 +105,7 @@ export class Detail {
   async deactivate(): Promise<void> {
     const emp = this.employee();
     if (!emp?.active) return;
-    
+
     this.confirmService.confirm({
       title: 'Deactivate Employee',
       message: `Are you sure you want to deactivate ${emp.displayName || emp.email}? This will trigger an uninstallation of the agent on their device.`,
@@ -173,8 +173,8 @@ export class Detail {
 
     this.confirmService.confirm({
       title: 'Delete Employee',
-      message: `Are you sure you want to permanently delete all data for ${emp.displayName || emp.email}? This action cannot be undone.`,
-      confirmText: 'Delete Forever',
+      message: `Are you sure you want to permanently delete all activity data, screenshots, and records for ${emp.displayName || emp.email}? \n\nNOTE: This will NOT delete their account. You must manually delete it from the Console if you wish to re-invite them with.`,
+      confirmText: 'Delete Everything',
       onConfirm: async () => {
         try {
           await this.employeeService.delete(emp.uid);

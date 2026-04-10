@@ -102,8 +102,8 @@ export class Invite implements OnInit {
         password,
       });
       this.success.set(true);
-    } catch (e) {
-      this.error.set('Failed to invite. Please try again.');
+    } catch (e: any) {
+      this.error.set(e.message || 'Failed to invite. Please try again.');
       this.submitting.set(false);
     }
   }
