@@ -7,6 +7,7 @@ import {
   query,
   onSnapshot,
   updateDoc,
+  deleteField,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { signal } from '@angular/core';
@@ -52,7 +53,13 @@ export class SiteRuleService {
 
   async updateRule(id: string, updates: Partial<SiteRule>) {
     const docRef = doc(db, 'site_rules', id);
-    await updateDoc(docRef, updates);
+    // If teamId is explicitly undefined, we must use deleteField() so the
+    // field is actually removed from Firestore (passing undefined is a no-op).
+    const payload: Record<string, unknown> = { ...updates };
+    if ('teamId' in updates && updates.teamId === undefined) {
+      payload['teamId'] = deleteField();
+    }
+    await updateDoc(docRef, payload);
   }
 
   async seedDefaultRules() {
@@ -106,9 +113,7 @@ export class SiteRuleService {
       { displayName: 'Wikipedia', category: 'neutral', keywords: ['wikipedia'] },
     ];
 
-    if (this.rulesSignal().length > 0) {
-      if (!confirm(`You already have ${this.rulesSignal().length} rules. This will add the defaults on top of them. Proceed?`)) return;
-    }
+    // Guard: button is only visible when rules().length === 0 so no extra check needed.
 
     for (const r of rules) {
       await this.addRule(r);

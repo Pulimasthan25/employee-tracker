@@ -25,9 +25,23 @@ export class Invite implements OnInit {
   readonly success = signal(false);
   readonly downloadUrl = signal<string | null>(null);
   readonly linkCopied = signal(false);
+  readonly availableTeams = signal<string[]>([]);
 
   ngOnInit() {
     this.fetchLatestRelease();
+    this.loadTeams();
+  }
+
+  private async loadTeams() {
+    try {
+      this.employeeService.invalidateCache();
+      const employees = await this.employeeService.getAll();
+      const teams = new Set<string>();
+      employees.forEach(e => { if (e.teamId) teams.add(e.teamId); });
+      this.availableTeams.set(Array.from(teams).sort());
+    } catch {
+      // Non-critical — just won't show suggestions
+    }
   }
 
   async fetchLatestRelease() {

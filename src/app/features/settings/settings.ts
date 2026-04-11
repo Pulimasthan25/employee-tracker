@@ -20,6 +20,8 @@ export class Settings implements OnInit {
   readonly availableTeams = signal<string[]>([]);
 
   async ngOnInit() {
+    // Bypass the 5-min cache so we always see the latest teams.
+    this.employeeService.invalidateCache();
     const employees = await this.employeeService.getAll();
     const teams = new Set<string>();
     employees.forEach(e => {

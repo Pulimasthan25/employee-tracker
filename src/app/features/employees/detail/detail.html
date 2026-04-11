@@ -136,7 +136,7 @@
             @if (savingTeam()) {
               <span class="saving-text">Saving…</span>
             } @else if (employee(); as emp) {
-              <div class="team-combo" (blur)="onTeamBlur()" tabindex="-1">
+              <div class="team-combo" #teamCombo tabindex="-1">
                 <input
                   type="text"
                   #teamInp
@@ -148,19 +148,26 @@
                   placeholder="Global / None"
                   class="team-combo__input"
                 />
-                <div class="team-combo__icon" (click)="teamInp.focus()">
+                <div class="team-combo__icon" (click)="openTeam = !openTeam; $event.stopPropagation()">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="6 9 12 15 18 9"/>
                   </svg>
                 </div>
                 
-                @if (openTeam && availableTeams().length > 0) {
+                @if (openTeam) {
                   <div class="team-combo__dropdown">
+                    <div
+                      class="team-combo__option team-combo__option--clear"
+                      [class.team-combo__option--active]="!emp.teamId"
+                      (mousedown)="onTeamChange(''); openTeam = false; $event.preventDefault()"
+                    >
+                      No team (global)
+                    </div>
                     @for (team of availableTeams(); track team) {
                       <div 
                         class="team-combo__option" 
                         [class.team-combo__option--active]="emp.teamId === team"
-                        (mousedown)="onTeamChange(team); openTeam = false"
+                        (mousedown)="onTeamChange(team); openTeam = false; $event.preventDefault()"
                       >
                         {{ team }}
                       </div>

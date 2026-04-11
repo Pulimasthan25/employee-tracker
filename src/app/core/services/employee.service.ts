@@ -65,7 +65,7 @@ export class EmployeeService {
     return mapped;
   }
 
-  private invalidateCache() {
+  invalidateCache() {
     this.cache.delete('all');
   }
 

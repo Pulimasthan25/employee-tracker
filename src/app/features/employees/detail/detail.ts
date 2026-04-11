@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy,
   ViewChild,
   ElementRef,
+  HostListener,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -34,6 +35,7 @@ export class Detail {
   private readonly router = inject(Router);
   
   @ViewChild('teamInp') teamInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('teamCombo') teamComboRef?: ElementRef<HTMLElement>;
 
   readonly id = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
@@ -79,6 +81,15 @@ export class Detail {
   openStart = false;
   openEnd = false;
   openTeam = false;
+
+  @HostListener('document:click', ['$event.target'])
+  onDocumentClick(target: EventTarget | null) {
+    // Close the team combo if the click was outside it
+    const comboEl = this.teamComboRef?.nativeElement;
+    if (this.openTeam && comboEl && target instanceof Node && !comboEl.contains(target)) {
+      this.openTeam = false;
+    }
+  }
 
   formatShiftHour(h: number): string {
     return `${String(h).padStart(2, '0')}:00`;
@@ -308,10 +319,11 @@ export class Detail {
   }
 
   onTeamBlur() {
-    // Small delay to allow clicks to register
+    // Kept for keyboard accessibility (Enter key path), but click-outside
+    // is now handled by the @HostListener above.
     setTimeout(() => {
       if (this.openTeam) this.openTeam = false;
-    }, 200);
+    }, 150);
   }
 
   toggleTeam() {

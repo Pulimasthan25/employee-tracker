@@ -114,15 +114,18 @@
       </div>
 
       <div class="invite__field">
-        <label for="invite-teamId" class="invite__label">Team ID <span class="invite__optional">(optional)</span></label>
-        <input
+        <label for="invite-teamId" class="invite__label">Team <span class="invite__optional">(optional)</span></label>
+        <select
           id="invite-teamId"
-          type="text"
           class="invite__input"
           [(ngModel)]="teamId"
           name="teamId"
-          placeholder="e.g. sales, engineering"
-        />
+        >
+          <option value="">No team (global)</option>
+          @for (team of availableTeams(); track team) {
+            <option [value]="team">{{ team }}</option>
+          }
+        </select>
       </div>
 
       <div class="invite__field">
