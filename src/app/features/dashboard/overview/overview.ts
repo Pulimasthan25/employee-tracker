@@ -21,14 +21,18 @@ import { ShiftService, type ShiftSession } from '../../../core/services/shift.se
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
 
 function formatDuration(seconds: number): string {
-  if (seconds < 60) return '0m';
+  if (seconds <= 0) return '0s';
+  if (seconds < 60) return `${Math.round(seconds)}s`;
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  if (h === 0) return `${m}m`;
-  return `${h}h ${m}m`;
+  const s = Math.round(seconds % 60);
+  if (h === 0) return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  return s > 0 ? `${h}h ${m}m ${s}s` : (m > 0 ? `${h}h ${m}m` : `${h}h`);
 }
 
 function formatHours(seconds: number): string {
+  if (seconds <= 0) return '0s';
+  if (seconds < 60) return `${Math.round(seconds)}s`;
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   if (h === 0) return `${m}m`;
