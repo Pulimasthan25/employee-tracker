@@ -30,6 +30,12 @@
   }
 }
 
+.team-badge {
+  background: hsla(var(--team-hue), 70%, 50%, 0.15) !important;
+  color: hsl(var(--team-hue), 85%, 80%) !important;
+  border: 1px solid hsla(var(--team-hue), 70%, 50%, 0.3) !important;
+}
+
 .detail__card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -243,25 +249,83 @@
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.custom-select-option {
-  padding: 8px 12px;
+.team-combo {
+  position: relative;
+  width: 160px;
+}
+
+.team-combo__input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 32px 8px 12px;
   color: var(--text-primary);
   font-size: 13px;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / 0.1);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+.team-combo__icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.team-combo__dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-top: 4px;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.team-combo__option {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: background var(--transition-fast);
-  text-align: center;
-}
+  transition: all var(--transition-fast);
 
-.custom-select-option:hover {
-  background: var(--bg-hover);
-}
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
 
-.custom-select-option--active {
-  background: var(--accent);
-  color: #fff;
-}
-.custom-select-option--active:hover {
-  background: var(--accent);
+  &--active {
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-weight: 500;
+  }
 }
 
 .detail__action-group {

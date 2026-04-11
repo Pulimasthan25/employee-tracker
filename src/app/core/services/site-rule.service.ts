@@ -16,6 +16,7 @@ export interface SiteRule {
   keywords: string[];
   category: 'productive' | 'unproductive' | 'neutral';
   displayName: string;
+  teamId?: string;
 }
 
 @Injectable({ providedIn: 'root' })

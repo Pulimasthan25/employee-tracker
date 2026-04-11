@@ -44,6 +44,16 @@
               <option value="neutral">Neutral</option>
             </select>
           </div>
+          <div class="form-group">
+            <label>Team Restriction (Optional)</label>
+            <input type="text" [(ngModel)]="newTeamId" name="teamId" placeholder="Global rule" list="teams-list"
+              class="input" />
+            <datalist id="teams-list">
+              @for (team of availableTeams(); track team) {
+                <option [value]="team">{{ team }}</option>
+              }
+            </datalist>
+          </div>
         </div>
         <div class="add-form__actions">
           <button type="button" class="btn btn--ghost" (click)="cancelEdit()">
@@ -89,6 +99,7 @@
           </span>
         </span>
         <span class="rule-card__col">Actions</span>
+        <span class="rule-card__col">Team Scope</span>
       </div>
 
       @for (rule of sortedRules(); track rule.id) {
@@ -106,6 +117,14 @@
           <span class="badge" [ngClass]="getCategoryClass(rule.category)">
             {{ rule.category }}
           </span>
+        </div>
+        <div class="rule-card__col">
+          <span class="rule-card__label">Scope</span>
+            @if (rule.teamId) {
+              <span class="badge team-badge" [style.--team-hue]="getTeamHue(rule.teamId)">{{ rule.teamId }}</span>
+            } @else {
+            <span class="badge badge--ghost">Global</span>
+          }
         </div>
         <div class="rule-card__col actions-cell">
           <button class="btn btn--flat-secondary btn--icon btn--sm" (click)="startEdit(rule)" title="Edit">

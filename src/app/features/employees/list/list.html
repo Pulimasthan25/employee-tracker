@@ -25,6 +25,7 @@
             <span class="list__table-cell list__table-cell--skeleton"></span>
             <span class="list__table-cell list__table-cell--skeleton"></span>
             <span class="list__table-cell list__table-cell--skeleton"></span>
+            <span class="list__table-cell list__table-cell--skeleton"></span>
           </div>
         }
       </div>
@@ -37,6 +38,7 @@
         <div class="list__table-header">
           <span class="list__table-cell">Name</span>
           <span class="list__table-cell">Email</span>
+          <span class="list__table-cell">Team</span>
           <span class="list__table-cell">Role</span>
           <span class="list__table-cell">Status</span>
           <span class="list__table-cell">Joined</span>
@@ -45,6 +47,13 @@
           <a [routerLink]="['/employees', emp.uid]" class="list__table-row list__table-row--link">
             <span class="list__table-cell list__table-cell--name">{{ emp.displayName || '—' }}</span>
             <span class="list__table-cell">{{ emp.email }}</span>
+            <span class="list__table-cell">
+              @if (emp.teamId) {
+                <span class="badge team-badge" [style.--team-hue]="getTeamHue(emp.teamId)">{{ emp.teamId }}</span>
+              } @else {
+                <span class="list__text-muted">—</span>
+              }
+            </span>
             <span class="list__table-cell">
               <span
                 class="badge"

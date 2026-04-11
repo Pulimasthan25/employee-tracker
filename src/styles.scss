@@ -160,7 +160,13 @@ body {
 
 .badge--info {
   background: rgba(80, 88, 112, 0.3);
-  color: #505870;
+  color: #a8b0c0;
+}
+
+.badge--ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
 }
 // styles.scss
 .shell__main-wrap .shell__content {

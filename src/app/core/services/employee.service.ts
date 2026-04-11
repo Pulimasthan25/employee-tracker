@@ -65,6 +65,10 @@ export class EmployeeService {
     return mapped;
   }
 
+  private invalidateCache() {
+    this.cache.delete('all');
+  }
+
   async getById(uid: string): Promise<AppUser | null> {
     const d = await getDoc(doc(db, 'users', uid));
     if (!d.exists()) return null;
@@ -114,10 +118,12 @@ export class EmployeeService {
       const col = collection(db, 'users');
       await addDoc(col, userData);
     }
+    this.invalidateCache();
   }
 
   async deactivate(uid: string): Promise<void> {
     await updateDoc(doc(db, 'users', uid), { active: false });
+    this.invalidateCache();
   }
 
   async repairAgent(uid: string): Promise<void> {
@@ -126,6 +132,7 @@ export class EmployeeService {
 
   async reactivate(uid: string): Promise<void> {
     await updateDoc(doc(db, 'users', uid), { active: true });
+    this.invalidateCache();
   }
 
   async delete(uid: string): Promise<void> {
@@ -151,16 +158,19 @@ export class EmployeeService {
 
     // Commit all deletions
     await batch.commit();
+    this.invalidateCache();
   }
 
   async updateScreenshotInterval(uid: string, intervalSeconds: number): Promise<void> {
     await updateDoc(doc(db, 'users', uid), {
       screenshotIntervalSeconds: intervalSeconds
     });
+    this.invalidateCache();
   }
 
   async updateIdleThreshold(uid: string, idleThresholdSeconds: number): Promise<void> {
     await updateDoc(doc(db, 'users', uid), { idleThresholdSeconds });
+    this.invalidateCache();
   }
 
   async updateShiftHours(uid: string, shiftStartHour: number, shiftEndHour: number): Promise<void> {
@@ -168,5 +178,11 @@ export class EmployeeService {
       shiftStartHour,
       shiftEndHour,
     });
+    this.invalidateCache();
+  }
+
+  async updateTeam(uid: string, teamId: string | null): Promise<void> {
+    await updateDoc(doc(db, 'users', uid), { teamId });
+    this.invalidateCache();
   }
 }

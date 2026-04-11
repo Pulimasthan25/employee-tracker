@@ -48,4 +48,14 @@ export class List {
       this.loading.set(false);
     }
   }
+
+  getTeamHue(team: string | undefined): number {
+    if (!team) return 0;
+    const professionalHues = [210, 225, 190, 170, 200, 215, 235, 180, 160, 205];
+    let hash = 0;
+    for (let i = 0; i < team.length; i++) {
+      hash = team.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return professionalHues[Math.abs(hash) % professionalHues.length];
+  }
 }

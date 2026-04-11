@@ -51,7 +51,7 @@
 
 .list__table-header {
   display: grid;
-  grid-template-columns: 1.5fr 2fr 1fr 1fr 1.2fr;
+  grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr 1.2fr;
   gap: var(--space-md);
   padding: var(--space-md) var(--space-lg);
   background: var(--bg-surface);
@@ -65,7 +65,7 @@
 
 .list__table-row {
   display: grid;
-  grid-template-columns: 1.5fr 2fr 1fr 1fr 1.2fr;
+  grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr 1.2fr;
   gap: var(--space-md);
   align-items: center;
   padding: var(--space-md) var(--space-lg);
@@ -113,6 +113,16 @@
     border-radius: var(--radius-sm);
     animation: list-skeleton 1.2s ease-in-out infinite;
   }
+}
+
+.team-badge {
+  background: hsla(var(--team-hue), 70%, 50%, 0.15) !important;
+  color: hsl(var(--team-hue), 85%, 80%) !important;
+  border: 1px solid hsla(var(--team-hue), 70%, 50%, 0.3) !important;
+}
+
+.list__text-muted {
+  color: var(--text-muted);
 }
 
 @keyframes list-skeleton {

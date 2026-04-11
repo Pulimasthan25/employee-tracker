@@ -5,6 +5,8 @@ import {
   effect,
   untracked,
   ChangeDetectionStrategy,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -13,12 +15,13 @@ import { map } from 'rxjs/operators';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import type { AppUser } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-detail',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, FormsModule],
   templateUrl: './detail.html',
   styleUrl: './detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +32,8 @@ export class Detail {
   private readonly toastService = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
   private readonly router = inject(Router);
+  
+  @ViewChild('teamInp') teamInput?: ElementRef<HTMLInputElement>;
 
   readonly id = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
@@ -41,6 +46,8 @@ export class Detail {
   readonly showReactivationSuccess = signal(false);
   readonly downloadUrl = signal<string | null>(null);
   readonly linkCopied = signal(false);
+  readonly availableTeams = signal<string[]>([]);
+  readonly savingTeam = signal(false);
 
   readonly intervalOptions = [
     { label: '1 minute',    value: 60   },
@@ -71,6 +78,7 @@ export class Detail {
 
   openStart = false;
   openEnd = false;
+  openTeam = false;
 
   formatShiftHour(h: number): string {
     return `${String(h).padStart(2, '0')}:00`;
@@ -92,6 +100,12 @@ export class Detail {
       const emp = await this.employeeService.getById(id);
       if (emp) {
         this.employee.set(emp);
+        
+        // Fetch all teams for suggestions
+        const all = await this.employeeService.getAll();
+        const teams = new Set<string>();
+        all.forEach(u => { if (u.teamId) teams.add(u.teamId); });
+        this.availableTeams.set(Array.from(teams).sort());
       } else {
         this.notFound.set(true);
       }
@@ -272,5 +286,51 @@ export class Detail {
     } finally {
       this.savingShiftHours.set(false);
     }
+  }
+
+  async onTeamChange(teamId: string): Promise<void> {
+    if (!this.employee()?.uid) return;
+    const finalTeamId = teamId.trim() || null;
+    this.savingTeam.set(true);
+    this.openTeam = false;
+    try {
+      await this.employeeService.updateTeam(this.employee()!.uid, finalTeamId);
+      this.toastService.show('Team updated.', 'success');
+      const emp = this.employee();
+      if (emp) {
+        this.employee.set({ ...emp, teamId: finalTeamId ?? undefined });
+      }
+    } catch {
+      this.toastService.show('Failed to update team.', 'error');
+    } finally {
+      this.savingTeam.set(false);
+    }
+  }
+
+  onTeamBlur() {
+    // Small delay to allow clicks to register
+    setTimeout(() => {
+      if (this.openTeam) this.openTeam = false;
+    }, 200);
+  }
+
+  toggleTeam() {
+    this.openTeam = !this.openTeam;
+    if (this.openTeam) {
+      setTimeout(() => {
+        this.teamInput?.nativeElement.focus();
+        this.teamInput?.nativeElement.select();
+      }, 0);
+    }
+  }
+
+  getTeamHue(team: string | undefined): number {
+    if (!team) return 0;
+    const professionalHues = [210, 225, 190, 170, 200, 215, 235, 180, 160, 205];
+    let hash = 0;
+    for (let i = 0; i < team.length; i++) {
+        hash = team.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return professionalHues[Math.abs(hash) % professionalHues.length];
   }
 }

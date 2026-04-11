@@ -53,7 +53,9 @@
         @if (emp.teamId) {
           <div class="detail__row">
             <span class="detail__label">Team</span>
-            <span class="detail__value">{{ emp.teamId }}</span>
+            <span class="detail__value">
+              <span class="badge team-badge" [style.--team-hue]="getTeamHue(emp.teamId)">{{ emp.teamId }}</span>
+            </span>
           </div>
         }
         <div class="detail__row">
@@ -119,6 +121,53 @@
                   </option>
                 }
               </select>
+            }
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Team ID</span>
+            <span class="setting-desc">
+              The team this employee belongs to. Used for team-based site categorization.
+            </span>
+          </div>
+          <div class="setting-control">
+            @if (savingTeam()) {
+              <span class="saving-text">Saving…</span>
+            } @else if (employee(); as emp) {
+              <div class="team-combo" (blur)="onTeamBlur()" tabindex="-1">
+                <input
+                  type="text"
+                  #teamInp
+                  [ngModel]="emp.teamId || ''"
+                  (ngModelChange)="onTeamChange($event)"
+                  (focus)="openTeam = true"
+                  (keyup.enter)="onTeamBlur(); teamInp.blur()"
+                  [ngModelOptions]="{updateOn: 'blur'}"
+                  placeholder="Global / None"
+                  class="team-combo__input"
+                />
+                <div class="team-combo__icon" (click)="teamInp.focus()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+                
+                @if (openTeam && availableTeams().length > 0) {
+                  <div class="team-combo__dropdown">
+                    @for (team of availableTeams(); track team) {
+                      <div 
+                        class="team-combo__option" 
+                        [class.team-combo__option--active]="emp.teamId === team"
+                        (mousedown)="onTeamChange(team); openTeam = false"
+                      >
+                        {{ team }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
             }
           </div>
         </div>
