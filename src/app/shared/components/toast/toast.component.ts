@@ -8,11 +8,11 @@ import { ToastService } from '../../../core/services/toast.service';
   animations: [
     trigger('toastAnim', [
       transition(':enter', [
-        style({ transform: 'translateX(100%)', opacity: 0 }),
-        animate('0.3s cubic-bezier(0.16, 1, 0.3, 1)', style({ transform: 'translateX(0)', opacity: 1 }))
+        style({ transform: 'translateY(12px)', opacity: 0 }),
+        animate('350ms cubic-bezier(0.1, 0.9, 0.2, 1)', style({ transform: 'translateY(0)', opacity: 1 }))
       ]),
       transition(':leave', [
-        animate('0.2s ease-in', style({ transform: 'scale(0.9)', opacity: 0 }))
+        animate('200ms ease-in', style({ transform: 'scale(0.95)', opacity: 0 }))
       ])
     ])
   ],

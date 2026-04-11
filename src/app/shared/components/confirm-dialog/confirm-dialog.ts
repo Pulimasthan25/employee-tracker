@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { fadeIn, scaleIn } from '../../animations';
 import { ConfirmService } from '../../../core/services/confirm.service';
 
 @Component({
@@ -8,8 +9,8 @@ import { ConfirmService } from '../../../core/services/confirm.service';
   imports: [CommonModule],
   template: `
     @if (service.data(); as data) {
-      <div class="confirm-backdrop" (click)="service.close()">
-        <div class="confirm-modal" (click)="$event.stopPropagation()">
+      <div class="confirm-backdrop" (click)="service.close()" @fadeIn>
+        <div class="confirm-modal" (click)="$event.stopPropagation()" @scaleIn>
           <div class="confirm-modal__header">
              <div class="confirm-modal__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -34,6 +35,7 @@ import { ConfirmService } from '../../../core/services/confirm.service';
     }
   `,
   styleUrl: './confirm-dialog.scss',
+  animations: [fadeIn, scaleIn]
 })
 export class ConfirmDialog {
   readonly service = inject(ConfirmService);

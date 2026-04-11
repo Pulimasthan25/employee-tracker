@@ -115,7 +115,7 @@
         <span class="rule-card__col">Actions</span>
       </div>
 
-      <div @staggerFadeIn>
+      <div [@staggerFadeIn]="sortedRules().length">
         @for (rule of sortedRules(); track rule.id) {
           <div class="rule-card">
             <div class="rule-card__col">

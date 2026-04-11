@@ -16,6 +16,7 @@ import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
+import { fadeIn, staggerFadeIn, scaleIn } from '../../../shared/animations';
 
 function formatDuration(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds || 0));
@@ -30,6 +31,7 @@ function formatDuration(seconds: number): string {
   templateUrl: './attendance.html',
   styleUrl: './attendance.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, staggerFadeIn, scaleIn]
 })
 export class Attendance {
   private readonly auth = inject(AuthService);

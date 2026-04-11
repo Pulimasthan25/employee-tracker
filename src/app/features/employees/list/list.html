@@ -43,7 +43,7 @@
           <span class="list__table-cell">Status</span>
           <span class="list__table-cell">Joined</span>
         </div>
-        <div class="list__rows-container" @staggerFadeIn>
+        <div class="list__rows-container" [@staggerFadeIn]="employees().length">
           @for (emp of employees(); track emp.uid) {
             <a [routerLink]="['/employees', emp.uid]" class="list__table-row list__table-row--link">
               <span class="list__table-cell list__table-cell--name">{{ emp.displayName || '—' }}</span>

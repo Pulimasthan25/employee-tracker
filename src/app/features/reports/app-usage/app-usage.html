@@ -47,7 +47,7 @@
           <th>% of total</th>
         </tr>
       </thead>
-      <tbody @staggerFadeIn>
+      <tbody [@staggerFadeIn]="data().length">
         @if (loading()) {
           <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
           <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>

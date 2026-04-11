@@ -10,7 +10,7 @@ import {
   HostListener,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { fadeIn, slideInUp, scaleIn } from '../../../shared/animations';
@@ -23,7 +23,7 @@ import type { AppUser } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-detail',
-  imports: [RouterLink, DatePipe, FormsModule, NgClass],
+  imports: [RouterLink, DatePipe, FormsModule],
   templateUrl: './detail.html',
   styleUrl: './detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,7 +35,7 @@ export class Detail {
   private readonly toastService = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
   private readonly router = inject(Router);
-  
+
   @ViewChild('teamInp') teamInput?: ElementRef<HTMLInputElement>;
   @ViewChild('teamCombo') teamComboRef?: ElementRef<HTMLElement>;
 
@@ -113,7 +113,7 @@ export class Detail {
       const emp = await this.employeeService.getById(id);
       if (emp) {
         this.employee.set(emp);
-        
+
         // Fetch all teams for suggestions
         const all = await this.employeeService.getAll();
         const teams = new Set<string>();

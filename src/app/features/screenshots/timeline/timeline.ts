@@ -12,6 +12,7 @@ import { ScreenshotService, Screenshot } from '../../../core/services/screenshot
 import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import type { AppUser } from '../../../core/services/auth.service';
+import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../../shared/animations';
 
 @Component({
   selector: 'app-timeline',
@@ -19,6 +20,7 @@ import type { AppUser } from '../../../core/services/auth.service';
   templateUrl: './timeline.html',
   styleUrl: './timeline.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, staggerFadeIn, scaleIn, slideInUp]
 })
 export class Timeline {
   private readonly screenshotService = inject(ScreenshotService);

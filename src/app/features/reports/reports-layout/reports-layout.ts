@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
-import { fadeIn } from '../../../shared/animations';
+import { fadeIn, staggerFadeIn } from '../../../shared/animations';
 
 @Component({
   selector: 'app-reports-layout',
@@ -9,6 +9,6 @@ import { fadeIn } from '../../../shared/animations';
   templateUrl: './reports-layout.html',
   styleUrl: './reports-layout.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeIn]
+  animations: [fadeIn, staggerFadeIn]
 })
 export class ReportsLayout {}

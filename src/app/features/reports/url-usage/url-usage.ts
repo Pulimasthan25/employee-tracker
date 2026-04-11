@@ -4,6 +4,7 @@ import { AuthService, AppUser } from '../../../core/services/auth.service';
 import { ActivityService, ActivityLog } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { FormsModule } from '@angular/forms';
+import { fadeIn, staggerFadeIn, scaleIn } from '../../../shared/animations';
 
 function formatDuration(seconds: number): string {
   if (!seconds) return '0h 0m';
@@ -18,6 +19,7 @@ function formatDuration(seconds: number): string {
   templateUrl: './url-usage.html',
   styleUrl: './url-usage.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, staggerFadeIn, scaleIn]
 })
 export class UrlUsage {
   private readonly auth = inject(AuthService);
