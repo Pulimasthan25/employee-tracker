@@ -54,40 +54,44 @@
 }
 
 .shell__nav-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    padding: var(--space-sm) var(--space-lg);
-    color: var(--text-secondary);
-    text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: all var(--transition-normal);
-    position: relative;
-    overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+
+  &:hover:not(.shell__nav-item--active) {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    transform: translateX(4px);
+  }
+
+  &--active {
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-weight: 500;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20%;
+      height: 60%;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 0 4px 4px 0;
+    }
 
     &:hover {
-      background: var(--bg-hover);
-      color: var(--text-primary);
       transform: translateX(4px);
     }
-
-    &--active {
-      background: var(--accent-glow);
-      color: var(--accent);
-      font-weight: 500;
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 20%;
-        height: 60%;
-        width: 3px;
-        background: var(--accent);
-        border-radius: 0 4px 4px 0;
-      }
-    }
   }
+}
 
 .shell__icon {
   width: 20px;
@@ -156,18 +160,18 @@
 }
 
 .shell__topbar {
-    height: 72px;
-    padding: 0 var(--space-xl);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(15, 17, 23, 0.8);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
+  height: 72px;
+  padding: 0 var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 17, 23, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
 
 .shell__title {
   margin: 0;
