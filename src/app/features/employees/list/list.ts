@@ -11,6 +11,7 @@ import { DatePipe } from '@angular/common';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { AuthService } from '../../../core/services/auth.service';
 import type { AppUser } from '../../../core/services/auth.service';
+import { fadeIn, slideInUp, staggerFadeIn } from '../../../shared/animations';
 
 @Component({
   selector: 'app-list',
@@ -18,6 +19,7 @@ import type { AppUser } from '../../../core/services/auth.service';
   templateUrl: './list.html',
   styleUrl: './list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, slideInUp, staggerFadeIn]
 })
 export class List {
   private readonly employeeService = inject(EmployeeService);

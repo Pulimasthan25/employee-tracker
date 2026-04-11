@@ -19,6 +19,7 @@ import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
+import { fadeIn, slideInUp, staggerFadeIn, scaleIn } from '../../../shared/animations';
 
 function formatDuration(seconds: number): string {
   if (seconds <= 0) return '0s';
@@ -66,6 +67,7 @@ function getDateRange(range: 'today' | '7d' | '30d' | 'custom', customStart?: st
   templateUrl: './overview.html',
   styleUrl: './overview.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, slideInUp, staggerFadeIn, scaleIn]
 })
 export class Overview implements OnDestroy {
   private activityService = inject(ActivityService);

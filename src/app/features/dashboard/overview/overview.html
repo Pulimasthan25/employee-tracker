@@ -1,4 +1,4 @@
-<div class="overview">
+<div class="overview" @fadeIn>
   <div class="overview__header">
     <div class="overview__header-top">
       <div>
@@ -149,7 +149,7 @@
   </div>
   } @else {
   <!-- stat cards row -->
-  <div class="overview__stats">
+  <div class="overview__stats" @staggerFadeIn>
     <div class="overview__card">
       <div class="overview__card-label">Productivity score</div>
       <div class="overview__card-value-row">
@@ -157,8 +157,8 @@
               productivityScore() > 70
                 ? '#34c98a'
                 : productivityScore() >= 40
-                  ? '#f5a623'
-                  : '#f05252'
+                   ? '#f5a623'
+                   : '#f05252'
             ">
           {{ productivityScore() }}%
         </div>
@@ -183,7 +183,7 @@
       </div>
     </div>
     } @else {
-    <div class="overview__card">
+    <div class="overview__card" @slideInUp>
       <div class="overview__card-label">Break time</div>
       <div class="overview__card-value" style="color: var(--text-muted)">
         {{ formattedBreakTime() }}
@@ -194,10 +194,10 @@
 
   <!-- charts row -->
   <div class="overview__charts">
-    <div class="overview__chart overview__chart--doughnut">
+    <div class="overview__chart overview__chart--doughnut" @scaleIn>
       <canvas id="productivity-chart"></canvas>
     </div>
-    <div class="overview__chart overview__chart--bar">
+    <div class="overview__chart overview__chart--bar" @scaleIn>
       <div class="overview__chart-header">
         <span class="overview__chart-title">{{ chartTitle() }}</span>
       </div>

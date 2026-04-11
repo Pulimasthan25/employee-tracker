@@ -1,4 +1,4 @@
-<div class="report">
+<div class="report" @fadeIn>
   <div class="report__header">
     <h2>App usage report</h2>
     <app-date-range (rangeChange)="onRangeChange($event)" />
@@ -17,7 +17,7 @@
     }
   </div>
 
-  <div class="report__card" style="padding: 24px;">
+  <div class="report__card" style="padding: 24px;" @scaleIn>
     <div style="height: 300px; width: 100%;">
       @if (loading()) {
         <div class="chart-placeholder loading">
@@ -37,7 +37,7 @@
     </div>
   </div>
 
-  <div class="report__card">
+  <div class="report__card" @scaleIn>
     <table class="report__table">
       <thead>
         <tr>
@@ -47,7 +47,7 @@
           <th>% of total</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody @staggerFadeIn>
         @if (loading()) {
           <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
           <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>

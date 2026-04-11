@@ -4,12 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { SiteRuleService, SiteRule } from '../../core/services/site-rule.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { EmployeeService } from '../../core/services/employee.service';
+import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../shared/animations';
 
 @Component({
   selector: 'app-settings',
   imports: [CommonModule, FormsModule],
   templateUrl: './settings.html',
-  styleUrl: './settings.scss'
+  styleUrl: './settings.scss',
+  animations: [fadeIn, staggerFadeIn, scaleIn, slideInUp]
 })
 export class Settings implements OnInit {
   private readonly siteRuleService = inject(SiteRuleService);

@@ -43,8 +43,17 @@
   padding: var(--space-xl);
 
   &--skeleton {
-    min-height: 200px;
+    min-height: 180px;
+    background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s infinite linear;
+    border-color: transparent;
   }
+}
+
+@keyframes skeleton-pulse {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
 }
 
 .detail__name {

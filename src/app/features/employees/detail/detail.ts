@@ -10,9 +10,10 @@ import {
   HostListener,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
+import { fadeIn, slideInUp, scaleIn } from '../../../shared/animations';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
@@ -22,10 +23,11 @@ import type { AppUser } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-detail',
-  imports: [RouterLink, DatePipe, FormsModule],
+  imports: [RouterLink, DatePipe, FormsModule, NgClass],
   templateUrl: './detail.html',
   styleUrl: './detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, slideInUp, scaleIn]
 })
 export class Detail {
   private readonly route = inject(ActivatedRoute);

@@ -71,9 +71,17 @@
 
   &--skeleton {
     min-height: 80px;
-    animation: overview-skeleton 1.2s ease-in-out infinite;
+    background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s infinite linear;
     pointer-events: none;
+    border-color: transparent;
   }
+}
+
+@keyframes skeleton-pulse {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
 }
 
 .overview__card-label {
@@ -251,6 +259,10 @@
   align-items: center;
   font-size: 0.9375rem;
   color: var(--text-primary);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  cursor: default;
 }
 
 .overview__table-cell {
