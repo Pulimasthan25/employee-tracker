@@ -5,36 +5,34 @@
         <h1 class="overview__title">Dashboard Overview</h1>
         <p class="overview__subtitle">Monitor productivity, activities, and application usage.</p>
       </div>
-      
+
       <div class="overview__actions">
         @if (isAdmin()) {
-          <div class="overview__employee-filter">
-            <select
-              id="employee-select"
-              class="overview__select"
-              [value]="selectedEmployeeId()"
-              (change)="setSelectedEmployee($any($event.target).value)"
-            >
-              <option value="all">All employees</option>
-              @for (emp of employees(); track emp.uid) {
-                <option [value]="emp.uid">
-                  {{ emp.displayName || emp.email }}
-                </option>
-              }
-            </select>
-          </div>
+        <div class="overview__employee-filter">
+          <select id="employee-select" class="overview__select" [value]="selectedEmployeeId()"
+            (change)="setSelectedEmployee($any($event.target).value)">
+            <option value="all">All employees</option>
+            @for (emp of employees(); track emp.uid) {
+            <option [value]="emp.uid">
+              {{ emp.displayName || emp.email }}
+            </option>
+            }
+          </select>
+        </div>
         }
 
         <div class="overview__refresh-group">
           @if (lastUpdated()) {
-            <span class="overview__last-updated">Updated: {{ lastUpdated() }}</span>
+          <span class="overview__last-updated">Updated: {{ lastUpdated() }}</span>
           }
-          <button type="button" class="overview__refresh-button" [class.is-loading]="loading()" (click)="refreshData()" title="Refresh data">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-              <path d="M3 3v5h5"/>
-              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-              <path d="M16 21v-5h5"/>
+          <button type="button" class="overview__refresh-button" [class.is-loading]="loading()" (click)="refreshData()"
+            title="Refresh data">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+              <path d="M16 21v-5h5" />
             </svg>
           </button>
         </div>
@@ -42,230 +40,257 @@
     </div>
 
     <div class="overview__range">
-      <button
-        type="button"
-        class="overview__pill"
-        [class.overview__pill--active]="selectedRange() === 'today'"
-        (click)="setRange('today')"
-      >
+      <button type="button" class="overview__pill" [class.overview__pill--active]="selectedRange() === 'today'"
+        (click)="setRange('today')">
         Today
       </button>
-      <button
-        type="button"
-        class="overview__pill"
-        [class.overview__pill--active]="selectedRange() === '7d'"
-        (click)="setRange('7d')"
-      >
+      <button type="button" class="overview__pill" [class.overview__pill--active]="selectedRange() === '7d'"
+        (click)="setRange('7d')">
         7 days
       </button>
-      <button
-        type="button"
-        class="overview__pill"
-        [class.overview__pill--active]="selectedRange() === '30d'"
-        (click)="setRange('30d')"
-      >
+      <button type="button" class="overview__pill" [class.overview__pill--active]="selectedRange() === '30d'"
+        (click)="setRange('30d')">
         30 days
       </button>
-      <button
-        type="button"
-        class="overview__pill"
-        [class.overview__pill--active]="selectedRange() === 'custom'"
-        (click)="setRange('custom')"
-      >
+      <button type="button" class="overview__pill" [class.overview__pill--active]="selectedRange() === 'custom'"
+        (click)="setRange('custom')">
         Custom
       </button>
-      
+
       @if (selectedRange() === 'custom') {
-        <div class="overview__custom-date">
-          <input type="date" class="overview__pill overview__pill--date" [value]="customStart()" (change)="setCustomStart($any($event.target).value)">
-          <span class="overview__date-sep">to</span>
-          <input type="date" class="overview__pill overview__pill--date" [value]="customEnd()" (change)="setCustomEnd($any($event.target).value)">
-        </div>
+      <div class="overview__custom-date">
+        <input type="date" class="overview__pill overview__pill--date" [value]="customStart()"
+          (change)="setCustomStart($any($event.target).value)">
+        <span class="overview__date-sep">to</span>
+        <input type="date" class="overview__pill overview__pill--date" [value]="customEnd()"
+          (change)="setCustomEnd($any($event.target).value)">
+      </div>
       }
     </div>
   </div>
 
   @if (connectionError()) {
-    <div class="connection-error">
-      Unable to reach the database. If you have an ad blocker, please disable it for localhost and refresh.
-    </div>
+  <div class="connection-error">
+    Unable to reach the database. If you have an ad blocker, please disable it for localhost and refresh.
+  </div>
   } @else if (loading() && !hasLoadedOnce()) {
-    <div class="overview__stats">
-      @for (i of [1,2,3,4]; track i) {
-        <div class="overview__card overview__card--skeleton"></div>
-      }
-    </div>
-    <div class="overview__charts">
-      <div class="overview__chart overview__chart--skeleton"></div>
-      <div class="overview__chart overview__chart--skeleton"></div>
-    </div>
+  <div class="overview__stats">
+    @for (i of [1,2,3,4]; track i) {
+    <div class="overview__card overview__card--skeleton"></div>
+    }
+  </div>
+  <div class="overview__charts">
+    <div class="overview__chart overview__chart--skeleton"></div>
+    <div class="overview__chart overview__chart--skeleton"></div>
+  </div>
   } @else if (logs().length === 0) {
-    <div class="overview__empty">No activity data yet</div>
+  <!-- empty-state: placeholder cards -->
+  <div class="overview__stats">
+    <div class="overview__card">
+      <div class="overview__card-label">Productivity score</div>
+      <div class="overview__card-value-row">
+        <div class="overview__card-value" style="color: var(--text-muted)">—</div>
+        <div class="overview__card-subvalue">0m</div>
+      </div>
+    </div>
+    <div class="overview__card">
+      <div class="overview__card-label">Tracked usage</div>
+      <div class="overview__card-value" style="color: var(--text-muted)">0m</div>
+    </div>
+    <div class="overview__card">
+      <div class="overview__card-label">{{ customAdminMetricLabel() }}</div>
+      <div class="overview__card-value" style="color: var(--text-muted)">—</div>
+    </div>
+    @if (!isAdmin() || (isAdmin() && selectedEmployeeId() !== 'all')) {
+    <div class="overview__card">
+      <div class="overview__card-label">First login</div>
+      <div class="overview__card-value overview__card-value--sm" style="color: var(--text-muted)">—</div>
+    </div>
+    } @else {
+    <div class="overview__card">
+      <div class="overview__card-label">Break time</div>
+      <div class="overview__card-value" style="color: var(--text-muted)">0m</div>
+    </div>
+    }
+  </div>
+
+  <!-- empty-state: chart panels with overlay -->
+  <div class="overview__charts overview__charts--empty">
+    <div class="overview__chart overview__chart--doughnut">
+      <div class="overview__chart-canvas-wrap -no-data">
+        <canvas id="productivity-chart"></canvas>
+        <div class="overview__chart-empty-overlay">No data</div>
+      </div>
+    </div>
+    <div class="overview__chart overview__chart--bar">
+      <div class="overview__chart-header">
+        <span class="overview__chart-title">{{ chartTitle() }}</span>
+      </div>
+      <div class="overview__chart-canvas-wrap">
+        <canvas id="activity-chart"></canvas>
+        <div class="overview__chart-empty-overlay">No activity recorded for this period</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- empty-state: message block -->
+  <div class="overview__empty">
+    <div class="overview__empty-content">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); opacity: 0.5;">
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+        <polyline points="14 2 14 8 20 8" />
+        <path d="M9 15h6" />
+        <path d="M9 19h6" />
+        <path d="M9 11h1" />
+      </svg>
+      <p>No activity recorded for this period.</p>
+    </div>
+  </div>
   } @else {
-    <!-- stat cards row -->
-    <div class="overview__stats">
-      <div class="overview__card">
-        <div class="overview__card-label">Productivity score</div>
-        <div class="overview__card-value-row">
-          <div
-            class="overview__card-value"
-            [style.color]="
+  <!-- stat cards row -->
+  <div class="overview__stats">
+    <div class="overview__card">
+      <div class="overview__card-label">Productivity score</div>
+      <div class="overview__card-value-row">
+        <div class="overview__card-value" [style.color]="
               productivityScore() > 70
                 ? '#34c98a'
                 : productivityScore() >= 40
                   ? '#f5a623'
                   : '#f05252'
-            "
-          >
-            {{ productivityScore() }}%
-          </div>
-          <div class="overview__card-subvalue">{{ formattedProductiveTime() }}</div>
+            ">
+          {{ productivityScore() }}%
         </div>
+        <div class="overview__card-subvalue">{{ formattedProductiveTime() }}</div>
       </div>
-      <div class="overview__card">
-        <div class="overview__card-label">Tracked usage</div>
-        <div class="overview__card-value">{{ formattedActiveTime() }}</div>
+    </div>
+    <div class="overview__card">
+      <div class="overview__card-label">Tracked usage</div>
+      <div class="overview__card-value">{{ formattedActiveTime() }}</div>
+    </div>
+    <div class="overview__card">
+      <div class="overview__card-label">{{ customAdminMetricLabel() }}</div>
+      <div class="overview__card-value">
+        {{ customAdminMetricValue() }}
       </div>
-      <div class="overview__card">
-        <div class="overview__card-label">{{ customAdminMetricLabel() }}</div>
-        <div class="overview__card-value">
-          {{ customAdminMetricValue() }}
-        </div>
+    </div>
+    @if (!isAdmin() || (isAdmin() && selectedEmployeeId() !== 'all')) {
+    <div class="overview__card">
+      <div class="overview__card-label">First login</div>
+      <div class="overview__card-value overview__card-value--sm">
+        {{ activeShift() ? formatTime(activeShift()!.loginTime) : '—' }}
       </div>
-      @if (!isAdmin() || (isAdmin() && selectedEmployeeId() !== 'all')) {
-        <div class="overview__card">
-          <div class="overview__card-label">First login</div>
-          <div class="overview__card-value overview__card-value--sm">
-            {{ activeShift() ? formatTime(activeShift()!.loginTime) : '—' }}
+    </div>
+    } @else {
+    <div class="overview__card">
+      <div class="overview__card-label">Break time</div>
+      <div class="overview__card-value" style="color: var(--text-muted)">
+        {{ formattedBreakTime() }}
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- charts row -->
+  <div class="overview__charts">
+    <div class="overview__chart overview__chart--doughnut">
+      <canvas id="productivity-chart"></canvas>
+    </div>
+    <div class="overview__chart overview__chart--bar">
+      <div class="overview__chart-header">
+        <span class="overview__chart-title">{{ chartTitle() }}</span>
+      </div>
+      <canvas id="activity-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- top apps table -->
+  <div class="overview__table-wrap">
+    <h3 class="overview__table-title">Top apps</h3>
+    <div class="overview__table">
+      <div class="overview__table-header">
+        <span class="overview__table-cell">App / Site</span>
+        <span class="overview__table-cell">Time</span>
+        <span class="overview__table-cell">Category</span>
+        <span class="overview__table-cell overview__table-cell--bar">
+          % of total
+        </span>
+      </div>
+
+      @for (row of displayRows(); track row.appName) {
+      <div class="overview__table-row" [class.overview__table-row--browser]="row.type === 'browser'"
+        [class.overview__table-row--expanded]="isExpanded(row.appName)" (click)="row.type === 'browser' && row.children.length > 0
+                      ? toggleBrowser(row.appName) : null">
+        <span class="overview__table-cell overview__table-cell--name">
+          @if (row.type === 'browser' && row.children.length > 0) {
+          <span class="overview__chevron" [class.overview__chevron--open]="isExpanded(row.appName)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </span>
+          } @else {
+          <span class="overview__chevron-placeholder"></span>
+          }
+          {{ row.appName }}
+          @if (row.type === 'browser' && row.siteCount > 0) {
+          <span class="overview__site-count">
+            {{ row.siteCount }}
+          </span>
+          }
+        </span>
+        <span class="overview__table-cell">
+          {{ formatAppTime(row.totalSeconds) }}
+        </span>
+        <span class="overview__table-cell">
+          <span class="badge" [class.badge--success]="row.category === 'productive'"
+            [class.badge--danger]="row.category === 'unproductive'" [class.badge--info]="row.category === 'neutral'">
+            {{ row.category }}
+          </span>
+        </span>
+        <span class="overview__table-cell overview__table-cell--bar">
+          <div class="overview__progress-wrap">
+            <div class="overview__progress-fill" [style.width.%]="getAppPercent(row.totalSeconds)"></div>
           </div>
-        </div>
-      } @else {
-        <div class="overview__card">
-          <div class="overview__card-label">Break time</div>
-          <div class="overview__card-value" style="color: var(--text-muted)">
-            {{ formattedBreakTime() }}
+          <span class="overview__progress-label">
+            {{ getAppPercent(row.totalSeconds) }}%
+          </span>
+        </span>
+      </div>
+
+      @if (row.type === 'browser' && isExpanded(row.appName)) {
+      @for (child of row.children; track child.appName) {
+      <div class="overview__table-row overview__table-row--child">
+        <span class="overview__table-cell overview__table-cell--name
+                             overview__table-cell--indented">
+          <span class="overview__group-line"></span>
+          {{ child.appName }}
+        </span>
+        <span class="overview__table-cell">
+          {{ formatAppTime(child.totalSeconds) }}
+        </span>
+        <span class="overview__table-cell">
+          <span class="badge" [class.badge--success]="child.category === 'productive'"
+            [class.badge--danger]="child.category === 'unproductive'"
+            [class.badge--info]="child.category === 'neutral'">
+            {{ child.category }}
+          </span>
+        </span>
+        <span class="overview__table-cell overview__table-cell--bar">
+          <div class="overview__progress-wrap">
+            <div class="overview__progress-fill overview__progress-fill--child" [style.width.%]="child.percentOfTotal">
+            </div>
           </div>
-        </div>
+          <span class="overview__progress-label">
+            {{ child.percentOfTotal }}%
+          </span>
+        </span>
+      </div>
+      }
+      }
       }
     </div>
-
-    <!-- charts row -->
-    <div class="overview__charts">
-      <div class="overview__chart overview__chart--doughnut">
-        <canvas id="productivity-chart"></canvas>
-      </div>
-      <div class="overview__chart overview__chart--bar">
-        <div class="overview__chart-header">
-          <span class="overview__chart-title">{{ chartTitle() }}</span>
-        </div>
-        <canvas id="activity-chart"></canvas>
-      </div>
-    </div>
-
-    <!-- top apps table -->
-    <div class="overview__table-wrap">
-      <h3 class="overview__table-title">Top apps</h3>
-      <div class="overview__table">
-        <div class="overview__table-header">
-          <span class="overview__table-cell">App / Site</span>
-          <span class="overview__table-cell">Time</span>
-          <span class="overview__table-cell">Category</span>
-          <span class="overview__table-cell overview__table-cell--bar">
-            % of total
-          </span>
-        </div>
-
-        @for (row of displayRows(); track row.appName) {
-          <div
-            class="overview__table-row"
-            [class.overview__table-row--browser]="row.type === 'browser'"
-            [class.overview__table-row--expanded]="isExpanded(row.appName)"
-            (click)="row.type === 'browser' && row.children.length > 0
-                      ? toggleBrowser(row.appName) : null"
-          >
-            <span class="overview__table-cell overview__table-cell--name">
-              @if (row.type === 'browser' && row.children.length > 0) {
-                <span class="overview__chevron"
-                  [class.overview__chevron--open]="isExpanded(row.appName)">
-                  <svg width="11" height="11" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </span>
-              } @else {
-                <span class="overview__chevron-placeholder"></span>
-              }
-              {{ row.appName }}
-              @if (row.type === 'browser' && row.siteCount > 0) {
-                <span class="overview__site-count">
-                  {{ row.siteCount }}
-                </span>
-              }
-            </span>
-            <span class="overview__table-cell">
-              {{ formatAppTime(row.totalSeconds) }}
-            </span>
-            <span class="overview__table-cell">
-              <span
-                class="badge"
-                [class.badge--success]="row.category === 'productive'"
-                [class.badge--danger]="row.category === 'unproductive'"
-                [class.badge--info]="row.category === 'neutral'"
-              >
-                {{ row.category }}
-              </span>
-            </span>
-            <span class="overview__table-cell overview__table-cell--bar">
-              <div class="overview__progress-wrap">
-                <div
-                  class="overview__progress-fill"
-                  [style.width.%]="getAppPercent(row.totalSeconds)"
-                ></div>
-              </div>
-              <span class="overview__progress-label">
-                {{ getAppPercent(row.totalSeconds) }}%
-              </span>
-            </span>
-          </div>
-
-          @if (row.type === 'browser' && isExpanded(row.appName)) {
-            @for (child of row.children; track child.appName) {
-              <div class="overview__table-row overview__table-row--child">
-                <span class="overview__table-cell overview__table-cell--name
-                             overview__table-cell--indented">
-                  <span class="overview__group-line"></span>
-                  {{ child.appName }}
-                </span>
-                <span class="overview__table-cell">
-                  {{ formatAppTime(child.totalSeconds) }}
-                </span>
-                <span class="overview__table-cell">
-                  <span
-                    class="badge"
-                    [class.badge--success]="child.category === 'productive'"
-                    [class.badge--danger]="child.category === 'unproductive'"
-                    [class.badge--info]="child.category === 'neutral'"
-                  >
-                    {{ child.category }}
-                  </span>
-                </span>
-                <span class="overview__table-cell overview__table-cell--bar">
-                  <div class="overview__progress-wrap">
-                    <div
-                      class="overview__progress-fill overview__progress-fill--child"
-                      [style.width.%]="child.percentOfTotal"
-                    ></div>
-                  </div>
-                  <span class="overview__progress-label">
-                    {{ child.percentOfTotal }}%
-                  </span>
-                </span>
-              </div>
-            }
-          }
-        }
-      </div>
-    </div>
+  </div>
   }
 </div>
