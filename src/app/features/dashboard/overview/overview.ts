@@ -519,6 +519,7 @@ export class Overview implements OnDestroy {
         maintainAspectRatio: false,
         plugins: {
           legend: { display: total > 0 },
+          tooltip: { animation: { duration: 150 } }
         },
       },
     });
@@ -578,10 +579,16 @@ export class Overview implements OnDestroy {
             }
           },
           tooltip: {
+            animation: { duration: 150 },
+            filter: (item) => Number(item.raw) > 0,
             callbacks: {
               label: (ctx) => `${ctx.dataset.label}: ${formatHours(ctx.raw as number)}`,
             },
           },
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false,
         },
         scales: {
           x: {

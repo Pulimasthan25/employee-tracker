@@ -176,6 +176,8 @@ export class AppUsage implements OnDestroy {
         plugins: {
           legend: { display: false },
           tooltip: {
+            animation: { duration: 150 },
+            filter: (item: any) => Number(item.raw) > 0,
             callbacks: {
               label: (context: any) => {
                 const h = Math.floor(context.raw);
@@ -184,6 +186,11 @@ export class AppUsage implements OnDestroy {
               }
             }
           }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false,
+          axis: 'y'
         },
         scales: {
           x: {
