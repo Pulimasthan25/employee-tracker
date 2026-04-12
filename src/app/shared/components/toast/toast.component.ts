@@ -25,6 +25,7 @@ import { ToastService } from '../../../core/services/toast.service';
           [class.toast--error]="toast.type === 'error'"
           [class.toast--success]="toast.type === 'success'"
           [class.toast--warning]="toast.type === 'warning'"
+          [class.toast--info]="toast.type === 'info'"
         >
           <div class="toast__content">
             @if (toast.type === 'error') {
@@ -36,6 +37,12 @@ import { ToastService } from '../../../core/services/toast.service';
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                 <line x1="12" y1="9" x2="12" y2="13"/>
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            } @else if (toast.type === 'info') {
+              <svg class="toast__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
               </svg>
             } @else {
               <svg class="toast__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -85,21 +92,29 @@ import { ToastService } from '../../../core/services/toast.service';
       height: 18px;
       flex-shrink: 0;
     }
-    .toast--error   { 
-      border-color: rgba(240,82,82,0.3);   
-      background: rgba(240,82,82,0.05);
+    .toast--error { 
+      border-color: rgba(240,82,82,0.4);   
+      background: rgba(240,82,82,0.15);
+      border-left: 4px solid var(--danger);
       .toast__icon { color: var(--danger); }
     }
     .toast--success { 
-      border-color: rgba(52,201,138,0.3);
-      background: rgba(52,201,138,0.05);
+      border-color: rgba(52,201,138,0.4);
+      background: rgba(52,201,138,0.15);
+      border-left: 4px solid var(--success);
       .toast__icon { color: var(--success); }
     }
     .toast--warning { 
-      border-color: #ffab00;  
+      border-color: rgba(255, 171, 0, 0.4);  
       background: rgba(255, 171, 0, 0.15);
       border-left: 4px solid #ffab00;
       .toast__icon { color: #ffab00; }
+    }
+    .toast--info {
+      border-color: rgba(59,130,246,0.4);
+      background: rgba(59,130,246,0.15);
+      border-left: 4px solid #3b82f6;
+      .toast__icon { color: #3b82f6; }
     }
     .toast__close {
       background: none; border: none; color: var(--text-muted);
