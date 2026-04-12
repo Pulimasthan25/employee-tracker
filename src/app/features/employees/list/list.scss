@@ -66,11 +66,11 @@
 .list__table {
   display: flex;
   flex-direction: column;
-  min-width: 1200px;
+  min-width: 1250px;
 }
 
-// 9 columns: Name | Email | Team | Role | Status | Screenshot Interval | Idle | Shift | Joined
-$cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr;
+// 10 columns: Name | Email | Team | Role | Status | Screenshot Interval | Idle | Shift | Joined | Actions
+$cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr 50px;
 
 .list__table-header {
   display: grid;
@@ -197,6 +197,75 @@ $cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr;
     background: var(--bg-hover);
     border-radius: var(--radius-sm);
     animation: list-skeleton 1.2s ease-in-out infinite;
+  }
+}
+
+.list__actions-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.list__action-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+}
+
+.list__action-dropdown {
+  position: absolute;
+  top: calc(100% - 4px);
+  right: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 50;
+  min-width: 160px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.list__action-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  &--danger {
+    color: var(--danger, #ef4444);
+    &:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger, #ef4444);
+    }
   }
 }
 
