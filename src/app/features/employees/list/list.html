@@ -14,12 +14,19 @@
         <div class="list__table-header">
           <span class="list__table-cell">Name</span>
           <span class="list__table-cell">Email</span>
+          <span class="list__table-cell">Team</span>
           <span class="list__table-cell">Role</span>
           <span class="list__table-cell">Status</span>
+          <span class="list__table-cell">Screenshot Interval</span>
+          <span class="list__table-cell">Idle</span>
+          <span class="list__table-cell">Shift</span>
           <span class="list__table-cell">Joined</span>
         </div>
         @for (i of [1,2,3,4,5]; track i) {
           <div class="list__table-row list__table-row--skeleton">
+            <span class="list__table-cell list__table-cell--skeleton"></span>
+            <span class="list__table-cell list__table-cell--skeleton"></span>
+            <span class="list__table-cell list__table-cell--skeleton"></span>
             <span class="list__table-cell list__table-cell--skeleton"></span>
             <span class="list__table-cell list__table-cell--skeleton"></span>
             <span class="list__table-cell list__table-cell--skeleton"></span>
@@ -36,18 +43,95 @@
     <div class="list__table-wrap">
       <div class="list__table">
         <div class="list__table-header">
-          <span class="list__table-cell">Name</span>
-          <span class="list__table-cell">Email</span>
-          <span class="list__table-cell">Team</span>
-          <span class="list__table-cell">Role</span>
-          <span class="list__table-cell">Status</span>
-          <span class="list__table-cell">Joined</span>
+          <!-- Sort Buttons with custom SVGs -->
+          <button class="list__sort-btn" [class.list__sort-btn--active]="sortField() === 'displayName'" (click)="sort('displayName')">
+            Name
+            <span class="list__sort-icon" [class.list__sort-icon--active]="sortField() === 'displayName'">
+              @if (sortField() === 'displayName' && sortDir() === 'asc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg> }
+              @else if (sortField() === 'displayName' && sortDir() === 'desc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> }
+              @else { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg> }
+            </span>
+          </button>
+          
+          <button class="list__sort-btn" [class.list__sort-btn--active]="sortField() === 'email'" (click)="sort('email')">
+            Email
+            <span class="list__sort-icon" [class.list__sort-icon--active]="sortField() === 'email'">
+              @if (sortField() === 'email' && sortDir() === 'asc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg> }
+              @else if (sortField() === 'email' && sortDir() === 'desc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> }
+              @else { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg> }
+            </span>
+          </button>
+          
+          <button class="list__sort-btn" [class.list__sort-btn--active]="sortField() === 'teamId'" (click)="sort('teamId')">
+            Team
+            <span class="list__sort-icon" [class.list__sort-icon--active]="sortField() === 'teamId'">
+              @if (sortField() === 'teamId' && sortDir() === 'asc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg> }
+              @else if (sortField() === 'teamId' && sortDir() === 'desc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> }
+              @else { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg> }
+            </span>
+          </button>
+          
+          <button class="list__sort-btn" [class.list__sort-btn--active]="sortField() === 'role'" (click)="sort('role')">
+            Role
+            <span class="list__sort-icon" [class.list__sort-icon--active]="sortField() === 'role'">
+              @if (sortField() === 'role' && sortDir() === 'asc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg> }
+              @else if (sortField() === 'role' && sortDir() === 'desc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> }
+              @else { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg> }
+            </span>
+          </button>
+          
+          <button class="list__sort-btn" [class.list__sort-btn--active]="sortField() === 'active'" (click)="sort('active')">
+            Status
+            <span class="list__sort-icon" [class.list__sort-icon--active]="sortField() === 'active'">
+              @if (sortField() === 'active' && sortDir() === 'asc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg> }
+              @else if (sortField() === 'active' && sortDir() === 'desc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> }
+              @else { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg> }
+            </span>
+          </button>
+          
+          <button class="list__sort-btn" [class.list__sort-btn--active]="sortField() === 'screenshotIntervalSeconds'" (click)="sort('screenshotIntervalSeconds')">
+            Screenshot Interval
+            <span class="list__sort-icon" [class.list__sort-icon--active]="sortField() === 'screenshotIntervalSeconds'">
+              @if (sortField() === 'screenshotIntervalSeconds' && sortDir() === 'asc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg> }
+              @else if (sortField() === 'screenshotIntervalSeconds' && sortDir() === 'desc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> }
+              @else { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg> }
+            </span>
+          </button>
+          
+          <button class="list__sort-btn" [class.list__sort-btn--active]="sortField() === 'idleThresholdSeconds'" (click)="sort('idleThresholdSeconds')">
+            Idle
+            <span class="list__sort-icon" [class.list__sort-icon--active]="sortField() === 'idleThresholdSeconds'">
+              @if (sortField() === 'idleThresholdSeconds' && sortDir() === 'asc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg> }
+              @else if (sortField() === 'idleThresholdSeconds' && sortDir() === 'desc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> }
+              @else { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg> }
+            </span>
+          </button>
+          
+          <button class="list__sort-btn" [class.list__sort-btn--active]="sortField() === 'shiftHours'" (click)="sort('shiftHours')">
+            Shift
+            <span class="list__sort-icon" [class.list__sort-icon--active]="sortField() === 'shiftHours'">
+              @if (sortField() === 'shiftHours' && sortDir() === 'asc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg> }
+              @else if (sortField() === 'shiftHours' && sortDir() === 'desc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> }
+              @else { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg> }
+            </span>
+          </button>
+          
+          <button class="list__sort-btn" [class.list__sort-btn--active]="sortField() === 'createdAt'" (click)="sort('createdAt')">
+            Joined
+            <span class="list__sort-icon" [class.list__sort-icon--active]="sortField() === 'createdAt'">
+              @if (sortField() === 'createdAt' && sortDir() === 'asc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg> }
+              @else if (sortField() === 'createdAt' && sortDir() === 'desc') { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg> }
+              @else { <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg> }
+            </span>
+          </button>
         </div>
-        <div class="list__rows-container" [@staggerFadeIn]="employees().length">
-          @for (emp of employees(); track emp.uid) {
+        
+        <!-- Removed staggerFadeIn to reduce animation noise -->
+        <div class="list__rows-container">
+          @for (emp of sortedEmployees(); track emp.uid) {
             <a [routerLink]="['/employees', emp.uid]" class="list__table-row list__table-row--link">
               <span class="list__table-cell list__table-cell--name">{{ emp.displayName || '—' }}</span>
-              <span class="list__table-cell">{{ emp.email }}</span>
+              <span class="list__table-cell list__table-cell--email">{{ emp.email }}</span>
               <span class="list__table-cell">
                 @if (emp.teamId) {
                   <span class="badge team-badge" [style.--team-hue]="getTeamHue(emp.teamId)">{{ emp.teamId }}</span>
@@ -73,6 +157,9 @@
                   {{ emp.active ? 'Active' : 'Inactive' }}
                 </span>
               </span>
+              <span class="list__table-cell list__table-cell--mono">{{ formatInterval(emp.screenshotIntervalSeconds) }}</span>
+              <span class="list__table-cell list__table-cell--mono">{{ formatIdle(emp.idleThresholdSeconds) }}</span>
+              <span class="list__table-cell list__table-cell--mono list__table-cell--shift">{{ formatShift(emp.shiftStartHour, emp.shiftEndHour) }}</span>
               <span class="list__table-cell list__table-cell--mono">{{ emp.createdAt | date:'mediumDate' }}</span>
             </a>
           }

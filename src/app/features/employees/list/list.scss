@@ -42,34 +42,97 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  overflow-x: auto;
+  
+  /* Custom thin scrollbar */
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-lg);
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-lg);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) rgba(0, 0, 0, 0.1);
 }
 
 .list__table {
   display: flex;
   flex-direction: column;
+  min-width: 1200px;
 }
+
+// 9 columns: Name | Email | Team | Role | Status | Screenshot Interval | Idle | Shift | Joined
+$cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr;
 
 .list__table-header {
   display: grid;
-  grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr 1.2fr;
-  gap: var(--space-md);
-  padding: var(--space-md) var(--space-lg);
+  grid-template-columns: $cols;
+  gap: var(--space-sm);
+  padding: 0 var(--space-lg);
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
-  font-size: 0.75rem;
+}
+
+.list__sort-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--space-md) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  text-align: center;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &--active {
+    color: var(--accent, #6366f1);
+  }
+
+  /* Left align text for Name and Email headers */
+  &:nth-child(1),
+  &:nth-child(2) {
+    justify-content: flex-start;
+    text-align: left;
+  }
+}
+
+.list__sort-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+
+  &--active {
+    opacity: 1;
+  }
 }
 
 .list__table-row {
   display: grid;
-  grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr 1.2fr;
-  gap: var(--space-md);
+  grid-template-columns: $cols;
+  gap: var(--space-sm);
   align-items: center;
   padding: var(--space-md) var(--space-lg);
-  font-size: 0.9375rem;
+  font-size: 0.9rem;
   color: var(--text-primary);
   text-decoration: none;
 
@@ -97,14 +160,36 @@
 }
 
 .list__table-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
   &--name {
     font-weight: 500;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  &--email {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    justify-content: flex-start;
+    text-align: left;
   }
 
   &--mono {
     font-family: 'DM Mono', monospace;
     font-size: 0.8125rem;
     color: var(--text-secondary);
+  }
+
+  &--shift {
+    font-size: 0.775rem;
+    letter-spacing: -0.01em;
   }
 
   &--skeleton {
