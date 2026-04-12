@@ -111,6 +111,7 @@ export class SiteRuleService {
       { displayName: 'New Tab', category: 'neutral', keywords: ['new tab', 'about:blank'] },
       { displayName: 'Google Search', category: 'neutral', keywords: ['google search', 'google -'] },
       { displayName: 'Wikipedia', category: 'neutral', keywords: ['wikipedia'] },
+      { displayName: 'Windows Lock Screen', category: 'neutral', keywords: ['lockapp.exe', 'lock component', 'lockapp'] },
     ];
 
     // Guard: button is only visible when rules().length === 0 so no extra check needed.

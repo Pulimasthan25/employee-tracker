@@ -119,21 +119,26 @@ export class Settings implements OnInit {
 
     if (!displayName || keywords.length === 0) return;
 
+    const teamIdValue = this.newTeamId();
+
     if (this.editingRuleId()) {
       await this.siteRuleService.updateRule(this.editingRuleId()!, {
         displayName,
         keywords,
         category: this.newCategory(),
-        teamId: this.newTeamId() || undefined
+        teamId: teamIdValue || undefined
       });
       this.editingRuleId.set(null);
     } else {
-      await this.siteRuleService.addRule({
+      const newRule: any = {
         displayName,
         keywords,
-        category: this.newCategory(),
-        teamId: this.newTeamId() || undefined
-      });
+        category: this.newCategory()
+      };
+      if (teamIdValue) {
+        newRule.teamId = teamIdValue;
+      }
+      await this.siteRuleService.addRule(newRule);
     }
 
     // Reset form
