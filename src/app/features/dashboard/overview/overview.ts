@@ -18,6 +18,7 @@ import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
 import { fadeIn, slideInUp, staggerFadeIn, scaleIn } from '../../../shared/animations';
 
@@ -76,6 +77,7 @@ export class Overview implements OnDestroy {
   private employeeService = inject(EmployeeService);
   private idleService = inject(IdleService);
   private shiftService = inject(ShiftService);
+  private toast = inject(ToastService);
 
   readonly isAdmin = this.authService.isAdmin;
 
@@ -417,6 +419,9 @@ export class Overview implements OnDestroy {
   }
 
   setRange(range: 'today' | '7d' | '30d' | 'custom'): void {
+    if (range !== 'today' && this.selectedRange() !== range) {
+      this.toast.show('We are fetching only a limited amount of data for extended ranges due to database read limits.', 'warning', 6000);
+    }
     this.selectedRange.set(range);
   }
 
