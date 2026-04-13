@@ -1,19 +1,57 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-toast',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('toastAnim', [
+      transition(':enter', [
+        style({ transform: 'translateY(12px)', opacity: 0 }),
+        animate('350ms cubic-bezier(0.1, 0.9, 0.2, 1)', style({ transform: 'translateY(0)', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ transform: 'scale(0.95)', opacity: 0 }))
+      ])
+    ])
+  ],
   template: `
     <div class="toast-container">
       @for (toast of toastService.toasts(); track toast.id) {
         <div
           class="toast"
+          [@toastAnim]
           [class.toast--error]="toast.type === 'error'"
           [class.toast--success]="toast.type === 'success'"
+          [class.toast--warning]="toast.type === 'warning'"
+          [class.toast--info]="toast.type === 'info'"
         >
-          <span>{{ toast.message }}</span>
-          <button (click)="toastService.dismiss(toast.id)">✕</button>
+          <div class="toast__content">
+            @if (toast.type === 'error') {
+              <svg class="toast__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            } @else if (toast.type === 'warning') {
+              <svg class="toast__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            } @else if (toast.type === 'info') {
+              <svg class="toast__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            } @else {
+              <svg class="toast__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            }
+            <span>{{ toast.message }}</span>
+          </div>
+          <button class="toast__close" (click)="toastService.dismiss(toast.id)">✕</button>
         </div>
       }
     </div>
@@ -25,7 +63,7 @@ import { ToastService } from '../../../core/services/toast.service';
       right: 24px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       z-index: 9999;
     }
     .toast {
@@ -33,26 +71,56 @@ import { ToastService } from '../../../core/services/toast.service';
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 12px 16px;
-      min-width: 280px;
-      max-width: 420px;
+      padding: 14px 18px;
+      min-width: 320px;
+      max-width: 480px;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      font-size: 13px;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
       color: var(--text-primary);
-      animation: slideIn 0.2s ease;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(8px);
     }
-    .toast--error   { border-color: rgba(240,82,82,0.4);   color: var(--danger);  }
-    .toast--success { border-color: rgba(52,201,138,0.4);  color: var(--success); }
-    button {
-      background: none; border: none; color: inherit;
-      cursor: pointer; font-size: 14px; padding: 0; opacity: 0.6;
+    .toast__content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    button:hover { opacity: 1; }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(16px); }
-      to   { opacity: 1; transform: translateX(0); }
+    .toast__icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+    .toast--error { 
+      border-color: rgba(240,82,82,0.4);   
+      background: rgba(240,82,82,0.15);
+      border-left: 4px solid var(--danger);
+      .toast__icon { color: var(--danger); }
+    }
+    .toast--success { 
+      border-color: rgba(52,201,138,0.4);
+      background: rgba(52,201,138,0.15);
+      border-left: 4px solid var(--success);
+      .toast__icon { color: var(--success); }
+    }
+    .toast--warning { 
+      border-color: rgba(255, 171, 0, 0.4);  
+      background: rgba(255, 171, 0, 0.15);
+      border-left: 4px solid #ffab00;
+      .toast__icon { color: #ffab00; }
+    }
+    .toast--info {
+      border-color: rgba(59,130,246,0.4);
+      background: rgba(59,130,246,0.15);
+      border-left: 4px solid #3b82f6;
+      .toast__icon { color: #3b82f6; }
+    }
+    .toast__close {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 16px; padding: 4px; 
+      transition: color 0.15s;
+      &:hover { color: var(--text-primary); }
     }
   `]
 })

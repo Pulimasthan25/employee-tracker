@@ -40,8 +40,15 @@
   --radius-lg: 12px;
 
   /* Transitions */
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.2s ease;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-accent: 0 0 20px -5px var(--accent-glow);
 }
 
 *,
@@ -98,16 +105,25 @@ body {
   border-radius: var(--radius-md);
   text-decoration: none;
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active {
+  transform: scale(0.98);
 }
 
 .btn--primary {
   background: var(--accent);
   color: white;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: var(--accent-dim);
+  background: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md), var(--shadow-accent);
 }
 
 .btn--secondary {
@@ -118,6 +134,8 @@ body {
 
 .btn--secondary:hover:not(:disabled) {
   background: var(--bg-surface);
+  border-color: var(--text-muted);
+  transform: translateY(-1px);
 }
 
 .btn--ghost {
@@ -133,6 +151,7 @@ body {
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  filter: grayscale(1);
 }
 
 /* Badge */
@@ -167,6 +186,53 @@ body {
   background: transparent;
   color: var(--text-muted);
   border: 1px solid var(--border);
+}
+/* Cards & Surfaces */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  border-color: var(--accent-dim);
+  background: var(--bg-hover);
+}
+
+/* Animations Classes */
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.hover-slide {
+  transition: transform var(--transition-normal);
+}
+
+.hover-slide:hover {
+  transform: translateX(4px);
+}
+
+.tap-effect:active {
+  transform: scale(0.96);
+}
+
+/* Scroll Animations */
+[data-animate] {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-animate].is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 // styles.scss
 .shell__main-wrap .shell__content {

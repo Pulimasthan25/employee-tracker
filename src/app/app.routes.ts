@@ -11,27 +11,32 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    data: { animation: 'DashboardPage' }
   },
   {
     path: 'employees',
     loadChildren: () => import('./features/employees/employees.routes').then(m => m.EMPLOYEE_ROUTES),
-    canActivate: [authGuard, adminGuard]
+    canActivate: [authGuard, adminGuard],
+    data: { animation: 'EmployeesPage' }
   },
   {
     path: 'screenshots',
     loadChildren: () => import('./features/screenshots/screenshots.routes').then(m => m.SCREENSHOT_ROUTES),
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    data: { animation: 'ScreenshotsPage' }
   },
   {
     path: 'reports',
     loadChildren: () => import('./features/reports/reports.routes').then(m => m.REPORT_ROUTES),
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    data: { animation: 'ReportsPage' }
   },
   {
     path: 'settings',
     loadChildren: () => import('./features/settings/settings.routes').then(m => m.SETTINGS_ROUTES),
-    canActivate: [authGuard, adminGuard]
+    canActivate: [authGuard, adminGuard],
+    data: { animation: 'SettingsPage' }
   },
   { path: '**', redirectTo: 'dashboard' }
 ];

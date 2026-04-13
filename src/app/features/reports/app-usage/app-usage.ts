@@ -4,6 +4,7 @@ import { AuthService, AppUser } from '../../../core/services/auth.service';
 import { ActivityService, type ActivityLog, type DisplayRow } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { FormsModule } from '@angular/forms';
+import { fadeIn, staggerFadeIn, scaleIn } from '../../../shared/animations';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -23,6 +24,7 @@ function formatDuration(seconds: number): string {
   templateUrl: './app-usage.html',
   styleUrl: './app-usage.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, staggerFadeIn, scaleIn]
 })
 export class AppUsage implements OnDestroy {
   private readonly auth = inject(AuthService);
@@ -174,6 +176,8 @@ export class AppUsage implements OnDestroy {
         plugins: {
           legend: { display: false },
           tooltip: {
+            animation: { duration: 150 },
+            filter: (item: any) => Number(item.raw) > 0,
             callbacks: {
               label: (context: any) => {
                 const h = Math.floor(context.raw);
@@ -182,6 +186,11 @@ export class AppUsage implements OnDestroy {
               }
             }
           }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false,
+          axis: 'y'
         },
         scales: {
           x: {

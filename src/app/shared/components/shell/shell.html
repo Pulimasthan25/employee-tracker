@@ -86,8 +86,8 @@
         </div>
       </div>
     </header>
-    <main class="shell__content">
-      <router-outlet />
+    <main class="shell__content" [@routeAnimations]="prepareRoute(outlet)">
+      <router-outlet #outlet="outlet" />
     </main>
   </div>
   <app-confirm-dialog />

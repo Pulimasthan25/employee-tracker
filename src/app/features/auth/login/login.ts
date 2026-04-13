@@ -1,6 +1,7 @@
 import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { fadeIn, slideInUp, scaleIn } from '../../../shared/animations';
 
 @Component({
   selector: 'app-login',
@@ -8,6 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './login.html',
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, slideInUp, scaleIn]
 })
 export class Login {
   private readonly fb = inject(FormBuilder).nonNullable;

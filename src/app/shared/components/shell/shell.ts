@@ -25,6 +25,7 @@ const TITLE_MAP: Record<string, string> = {
 };
 
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
+import { routeAnimations } from '../../animations';
 
 @Component({
   selector: 'app-shell',
@@ -32,6 +33,7 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [routeAnimations]
 })
 export class Shell {
   private readonly auth = inject(AuthService);
@@ -73,5 +75,9 @@ export class Shell {
 
   logout() {
     this.auth.logout();
+  }
+
+  prepareRoute(outlet: RouterOutlet) {
+    return outlet && outlet.activatedRouteData && outlet.activatedRouteData['animation'];
   }
 }

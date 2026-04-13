@@ -1,4 +1,4 @@
-<div class="report">
+<div class="report" @fadeIn>
   <div class="report__header">
     <h2>Productivity report</h2>
     <app-date-range (rangeChange)="onRangeChange($event)" />
@@ -11,7 +11,7 @@
       Export CSV
     </button>
   </div>
-  <div class="report__card">
+  <div class="report__card" @scaleIn>
     <table class="report__table">
       <thead>
         <tr>
@@ -22,7 +22,7 @@
           <th>Sessions</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody [@staggerFadeIn]="employees().length">
         @if (loading()) {
           <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
           <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>

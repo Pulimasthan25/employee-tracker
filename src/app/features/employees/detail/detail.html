@@ -1,4 +1,4 @@
-<div class="detail">
+<div class="detail" @fadeIn>
   <div class="detail__header">
     <a routerLink="/employees" class="detail__back">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -9,17 +9,17 @@
   </div>
 
   @if (loading()) {
-    <div class="detail__card detail__card--skeleton">
+    <div class="detail__card detail__card--skeleton" @scaleIn>
       <div class="detail__skeleton-line"></div>
       <div class="detail__skeleton-line"></div>
       <div class="detail__skeleton-line detail__skeleton-line--short"></div>
     </div>
   } @else if (notFound()) {
-    <div class="detail__not-found">
+    <div class="detail__not-found" @fadeIn>
       Employee not found.
     </div>
   } @else if (employee(); as emp) {
-    <div class="detail__card">
+    <div class="detail__card" @scaleIn>
       <h2 class="detail__name">{{ emp.displayName || '—' }}</h2>
       <div class="detail__meta">
         <div class="detail__row">

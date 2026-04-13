@@ -1,4 +1,4 @@
-<div class="overview">
+<div class="overview" @fadeIn>
   <div class="overview__header">
     <div class="overview__header-top">
       <div>
@@ -149,7 +149,7 @@
   </div>
   } @else {
   <!-- stat cards row -->
-  <div class="overview__stats">
+  <div class="overview__stats" [@staggerFadeIn]="logs().length">
     <div class="overview__card">
       <div class="overview__card-label">Productivity score</div>
       <div class="overview__card-value-row">
@@ -157,8 +157,8 @@
               productivityScore() > 70
                 ? '#34c98a'
                 : productivityScore() >= 40
-                  ? '#f5a623'
-                  : '#f05252'
+                   ? '#f5a623'
+                   : '#f05252'
             ">
           {{ productivityScore() }}%
         </div>
@@ -183,7 +183,7 @@
       </div>
     </div>
     } @else {
-    <div class="overview__card">
+    <div class="overview__card" @slideInUp>
       <div class="overview__card-label">Break time</div>
       <div class="overview__card-value" style="color: var(--text-muted)">
         {{ formattedBreakTime() }}
@@ -194,10 +194,10 @@
 
   <!-- charts row -->
   <div class="overview__charts">
-    <div class="overview__chart overview__chart--doughnut">
+    <div class="overview__chart overview__chart--doughnut" @scaleIn>
       <canvas id="productivity-chart"></canvas>
     </div>
-    <div class="overview__chart overview__chart--bar">
+    <div class="overview__chart overview__chart--bar" @scaleIn>
       <div class="overview__chart-header">
         <span class="overview__chart-title">{{ chartTitle() }}</span>
       </div>
@@ -218,78 +218,80 @@
         </span>
       </div>
 
-      @for (row of displayRows(); track row.appName) {
-      <div class="overview__table-row" [class.overview__table-row--browser]="row.type === 'browser'"
-        [class.overview__table-row--expanded]="isExpanded(row.appName)" (click)="row.type === 'browser' && row.children.length > 0
-                      ? toggleBrowser(row.appName) : null">
-        <span class="overview__table-cell overview__table-cell--name">
-          @if (row.type === 'browser' && row.children.length > 0) {
-          <span class="overview__chevron" [class.overview__chevron--open]="isExpanded(row.appName)">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </span>
-          } @else {
-          <span class="overview__chevron-placeholder"></span>
-          }
-          {{ row.appName }}
-          @if (row.type === 'browser' && row.siteCount > 0) {
-          <span class="overview__site-count">
-            {{ row.siteCount }}
-          </span>
-          }
-        </span>
-        <span class="overview__table-cell">
-          {{ formatAppTime(row.totalSeconds) }}
-        </span>
-        <span class="overview__table-cell">
-          <span class="badge" [class.badge--success]="row.category === 'productive'"
-            [class.badge--danger]="row.category === 'unproductive'" [class.badge--info]="row.category === 'neutral'">
-            {{ row.category }}
-          </span>
-        </span>
-        <span class="overview__table-cell overview__table-cell--bar">
-          <div class="overview__progress-wrap">
-            <div class="overview__progress-fill" [style.width.%]="getAppPercent(row.totalSeconds)"></div>
+      <div [@staggerFadeIn]="displayRows().length">
+        @for (row of displayRows(); track row.appName) {
+          <div class="overview__table-row" [class.overview__table-row--browser]="row.type === 'browser'"
+            [class.overview__table-row--expanded]="isExpanded(row.appName)" (click)="row.type === 'browser' && row.children.length > 0
+                          ? toggleBrowser(row.appName) : null">
+            <span class="overview__table-cell overview__table-cell--name">
+              @if (row.type === 'browser' && row.children.length > 0) {
+              <span class="overview__chevron" [class.overview__chevron--open]="isExpanded(row.appName)">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
+              } @else {
+              <span class="overview__chevron-placeholder"></span>
+              }
+              {{ row.appName }}
+              @if (row.type === 'browser' && row.siteCount > 0) {
+              <span class="overview__site-count">
+                {{ row.siteCount }}
+              </span>
+              }
+            </span>
+            <span class="overview__table-cell">
+              {{ formatAppTime(row.totalSeconds) }}
+            </span>
+            <span class="overview__table-cell">
+              <span class="badge" [class.badge--success]="row.category === 'productive'"
+                [class.badge--danger]="row.category === 'unproductive'" [class.badge--info]="row.category === 'neutral'">
+                {{ row.category }}
+              </span>
+            </span>
+            <span class="overview__table-cell overview__table-cell--bar">
+              <div class="overview__progress-wrap">
+                <div class="overview__progress-fill" [style.width.%]="getAppPercent(row.totalSeconds)"></div>
+              </div>
+              <span class="overview__progress-label">
+                {{ getAppPercent(row.totalSeconds) }}%
+              </span>
+            </span>
           </div>
-          <span class="overview__progress-label">
-            {{ getAppPercent(row.totalSeconds) }}%
-          </span>
-        </span>
-      </div>
 
-      @if (row.type === 'browser' && isExpanded(row.appName)) {
-      @for (child of row.children; track child.appName) {
-      <div class="overview__table-row overview__table-row--child">
-        <span class="overview__table-cell overview__table-cell--name
-                             overview__table-cell--indented">
-          <span class="overview__group-line"></span>
-          {{ child.appName }}
-        </span>
-        <span class="overview__table-cell">
-          {{ formatAppTime(child.totalSeconds) }}
-        </span>
-        <span class="overview__table-cell">
-          <span class="badge" [class.badge--success]="child.category === 'productive'"
-            [class.badge--danger]="child.category === 'unproductive'"
-            [class.badge--info]="child.category === 'neutral'">
-            {{ child.category }}
-          </span>
-        </span>
-        <span class="overview__table-cell overview__table-cell--bar">
-          <div class="overview__progress-wrap">
-            <div class="overview__progress-fill overview__progress-fill--child" [style.width.%]="child.percentOfTotal">
-            </div>
+          @if (row.type === 'browser' && isExpanded(row.appName)) {
+          @for (child of row.children; track child.appName) {
+          <div class="overview__table-row overview__table-row--child" @fadeIn>
+            <span class="overview__table-cell overview__table-cell--name
+                                 overview__table-cell--indented">
+              <span class="overview__group-line"></span>
+              {{ child.appName }}
+            </span>
+            <span class="overview__table-cell">
+              {{ formatAppTime(child.totalSeconds) }}
+            </span>
+            <span class="overview__table-cell">
+              <span class="badge" [class.badge--success]="child.category === 'productive'"
+                [class.badge--danger]="child.category === 'unproductive'"
+                [class.badge--info]="child.category === 'neutral'">
+                {{ child.category }}
+              </span>
+            </span>
+            <span class="overview__table-cell overview__table-cell--bar">
+              <div class="overview__progress-wrap">
+                <div class="overview__progress-fill overview__progress-fill--child" [style.width.%]="child.percentOfTotal">
+                </div>
+              </div>
+              <span class="overview__progress-label">
+                {{ child.percentOfTotal }}%
+              </span>
+            </span>
           </div>
-          <span class="overview__progress-label">
-            {{ child.percentOfTotal }}%
-          </span>
-        </span>
+          }
+          }
+        }
       </div>
-      }
-      }
-      }
     </div>
   </div>
   }

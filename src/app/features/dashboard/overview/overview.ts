@@ -18,7 +18,9 @@ import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
+import { fadeIn, slideInUp, staggerFadeIn, scaleIn } from '../../../shared/animations';
 
 function formatDuration(seconds: number): string {
   if (seconds <= 0) return '0s';
@@ -66,6 +68,7 @@ function getDateRange(range: 'today' | '7d' | '30d' | 'custom', customStart?: st
   templateUrl: './overview.html',
   styleUrl: './overview.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, slideInUp, staggerFadeIn, scaleIn]
 })
 export class Overview implements OnDestroy {
   private activityService = inject(ActivityService);
@@ -74,6 +77,7 @@ export class Overview implements OnDestroy {
   private employeeService = inject(EmployeeService);
   private idleService = inject(IdleService);
   private shiftService = inject(ShiftService);
+  private toast = inject(ToastService);
 
   readonly isAdmin = this.authService.isAdmin;
 
@@ -415,6 +419,9 @@ export class Overview implements OnDestroy {
   }
 
   setRange(range: 'today' | '7d' | '30d' | 'custom'): void {
+    if (range !== 'today' && this.selectedRange() !== range) {
+      this.toast.show('We are fetching only a limited amount of data for extended ranges due to database read limits.', 'warning', 6000);
+    }
     this.selectedRange.set(range);
   }
 
@@ -517,6 +524,7 @@ export class Overview implements OnDestroy {
         maintainAspectRatio: false,
         plugins: {
           legend: { display: total > 0 },
+          tooltip: { animation: { duration: 150 } }
         },
       },
     });
@@ -576,10 +584,16 @@ export class Overview implements OnDestroy {
             }
           },
           tooltip: {
+            animation: { duration: 150 },
+            filter: (item) => Number(item.raw) > 0,
             callbacks: {
               label: (ctx) => `${ctx.dataset.label}: ${formatHours(ctx.raw as number)}`,
             },
           },
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false,
         },
         scales: {
           x: {

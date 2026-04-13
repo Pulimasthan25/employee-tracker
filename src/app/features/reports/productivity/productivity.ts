@@ -4,6 +4,7 @@ import { AuthService, AppUser } from '../../../core/services/auth.service';
 import { ActivityService } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
+import { fadeIn, staggerFadeIn, scaleIn } from '../../../shared/animations';
 
 interface EmployeeRow {
   user: AppUser;
@@ -26,6 +27,7 @@ function formatDuration(seconds: number): string {
   templateUrl: './productivity.html',
   styleUrl: './productivity.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeIn, staggerFadeIn, scaleIn]
 })
 export class Productivity {
   private readonly auth = inject(AuthService);
