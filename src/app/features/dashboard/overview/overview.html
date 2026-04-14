@@ -39,33 +39,27 @@
       </div>
     </div>
 
-    <div class="overview__range">
-      <button type="button" class="overview__pill" [class.overview__pill--active]="selectedRange() === 'today'"
-        (click)="setRange('today')">
-        Today
-      </button>
-      <button type="button" class="overview__pill" [class.overview__pill--active]="selectedRange() === '7d'"
-        (click)="setRange('7d')">
-        7 days
-      </button>
-      <button type="button" class="overview__pill" [class.overview__pill--active]="selectedRange() === '30d'"
-        (click)="setRange('30d')">
-        30 days
-      </button>
-      <button type="button" class="overview__pill" [class.overview__pill--active]="selectedRange() === 'custom'"
-        (click)="setRange('custom')">
-        Custom
-      </button>
-
-      @if (selectedRange() === 'custom') {
-      <div class="overview__custom-date">
-        <input type="date" class="overview__pill overview__pill--date" [value]="customStart()"
-          (change)="setCustomStart($any($event.target).value)">
-        <span class="overview__date-sep">to</span>
-        <input type="date" class="overview__pill overview__pill--date" [value]="customEnd()"
-          (change)="setCustomEnd($any($event.target).value)">
+    <div class="overview__toolbar">
+      <div class="overview__nav">
+        <button type="button" class="overview__nav-btn" (click)="shiftDate(-1)" aria-label="Previous day">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+        <input type="date" class="overview__date-input" [value]="selectedDate()" [max]="todayMax()"
+          (change)="setDate($any($event.target).value)" aria-label="Select date" />
+        <button type="button" class="overview__nav-btn" (click)="shiftDate(1)" [disabled]="isToday()"
+          aria-label="Next day">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+        @if (!isToday()) {
+        <button type="button" class="btn btn--ghost overview__today-btn" (click)="goToday()" @scaleIn>Today</button>
+        }
       </div>
-      }
     </div>
   </div>
 
@@ -78,74 +72,6 @@
     @for (i of [1,2,3,4]; track i) {
     <div class="overview__card overview__card--skeleton"></div>
     }
-  </div>
-  <div class="overview__charts">
-    <div class="overview__chart overview__chart--skeleton"></div>
-    <div class="overview__chart overview__chart--skeleton"></div>
-  </div>
-  } @else if (logs().length === 0) {
-  <!-- empty-state: placeholder cards -->
-  <div class="overview__stats">
-    <div class="overview__card">
-      <div class="overview__card-label">Productivity score</div>
-      <div class="overview__card-value-row">
-        <div class="overview__card-value" style="color: var(--text-muted)">—</div>
-        <div class="overview__card-subvalue">0m</div>
-      </div>
-    </div>
-    <div class="overview__card">
-      <div class="overview__card-label">Tracked usage</div>
-      <div class="overview__card-value" style="color: var(--text-muted)">0m</div>
-    </div>
-    <div class="overview__card">
-      <div class="overview__card-label">{{ customAdminMetricLabel() }}</div>
-      <div class="overview__card-value" style="color: var(--text-muted)">—</div>
-    </div>
-    @if (!isAdmin() || (isAdmin() && selectedEmployeeId() !== 'all')) {
-    <div class="overview__card">
-      <div class="overview__card-label">First login</div>
-      <div class="overview__card-value overview__card-value--sm" style="color: var(--text-muted)">—</div>
-    </div>
-    } @else {
-    <div class="overview__card">
-      <div class="overview__card-label">Break time</div>
-      <div class="overview__card-value" style="color: var(--text-muted)">0m</div>
-    </div>
-    }
-  </div>
-
-  <!-- empty-state: chart panels with overlay -->
-  <div class="overview__charts overview__charts--empty">
-    <div class="overview__chart overview__chart--doughnut">
-      <div class="overview__chart-canvas-wrap -no-data">
-        <canvas id="productivity-chart"></canvas>
-        <div class="overview__chart-empty-overlay">No data</div>
-      </div>
-    </div>
-    <div class="overview__chart overview__chart--bar">
-      <div class="overview__chart-header">
-        <span class="overview__chart-title">{{ chartTitle() }}</span>
-      </div>
-      <div class="overview__chart-canvas-wrap">
-        <canvas id="activity-chart"></canvas>
-        <div class="overview__chart-empty-overlay">No activity recorded for this period</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- empty-state: message block -->
-  <div class="overview__empty">
-    <div class="overview__empty-content">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-        stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); opacity: 0.5;">
-        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-        <polyline points="14 2 14 8 20 8" />
-        <path d="M9 15h6" />
-        <path d="M9 19h6" />
-        <path d="M9 11h1" />
-      </svg>
-      <p>No activity recorded for this period.</p>
-    </div>
   </div>
   } @else {
   <!-- stat cards row -->
@@ -192,18 +118,15 @@
     }
   </div>
 
-  <!-- charts row -->
-  <div class="overview__charts">
-    <div class="overview__chart overview__chart--doughnut" @scaleIn>
-      <canvas id="productivity-chart"></canvas>
+  <section class="overview__timeline-section">
+    <div class="overview__timeline-header">
+      <h3 class="overview__timeline-title">Productive timeline</h3>
+      <span class="overview__timeline-date">{{ timelineDate() }}</span>
     </div>
-    <div class="overview__chart overview__chart--bar" @scaleIn>
-      <div class="overview__chart-header">
-        <span class="overview__chart-title">{{ chartTitle() }}</span>
-      </div>
-      <canvas id="activity-chart"></canvas>
-    </div>
-  </div>
+    <app-timeline [hideToolbar]="true" [externalActivities]="logs()" [externalEmployees]="employees()"
+      [externalSelectedDate]="timelineDate()" [externalSelectedUserId]="selectedEmployeeId()">
+    </app-timeline>
+  </section>
 
   <!-- top apps table -->
   <div class="overview__table-wrap">

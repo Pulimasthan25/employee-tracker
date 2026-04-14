@@ -6,6 +6,7 @@ import {
   effect,
   untracked,
   computed,
+  input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -54,9 +55,23 @@ export class TimelineReport {
   readonly employees = signal<AppUser[]>([]);
   readonly selectedDate = signal<string>(this.todayString());
   readonly selectedUserId = signal<string>('all');
+  readonly externalActivities = input<ActivityLog[] | null>(null);
+  readonly externalEmployees = input<AppUser[] | null>(null);
+  readonly externalSelectedDate = input<string | null>(null);
+  readonly externalSelectedUserId = input<string | null>(null);
+  readonly hideToolbar = input<boolean>(false);
   
   readonly isAdmin = this.auth.isAdmin;
-  readonly isAllMode = computed(() => this.selectedUserId() === 'all');
+  readonly isControlled = computed(() =>
+    this.externalActivities() !== null
+    || this.externalEmployees() !== null
+    || this.externalSelectedDate() !== null
+    || this.externalSelectedUserId() !== null
+  );
+  readonly effectiveDate = computed(() => this.externalSelectedDate() ?? this.selectedDate());
+  readonly effectiveUserId = computed(() => this.externalSelectedUserId() ?? this.selectedUserId());
+  readonly effectiveEmployees = computed(() => this.externalEmployees() ?? this.employees());
+  readonly isAllMode = computed(() => this.effectiveUserId() === 'all');
   
   readonly timelineRows = signal<TimelineRow[]>([]);
   // Hours 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
@@ -66,17 +81,34 @@ export class TimelineReport {
 
   constructor() {
     effect(() => {
+      const controlled = this.isControlled();
       const ready = this.auth.authReady();
       if (!ready) return;
+      if (controlled) return;
       untracked(() => { void this.init(); });
     });
 
     effect(() => {
-      const date = this.selectedDate();
-      const uid = this.selectedUserId();
+      const controlled = this.isControlled();
+      if (controlled) return;
+      const date = this.effectiveDate();
+      const uid = this.effectiveUserId();
       const ready = this.auth.authReady();
       if (!ready) return;
       untracked(() => { void this.loadData(); });
+    });
+
+    effect(() => {
+      const controlled = this.isControlled();
+      if (!controlled) return;
+      const activities = this.externalActivities() ?? [];
+      const date = this.effectiveDate();
+      const uid = this.effectiveUserId();
+      const users = this.effectiveEmployees();
+      untracked(() => {
+        this.loading.set(false);
+        this.updateRowsFromActivities(activities, uid, date, users);
+      });
     });
   }
 
@@ -103,7 +135,7 @@ export class TimelineReport {
   }
 
   async loadData(): Promise<void> {
-    const uid = this.selectedUserId();
+    const uid = this.effectiveUserId();
     if (!uid) {
       this.timelineRows.set([]);
       this.loading.set(false);
@@ -113,7 +145,8 @@ export class TimelineReport {
     const seq = ++this.loadSeq;
     this.loading.set(true);
     
-    const [y, m, d] = this.selectedDate().split('-').map(Number);
+    const selectedDate = this.effectiveDate();
+    const [y, m, d] = selectedDate.split('-').map(Number);
     const from = new Date(y, m - 1, d, 0, 0, 0, 0);
     const to = new Date(y, m - 1, d, 23, 59, 59, 999);
     
@@ -126,86 +159,94 @@ export class TimelineReport {
       }
 
       if (seq !== this.loadSeq) return;
-
-      const userLogs = new Map<string, ActivityLog[]>();
-      for (const log of activities) {
-        if (log.category !== 'productive') continue;
-        if (!userLogs.has(log.userId)) userLogs.set(log.userId, []);
-        userLogs.get(log.userId)!.push(log);
-      }
-
-      const rows: TimelineRow[] = [];
-      const usersToProcess = uid === 'all' ? this.employees() : this.employees().filter(e => e.uid === uid);
-      if (usersToProcess.length === 0 && uid !== 'all') {
-         // handle non-admin case where employees list might be empty
-         const u = this.auth.appUser();
-         if (u) usersToProcess.push(u);
-      }
-
-      const dayStartMs = from.getTime();
-      const dayEndMs = to.getTime();
-      const dayDurationMs = dayEndMs - dayStartMs;
-
-      for (const user of usersToProcess) {
-        const logs = userLogs.get(user.uid) || [];
-        
-        if (logs.length === 0) {
-          rows.push({
-            userId: user.uid,
-            user: user,
-            totalProductiveSeconds: 0,
-            timeWorkedStr: '0m',
-            startTimeStr: '00:00',
-            endTimeStr: '00:00',
-            segments: []
-          });
-          continue;
-        }
-
-        logs.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
-        const startTimeStr = this.formatTimeAMPM(logs[0].startTime);
-        const endTimeStr = this.formatTimeAMPM(logs[logs.length - 1].endTime);
-
-        const sortedSegments = logs.map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
-        const totalSecs = sumUniqueTimeSeconds(sortedSegments);
-
-        const segments: { left: number; width: number }[] = [];
-        for (const log of logs) {
-          const s = log.startTime.getTime();
-          const e = log.endTime.getTime();
-          const pStart = Math.max(s, dayStartMs);
-          const pEnd = Math.min(e, dayEndMs);
-          
-          if (pEnd > pStart) {
-            const left = ((pStart - dayStartMs) / dayDurationMs) * 100;
-            const width = ((pEnd - pStart) / dayDurationMs) * 100;
-            segments.push({ left, width });
-          }
-        }
-
-        rows.push({
-          userId: user.uid,
-          user: user,
-          totalProductiveSeconds: totalSecs,
-          timeWorkedStr: formatDuration(totalSecs),
-          startTimeStr,
-          endTimeStr,
-          segments
-        });
-      }
-
-      rows.sort((a, b) => {
-        const nameA = this.getEmployeeName(a.user).toLowerCase();
-        const nameB = this.getEmployeeName(b.user).toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-
-      this.timelineRows.set(rows);
+      this.updateRowsFromActivities(activities, uid, selectedDate, this.effectiveEmployees());
     } finally {
       if (seq === this.loadSeq) {
         this.loading.set(false);
       }
     }
+  }
+
+  private updateRowsFromActivities(
+    activities: ActivityLog[],
+    uid: string,
+    selectedDate: string,
+    employees: AppUser[]
+  ): void {
+    const [y, m, d] = selectedDate.split('-').map(Number);
+    const from = new Date(y, m - 1, d, 0, 0, 0, 0);
+    const to = new Date(y, m - 1, d, 23, 59, 59, 999);
+    const dayStartMs = from.getTime();
+    const dayEndMs = to.getTime();
+    const dayDurationMs = dayEndMs - dayStartMs;
+
+    const productive = activities.filter((log) =>
+      log.category === 'productive' && log.startTime.getTime() <= dayEndMs && log.endTime.getTime() >= dayStartMs
+    );
+
+    const userLogs = new Map<string, ActivityLog[]>();
+    for (const log of productive) {
+      if (!userLogs.has(log.userId)) userLogs.set(log.userId, []);
+      userLogs.get(log.userId)!.push(log);
+    }
+
+    const rows: TimelineRow[] = [];
+    const usersToProcess = uid === 'all' ? [...employees] : employees.filter((e) => e.uid === uid);
+    if (usersToProcess.length === 0 && uid !== 'all') {
+      const u = this.auth.appUser();
+      if (u) usersToProcess.push(u);
+    }
+
+    for (const user of usersToProcess) {
+      const logs = userLogs.get(user.uid) || [];
+      if (logs.length === 0) {
+        rows.push({
+          userId: user.uid,
+          user,
+          totalProductiveSeconds: 0,
+          timeWorkedStr: '0m',
+          startTimeStr: '00:00',
+          endTimeStr: '00:00',
+          segments: []
+        });
+        continue;
+      }
+
+      logs.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+      const startTimeStr = this.formatTimeAMPM(logs[0].startTime);
+      const endTimeStr = this.formatTimeAMPM(logs[logs.length - 1].endTime);
+      const sortedSegments = logs.map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
+      const totalSecs = sumUniqueTimeSeconds(sortedSegments);
+
+      const segments: { left: number; width: number }[] = [];
+      for (const log of logs) {
+        const pStart = Math.max(log.startTime.getTime(), dayStartMs);
+        const pEnd = Math.min(log.endTime.getTime(), dayEndMs);
+        if (pEnd > pStart) {
+          const left = ((pStart - dayStartMs) / dayDurationMs) * 100;
+          const width = ((pEnd - pStart) / dayDurationMs) * 100;
+          segments.push({ left, width });
+        }
+      }
+
+      rows.push({
+        userId: user.uid,
+        user,
+        totalProductiveSeconds: totalSecs,
+        timeWorkedStr: formatDuration(totalSecs),
+        startTimeStr,
+        endTimeStr,
+        segments
+      });
+    }
+
+    rows.sort((a, b) => {
+      const nameA = this.getEmployeeName(a.user).toLowerCase();
+      const nameB = this.getEmployeeName(b.user).toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
+    this.timelineRows.set(rows);
   }
 
   getEmployeeName(user?: AppUser): string {

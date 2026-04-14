@@ -10,9 +10,10 @@ export const REPORT_ROUTES: Routes = [
         path: '',
         loadComponent: () => import('./reports-layout/reports-layout').then(m => m.ReportsLayout),
         children: [
-          { path: '', redirectTo: 'timeline', pathMatch: 'full' },
+          { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+          { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard').then(m => m.ReportsDashboard) },
           { path: 'productivity', loadComponent: () => import('./productivity/productivity').then(m => m.Productivity) },
-          { path: 'timeline', loadComponent: () => import('./timeline/timeline').then(m => m.TimelineReport) },
+          { path: 'timeline', redirectTo: 'dashboard', pathMatch: 'full' },
           { path: 'apps', loadComponent: () => import('./app-usage/app-usage').then(m => m.AppUsage) },
           { path: 'urls', loadComponent: () => import('./url-usage/url-usage').then(m => m.UrlUsage) },
           {

@@ -1,4 +1,5 @@
 <div class="timeline-report" @fadeIn>
+  @if (!hideToolbar()) {
   <div class="timeline-report__toolbar">
     <div class="timeline-report__nav">
       <button type="button" class="btn btn--icon timeline-report__nav-btn" (click)="shiftDate(-1)" aria-label="Previous day">
@@ -27,6 +28,7 @@
     </div>
     }
   </div>
+  }
 
   <div class="card timeline-report__card">
     @if (loading()) {
