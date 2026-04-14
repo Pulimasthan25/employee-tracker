@@ -10,8 +10,8 @@ import {
 } from 'firebase/firestore';
 
 /**
- * Fetches all documents matching `baseConstraints` using fixed-size pages.
- * Avoids silent truncation from a single limit(N) on large date ranges or teams.
+ * Fetches documents matching `baseConstraints` up to a fixed limit.
+ * Used to manage Firebase read costs.
  */
 export async function getDocsAllPages(
   col: CollectionReference,

@@ -15,7 +15,8 @@ import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
-import { fadeIn, slideInUp, staggerFadeIn, scaleIn } from '../../../shared/animations';
+import { ToastService } from '../../../core/services/toast.service';
+import { fadeIn, slideInUp, staggerFadeIn, scaleIn, expandVertical } from '../../../shared/animations';
 import { TimelineReport } from '../../reports/timeline/timeline';
 
 function formatDuration(seconds: number): string {
@@ -34,7 +35,7 @@ function formatDuration(seconds: number): string {
   templateUrl: './overview.html',
   styleUrl: './overview.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeIn, slideInUp, staggerFadeIn, scaleIn]
+  animations: [fadeIn, slideInUp, staggerFadeIn, scaleIn, expandVertical]
 })
 export class Overview {
   private activityService = inject(ActivityService);
@@ -42,6 +43,7 @@ export class Overview {
   private employeeService = inject(EmployeeService);
   private idleService = inject(IdleService);
   private shiftService = inject(ShiftService);
+  private toast = inject(ToastService);
 
   readonly isAdmin = this.authService.isAdmin;
 
@@ -58,9 +60,12 @@ export class Overview {
 
   lastUpdated = signal('');
 
-  productivityScore = computed(() =>
-    this.activityService.getDailyProductivityScore(this.logs())
-  );
+  productivityScore = computed(() => {
+    const total = this.totalSeconds();
+    const prod = this.productiveSeconds();
+    if (total === 0) return 0;
+    return Math.round((prod / total) * 100);
+  });
   displayRows = computed<DisplayRow[]>(() =>
     this.activityService.groupForDisplay(this.logs())
   );
@@ -82,20 +87,53 @@ export class Overview {
     return { productive, unproductive, neutral };
   });
 
-  totalSeconds = computed(() =>
-    sumUniqueTimeSeconds(
-      this.logs().map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
-    )
-  );
+  totalSeconds = computed(() => {
+    const list = this.logs();
+    const selected = this.selectedEmployeeId();
+    if (selected !== 'all') {
+      return sumUniqueTimeSeconds(
+        list.map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
+      );
+    }
+    // Sum unique time PER user
+    const userGroups = new Map<string, { start: number; end: number }[]>();
+    for (const log of list) {
+      if (!userGroups.has(log.userId)) userGroups.set(log.userId, []);
+      userGroups.get(log.userId)!.push({
+        start: log.startTime.getTime(),
+        end: log.endTime.getTime(),
+      });
+    }
+    let total = 0;
+    for (const segments of userGroups.values()) {
+      total += sumUniqueTimeSeconds(segments);
+    }
+    return total;
+  });
   formattedActiveTime = computed(() => formatDuration(this.totalSeconds()));
 
-  productiveSeconds = computed(() =>
-    sumUniqueTimeSeconds(
-      this.logs()
-        .filter((l) => l.category === 'productive')
-        .map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
-    )
-  );
+  productiveSeconds = computed(() => {
+    const list = this.logs().filter((l) => l.category === 'productive');
+    const selected = this.selectedEmployeeId();
+    if (selected !== 'all') {
+      return sumUniqueTimeSeconds(
+        list.map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
+      );
+    }
+    const userGroups = new Map<string, { start: number; end: number }[]>();
+    for (const log of list) {
+      if (!userGroups.has(log.userId)) userGroups.set(log.userId, []);
+      userGroups.get(log.userId)!.push({
+        start: log.startTime.getTime(),
+        end: log.endTime.getTime(),
+      });
+    }
+    let total = 0;
+    for (const segments of userGroups.values()) {
+      total += sumUniqueTimeSeconds(segments);
+    }
+    return total;
+  });
   formattedProductiveTime = computed(() =>
     formatDuration(this.productiveSeconds())
   );
@@ -199,6 +237,13 @@ export class Overview {
         this.loading.set(false);
         this.hasLoadedOnce.set(true);
         this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        
+        this.toast.show(
+          'We are facing the database read limit issue, so loading only some data in the UI.',
+          'warning',
+          8000
+        );
+        
         void this.loadIdleSessions(from, to);
       } else {
         const uid = this.authService.firebaseUser()?.uid;

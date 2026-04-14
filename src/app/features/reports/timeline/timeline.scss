@@ -100,76 +100,89 @@
 
   &__header {
     background: var(--bg-surface);
-    border-bottom: 1px solid var(--border);
-    font-size: 0.85rem;
-    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+    font-size: 0.875rem;
+    font-weight: 800;
     color: var(--text-muted);
-    padding: 16px;
+    padding: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   &__row {
-    padding: 16px;
+    padding: 0;
     border-bottom: 1px solid var(--border);
-    transition: background 0.2s ease;
 
     &:last-child {
       border-bottom: none;
     }
-
-    &:hover {
-      background: var(--bg-hover);
-    }
   }
 
   &__col-user {
-    width: 220px;
+    width: 280px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 12px;
-    overflow: hidden;
+    padding: 16px 20px;
+    background: var(--bg-surface);
+    border-right: 2px solid var(--border);
+    position: sticky;
+    left: 0;
+    z-index: 2;
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
 
     .user-name {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       color: var(--text-primary);
-      font-weight: 500;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .user-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono, 'DM Mono', monospace);
     }
   }
 
   &__graph-header {
     flex-grow: 1;
     position: relative;
-    margin-left: 16px;
-    height: 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
   }
 
   &__tick {
     position: absolute;
     transform: translateX(-50%);
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     color: var(--text-muted);
+    font-weight: 700;
+    white-space: nowrap;
   }
-
-  &__tick:nth-child(1) { left: 8.33%; }
-  &__tick:nth-child(2) { left: 16.66%; }
-  &__tick:nth-child(3) { left: 25%; }
-  &__tick:nth-child(4) { left: 33.33%; }
-  &__tick:nth-child(5) { left: 41.66%; }
-  &__tick:nth-child(6) { left: 50%; }
-  &__tick:nth-child(7) { left: 58.33%; }
-  &__tick:nth-child(8) { left: 66.66%; }
-  &__tick:nth-child(9) { left: 75%; }
-  &__tick:nth-child(10) { left: 83.33%; }
-  &__tick:nth-child(11) { left: 91.66%; }
 
   &__graph-cell {
     flex-grow: 1;
     position: relative;
-    margin-left: 16px;
     display: flex;
     align-items: center;
+    padding: 0;
+    background: transparent;
   }
 
   &__lines {
@@ -180,57 +193,73 @@
 
   &__line {
     position: absolute;
-    top: -16px;
-    bottom: -16px;
+    top: 0;
+    bottom: 0;
     width: 1px;
-    background: rgba(255, 255, 255, 0.05); /* very subtle lines to look clean */
+    background: var(--border);
+    opacity: 0.5;
 
-    &:nth-child(1) { left: 8.33%; }
-    &:nth-child(2) { left: 16.66%; }
-    &:nth-child(3) { left: 25%; }
-    &:nth-child(4) { left: 33.33%; }
-    &:nth-child(5) { left: 41.66%; }
-    &:nth-child(6) { left: 50%; }
-    &:nth-child(7) { left: 58.33%; }
-    &:nth-child(8) { left: 66.66%; }
-    &:nth-child(9) { left: 75%; }
-    &:nth-child(10) { left: 83.33%; }
-    &:nth-child(11) { left: 91.66%; }
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -2px;
+      width: 5px;
+      height: 4px;
+      background: var(--border);
+      opacity: 0.5;
+    }
   }
 
   &__segments {
     position: relative;
     width: 100%;
-    height: 24px;
+    height: 40px;
     z-index: 1;
+    margin: 16px 0;
   }
 
   &__segment {
     position: absolute;
-    height: 100%;
-    background-color: #00E676;
+    top: 8px;
+    bottom: 8px;
+    background: linear-gradient(180deg, #00E676 0%, #00C853 100%);
     border-radius: 1px;
+    min-width: 1px;
     pointer-events: none;
   }
 
   &__empty {
-    padding: 32px;
+    padding: 64px 32px;
     text-align: center;
     color: var(--text-muted);
-    font-style: italic;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    svg {
+      opacity: 0.3;
+    }
+
+    p {
+      font-style: italic;
+      margin: 0;
+    }
   }
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 800;
   color: #fff;
-  background-color: hsl(var(--emp-hue, 0), 65%, 50%);
+  background-color: hsl(var(--emp-hue, 0), 60%, 45%);
   flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.1);
 }

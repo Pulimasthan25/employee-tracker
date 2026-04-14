@@ -121,7 +121,7 @@ export class TimelineReport {
   }
 
   private async init(): Promise<void> {
-    this.toast.show('We are getting only a limited number of data directly as we are facing read limits issue.', 'warning', 6000);
+    this.toast.show('We are facing the database read limit issue, so loading only some data in the UI.', 'warning', 8000);
 
     if (this.auth.isAdmin()) {
       try {

@@ -3,14 +3,14 @@
   <div class="timeline-report__toolbar">
     <div class="timeline-report__nav">
       <button type="button" class="btn btn--icon timeline-report__nav-btn" (click)="shiftDate(-1)" aria-label="Previous day">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
       <input type="date" class="timeline-report__date-input input" [value]="selectedDate()"
         (change)="setDate($any($event.target).value)" aria-label="Select date" />
       <button type="button" class="btn btn--icon timeline-report__nav-btn" (click)="shiftDate(1)" aria-label="Next day">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>
@@ -43,33 +43,46 @@
         <div class="timeline-grid__col-user">User</div>
         <div class="timeline-grid__graph-header">
           @for (h of hours; track h) {
-          <div class="timeline-grid__tick">{{ formatHourLabel(h) }}</div>
+          <div class="timeline-grid__tick" [style.left.%]="(h/24)*100">
+            {{ formatHourLabel(h) }}
+          </div>
           }
         </div>
       </div>
 
       <div class="timeline-grid__body" [@staggerFadeIn]="timelineRows().length">
-        @if (timelineRows().length === 0) {
-        <div class="timeline-grid__empty">No data available for the selected date.</div>
+        @if (timelineRows().length === 0 && !loading()) {
+        <div class="timeline-grid__empty">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>No activity recorded for this day.</p>
+        </div>
         }
         @for (row of timelineRows(); track row.userId) {
         <div class="timeline-grid__row">
           <div class="timeline-grid__col-user">
-            <span class="avatar avatar--small" [style.--emp-hue]="getAvatarHue(row.user)">
-              {{ getInitials(row.user) }}
-            </span>
-            <span class="user-name" title="{{ getEmployeeName(row.user) }}">{{ getEmployeeName(row.user) }}</span>
+            <div class="user-info">
+              <span class="avatar avatar--small" [style.--emp-hue]="getAvatarHue(row.user)">
+                {{ getInitials(row.user) }}
+              </span>
+              <div class="user-details">
+                <span class="user-name" title="{{ getEmployeeName(row.user) }}">{{ getEmployeeName(row.user) }}</span>
+                <span class="user-meta">{{ row.timeWorkedStr }} productive</span>
+              </div>
+            </div>
           </div>
 
           <div class="timeline-grid__graph-cell">
             <div class="timeline-grid__lines">
               @for (h of hours; track h) {
-              <div class="timeline-grid__line"></div>
+              <div class="timeline-grid__line" [style.left.%]="(h/24)*100"></div>
               }
             </div>
             <div class="timeline-grid__segments">
               @for (seg of row.segments; track seg.left) {
-              <div class="timeline-grid__segment" [style.left.%]="seg.left" [style.width.%]="seg.width"></div>
+              <div class="timeline-grid__segment" [style.left.%]="seg.left" [style.width.%]="seg.width">
+              </div>
               }
             </div>
           </div>

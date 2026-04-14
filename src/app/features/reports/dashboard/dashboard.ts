@@ -228,13 +228,6 @@ export class ReportsDashboard implements OnDestroy {
   }
 
   setRange(range: 'today' | '7d' | '30d' | 'custom'): void {
-    if (range !== 'today' && this.selectedRange() !== range) {
-      this.toast.show(
-        'We are fetching only a limited amount of data for extended ranges due to database read limits.',
-        'warning',
-        6000
-      );
-    }
     this.selectedRange.set(range);
   }
 
@@ -285,6 +278,12 @@ export class ReportsDashboard implements OnDestroy {
       }
       this.hasLoadedOnce.set(true);
       this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      
+      this.toast.show(
+        'We are facing the database read limit issue, so loading only some data in the UI.',
+        'warning',
+        8000
+      );
     } catch (e) {
       console.error('[ReportsDashboard] Failed to load activity:', e);
       this.connectionError.set(true);
