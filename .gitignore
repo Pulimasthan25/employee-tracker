@@ -11,7 +11,7 @@
 /node_modules
 npm-debug.log
 yarn-error.log
-
+node_modules
 # IDEs and editors
 .idea/
 .project
@@ -46,3 +46,4 @@ package-lock.json
 Thumbs.db
 # Environment files
 src/environments/environment.production.ts
+supabase/.temp/
