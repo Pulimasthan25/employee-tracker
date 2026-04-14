@@ -10,6 +10,11 @@ const envConfigFile = `export const environment = {
     storageBucket: '${process.env.FIREBASE_STORAGE_BUCKET}',
     messagingSenderId: '${process.env.FIREBASE_MESSAGING_SENDER_ID}',
     appId: '${process.env.FIREBASE_APP_ID}'
+  },
+  supabase: {
+    url: '${process.env.SUPABASE_URL || ''}',
+    anonKey: '${process.env.SUPABASE_ANON_KEY || ''}',
+    screenshotBucket: '${process.env.SCREENSHOT_BUCKET || process.env.SUPABASE_SCREENSHOT_BUCKET || 'screenshots'}'
   }
 };
 `;

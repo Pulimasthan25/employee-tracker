@@ -1,0 +1,2 @@
+[functions.sign-screenshot-urls]
+verify_jwt = false
