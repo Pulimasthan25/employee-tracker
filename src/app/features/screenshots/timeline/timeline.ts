@@ -6,6 +6,7 @@ import {
   effect,
   untracked,
   ChangeDetectionStrategy,
+  HostListener,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ScreenshotService, Screenshot } from '../../../core/services/screenshot.service';
@@ -222,5 +223,22 @@ export class Timeline {
     if (idx >= shots.length - 1) return;
     this.lightboxIndex.set(idx + 1);
     this.lightboxShot.set(shots[idx + 1]);
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (!this.lightboxShot()) return;
+
+    switch (event.key) {
+      case 'ArrowLeft':
+        this.prevShot();
+        break;
+      case 'ArrowRight':
+        this.nextShot();
+        break;
+      case 'Escape':
+        this.closeLightbox();
+        break;
+    }
   }
 }
