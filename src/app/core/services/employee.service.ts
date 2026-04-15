@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { environment } from '../../../environments/environment';
@@ -18,6 +18,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { AppUser } from './auth.service';
+import { FirebaseClaimsSyncService } from './firebase-claims-sync.service';
 
 function toDate(val: unknown): Date {
   if (val instanceof Date) return val;
@@ -48,6 +49,7 @@ function toAppUser(id: string, data: Record<string, unknown>): AppUser {
 
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
+  private readonly claimsSync = inject(FirebaseClaimsSyncService);
   private cache = new Map<string, { data: AppUser[]; ts: number }>();
 
   async getAll(): Promise<AppUser[]> {
@@ -114,6 +116,8 @@ export class EmployeeService {
 
     if (authUid) {
       await setDoc(doc(db, 'users', authUid), { ...userData, uid: authUid });
+      // Push Firestore role into Firebase Auth custom claims for the new account (admin invite path).
+      void this.claimsSync.syncUser(authUid);
     } else {
       const col = collection(db, 'users');
       await addDoc(col, userData);

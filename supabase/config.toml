@@ -1,2 +1,5 @@
 [functions.sign-screenshot-urls]
 verify_jwt = false
+
+[functions.sync-firebase-claims]
+verify_jwt = false

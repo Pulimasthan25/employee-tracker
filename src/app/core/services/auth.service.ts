@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { FirebaseClaimsSyncService } from './firebase-claims-sync.service';
 
 export interface AppUser {
   uid: string;
@@ -27,6 +28,7 @@ export interface AppUser {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private router = inject(Router);
+  private readonly claimsSync = inject(FirebaseClaimsSyncService);
 
   // Signals — Angular 21 reactive state
   readonly firebaseUser = signal<User | null>(null);
@@ -43,6 +45,8 @@ export class AuthService {
       if (user) {
         const snap = await getDoc(doc(db, 'users', user.uid));
         this.appUser.set(snap.exists() ? snap.data() as AppUser : null);
+        // Align Auth custom claims with Firestore role (promote/demote) without manual scripts.
+        void this.claimsSync.syncSelf();
       } else {
         this.appUser.set(null);
       }
@@ -53,7 +57,8 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const cred = await signInWithEmailAndPassword(auth, email, password);
-    await cred.user.getIdToken(true); // force refresh to get latest claims
+    await this.claimsSync.syncSelf();
+    await cred.user.getIdToken(true);
     this.router.navigate(['/dashboard']);
   }
 
