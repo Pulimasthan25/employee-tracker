@@ -1,34 +1,58 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <title>Pulse</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Pulse — real-time employee productivity tracker">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Pulse — real-time employee productivity tracker" />
+  <meta name="theme-color" content="#0f1117" />
+  <link rel="icon" type="image/x-icon" href="icons/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
 </head>
+
 <body>
   <app-root>
     <div style="
-      position: fixed; inset: 0;
-      background: #0f1117;
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 16px;
-    ">
+          position: fixed;
+          inset: 0;
+          background: #0f1117;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          gap: 16px;
+        ">
       <div style="
-        width: 10px; height: 10px; border-radius: 50%;
-        background: #4f8ef7;
-        box-shadow: 0 0 12px #4f8ef7;
-        animation: p 1.2s ease-in-out infinite;
-      "></div>
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4f8ef7;
+            box-shadow: 0 0 12px #4f8ef7;
+            animation: p 1.2s ease-in-out infinite;
+          "></div>
       <style>
         @keyframes p {
-          0%,100% { opacity: 1; transform: scale(1); }
-          50%      { opacity: 0.3; transform: scale(0.7); }
+
+          0%,
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+
+          50% {
+            opacity: 0.3;
+            transform: scale(0.7);
+          }
         }
       </style>
     </div>
   </app-root>
+  <noscript>Please enable JavaScript to continue using this application.</noscript>
 </body>
+
 </html>

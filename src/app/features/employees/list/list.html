@@ -136,14 +136,14 @@
             <a [routerLink]="['/employees', emp.uid]" class="list__table-row list__table-row--link">
               <span class="list__table-cell list__table-cell--name">{{ emp.displayName || '—' }}</span>
               <span class="list__table-cell list__table-cell--email">{{ emp.email }}</span>
-              <span class="list__table-cell">
+              <span class="list__table-cell" data-label="Team">
                 @if (emp.teamId) {
                   <span class="badge team-badge" [style.--team-hue]="getTeamHue(emp.teamId)">{{ emp.teamId }}</span>
                 } @else {
                   <span class="list__text-muted">—</span>
                 }
               </span>
-              <span class="list__table-cell">
+              <span class="list__table-cell" data-label="Role">
                 <span
                   class="badge"
                   [class.badge--success]="emp.role === 'admin'"
@@ -152,7 +152,7 @@
                   {{ emp.role }}
                 </span>
               </span>
-              <span class="list__table-cell">
+              <span class="list__table-cell" data-label="Status">
                 <span
                   class="badge"
                   [class.badge--success]="emp.active"
@@ -161,10 +161,10 @@
                   {{ emp.active ? 'Active' : 'Inactive' }}
                 </span>
               </span>
-              <span class="list__table-cell list__table-cell--mono">{{ formatInterval(emp.screenshotIntervalSeconds) }}</span>
-              <span class="list__table-cell list__table-cell--mono">{{ formatIdle(emp.idleThresholdSeconds) }}</span>
-              <span class="list__table-cell list__table-cell--mono list__table-cell--shift">{{ formatShift(emp.shiftStartHour, emp.shiftEndHour) }}</span>
-              <span class="list__table-cell list__table-cell--mono">{{ emp.createdAt | date:'mediumDate' }}</span>
+              <span class="list__table-cell list__table-cell--mono" data-label="Interval">{{ formatInterval(emp.screenshotIntervalSeconds) }}</span>
+              <span class="list__table-cell list__table-cell--mono" data-label="Idle">{{ formatIdle(emp.idleThresholdSeconds) }}</span>
+              <span class="list__table-cell list__table-cell--mono list__table-cell--shift" data-label="Shift">{{ formatShift(emp.shiftStartHour, emp.shiftEndHour) }}</span>
+              <span class="list__table-cell list__table-cell--mono" data-label="Joined">{{ emp.createdAt | date:'mediumDate' }}</span>
               <div class="list__actions-menu">
                 <button type="button" class="list__action-toggle" (click)="toggleActionMenu(emp.uid, $event)">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

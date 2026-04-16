@@ -77,7 +77,8 @@
 
   &__card {
     padding: 0;
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg, 8px);
@@ -92,6 +93,11 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-width: 800px; // Ensure graph has enough space even on mobile scroll
+
+  @media (max-width: 768px) {
+    min-width: 600px;
+  }
 
   &__header, &__row {
     display: flex;
@@ -130,11 +136,25 @@
     left: 0;
     z-index: 2;
 
+    @media (max-width: 768px) {
+      width: 180px;
+      padding: 12px 14px;
+    }
+
+    @media (max-width: 480px) {
+      width: 140px;
+      padding: 10px 10px;
+    }
+
     .user-info {
       display: flex;
       align-items: center;
       gap: 12px;
       min-width: 0;
+
+      @media (max-width: 480px) {
+        gap: 6px;
+      }
     }
 
     .user-details {
@@ -150,12 +170,20 @@
       color: var(--text-primary);
       font-weight: 700;
       font-size: 1rem;
+
+      @media (max-width: 480px) {
+        font-size: 0.8125rem;
+      }
     }
 
     .user-meta {
       font-size: 0.875rem;
       color: var(--text-muted);
       font-family: var(--font-mono, 'DM Mono', monospace);
+
+      @media (max-width: 480px) {
+        font-size: 0.75rem;
+      }
     }
   }
 

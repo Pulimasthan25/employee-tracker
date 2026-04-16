@@ -1,4 +1,4 @@
-import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import {
   RouterOutlet,
   RouterLink,
@@ -9,6 +9,7 @@ import {
 import { filter, map, startWith } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
+import { PwaInstallService } from '../../../core/services/pwa-install';
 
 interface NavItem {
   label: string;
@@ -38,6 +39,9 @@ import { routeAnimations } from '../../animations';
 export class Shell {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  public readonly pwaInstall = inject(PwaInstallService);
+
+  readonly isMenuOpen = signal(false);
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', path: '/dashboard', icon: 'grid' },
@@ -46,6 +50,12 @@ export class Shell {
     { label: 'Reports', path: '/reports', icon: 'chart' },
     { label: 'Settings', path: '/settings', icon: 'settings', adminOnly: true },
   ];
+
+  constructor() {
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe(() => this.isMenuOpen.set(false));
+  }
 
   readonly visibleNav = computed(() =>
     this.navItems.filter((item) => !item.adminOnly || this.auth.isAdmin())
@@ -72,6 +82,10 @@ export class Shell {
     ),
     { initialValue: 'Overview' }
   );
+
+  toggleMenu() {
+    this.isMenuOpen.update(v => !v);
+  }
 
   logout() {
     this.auth.logout();

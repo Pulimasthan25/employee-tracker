@@ -15,6 +15,32 @@
   flex-direction: column;
   overflow: hidden;
   z-index: 100;
+  transition: transform var(--transition-normal);
+
+  @media (max-width: 1024px) {
+    transform: translateX(-100%);
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.shell--menu-open .shell__sidebar {
+  @media (max-width: 1024px) {
+    transform: translateX(0);
+  }
+}
+
+.shell__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .shell__brand {
@@ -91,21 +117,29 @@
       transform: translateX(4px);
     }
   }
+
+  &--install {
+    margin-top: auto;
+    background: var(--accent-glow);
+    color: var(--accent);
+    border: 1px dashed var(--accent);
+    
+    &:hover {
+      background: var(--accent);
+      color: white;
+      transform: translateY(-2px) !important;
+    }
+
+    svg {
+      color: inherit;
+    }
+  }
 }
 
 .shell__icon {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-}
-
-.shell__user {
-  padding: var(--space-lg);
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-md);
 }
 
 .shell__avatar {
@@ -121,25 +155,12 @@
   font-family: 'DM Mono', monospace;
   font-size: 0.875rem;
   font-weight: 500;
-}
 
-.shell__user-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.shell__user-name {
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.shell__user-email {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
+  @media (max-width: 480px) {
+    width: 30px;
+    height: 30px;
+    font-size: 0.75rem;
+  }
 }
 
 .shell__logout {
@@ -157,6 +178,11 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  transition: margin-left var(--transition-normal);
+
+  @media (max-width: 1024px) {
+    margin-left: 0;
+  }
 }
 
 .shell__topbar {
@@ -171,6 +197,40 @@
   position: sticky;
   top: 0;
   z-index: 10;
+
+  @media (max-width: 768px) {
+    padding: 0 var(--space-md);
+    height: 64px;
+  }
+}
+
+.shell__topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.shell__menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  z-index: 110;
+
+  @media (max-width: 1024px) {
+    display: flex;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 .shell__title {
@@ -178,6 +238,10 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-primary);
+
+  @media (max-width: 640px) {
+    font-size: 1.1rem;
+  }
 }
 
 .shell__topbar-right {
@@ -192,13 +256,16 @@
   gap: var(--space-md);
 }
 
-.shell__topbar-email {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
 .shell__content {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-xl);
-}
+
+  @media (max-width: 768px) {
+    padding: var(--space-lg);
+  }
+
+  @media (max-width: 480px) {
+    padding: var(--space-md);
+  }
+}
