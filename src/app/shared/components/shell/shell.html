@@ -1,4 +1,8 @@
-<div class="shell">
+<div class="shell" [class.shell--menu-open]="isMenuOpen()">
+  @if (isMenuOpen()) {
+    <div class="shell__backdrop" (click)="toggleMenu()"></div>
+  }
+
   <aside class="shell__sidebar">
     <div class="shell__brand">
       <span class="shell__logo">
@@ -59,19 +63,37 @@
           <span>{{ item.label }}</span>
         </a>
       }
+      @if (pwaInstall.canInstall()) {
+        <button type="button" class="shell__nav-item shell__nav-item--install" (click)="pwaInstall.install()">
+          <svg class="shell__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Download App</span>
+        </button>
+      }
     </nav>
   </aside>
+
   <div class="shell__main-wrap">
     <header class="shell__topbar">
-      <h1 class="shell__title">{{ pageTitle() }}</h1>
+      <div class="shell__topbar-left">
+        <button type="button" class="shell__menu-toggle" (click)="toggleMenu()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            @if (isMenuOpen()) {
+              <path d="M18 6L6 18M6 6l12 12"/>
+            } @else {
+              <path d="M3 12h18M3 6h18M3 18h18"/>
+            }
+          </svg>
+        </button>
+        <h1 class="shell__title">{{ pageTitle() }}</h1>
+      </div>
+
       <div class="shell__topbar-right">
-        <!-- <span class="badge">Live</span> -->
         <div class="shell__topbar-user">
           <div class="shell__avatar" [title]="displayName()">{{ avatarLetter() }}</div>
-          <!-- <div class="shell__user-info">
-            <span class="shell__user-name">{{ displayName() }}</span>
-            <span class="shell__user-email">{{ userEmail() }}</span>
-          </div> -->
           <button
             type="button"
             class="btn btn--ghost shell__logout" title="Logout"
@@ -86,6 +108,7 @@
         </div>
       </div>
     </header>
+
     <main class="shell__content" [@routeAnimations]="prepareRoute(outlet)">
       <router-outlet #outlet="outlet" />
     </main>

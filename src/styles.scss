@@ -165,6 +165,11 @@ body {
   border-radius: var(--radius-sm);
   background: var(--accent-glow);
   color: var(--accent);
+
+  @media (max-width: 480px) {
+    padding: 2px 6px;
+    font-size: 0.65rem;
+  }
 }
 
 .badge--success {
@@ -233,6 +238,100 @@ body {
 [data-animate].is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  :root {
+    --space-xl: 1.5rem;
+    --space-lg: 1.25rem;
+    --space-md: 0.875rem;
+  }
+  
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --space-xl: 1.25rem;
+    --space-lg: 1rem;
+    --space-md: 0.75rem;
+    --space-sm: 0.375rem;
+  }
+}
+
+// Global responsive helpers
+.hidden-mobile {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.show-mobile {
+  display: none !important;
+  @media (max-width: 768px) {
+    display: block !important;
+  }
+}
+
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 1), 1fr);
+  gap: var(--space-md);
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(var(--grid-cols-md, 1), 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile-first patterns */
+.stack-on-mobile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-md);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.flex-between-responsive {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.mobile-label {
+  display: none;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
 }
 // styles.scss
 .shell__main-wrap .shell__content {

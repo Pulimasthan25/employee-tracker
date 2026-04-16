@@ -1,7 +1,7 @@
 <div class="settings-page" @fadeIn>
   <div class="settings-container">
     <header class="settings-header">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div class="flex-between-responsive">
         <div>
           <h1 class="settings-header__title">Productivity Site Management</h1>
           <p class="settings-header__desc">Manage categorization for websites. These rules sync instantly with all
@@ -124,7 +124,11 @@
             </div>
             <div class="rule-card__col">
               <span class="rule-card__label">Keywords</span>
-              <code>{{ rule.keywords.join(', ') }}</code>
+              <div class="keyword-tags">
+                @for (kw of rule.keywords; track kw) {
+                  <span class="keyword-tag">{{ kw }}</span>
+                }
+              </div>
             </div>
             <div class="rule-card__col">
               <span class="rule-card__label">Category</span>

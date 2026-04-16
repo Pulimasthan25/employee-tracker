@@ -10,6 +10,13 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--space-md);
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: var(--space-sm);
+  }
 }
 
 .list__title {
@@ -279,12 +286,89 @@ $cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr 50px;
   color: var(--text-muted);
 }
 
-@keyframes list-skeleton {
-  0%,
-  100% {
-    opacity: 1;
+@media (max-width: 1024px) {
+  .list__table-wrap {
+    background: transparent;
+    border: none;
   }
-  50% {
-    opacity: 0.5;
+
+  .list__table {
+    min-width: 0;
+    gap: var(--space-md);
+  }
+
+  .list__table-header {
+    display: none;
+  }
+
+  .list__table-row {
+    grid-template-columns: 1fr;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    gap: var(--space-sm);
+    position: relative;
+    margin-bottom: var(--space-md);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-dim);
+    }
+  }
+
+  .list__table-cell {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 6px 0;
+    text-align: right;
+    border: none;
+    font-size: 0.875rem;
+
+    &::before {
+      content: attr(data-label);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-right: var(--space-md);
+      text-align: left;
+      flex-shrink: 0;
+      letter-spacing: 0.05em;
+    }
+
+    &--name {
+      font-size: 1.125rem;
+      font-weight: 800;
+      justify-content: flex-start;
+      margin-bottom: 2px;
+      color: var(--text-primary);
+      &::before { display: none; }
+    }
+
+    &--email {
+      justify-content: flex-start;
+      margin-bottom: var(--space-md);
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      &::before { display: none; }
+    }
+    
+    &--mono {
+      font-family: 'DM Mono', monospace;
+      color: var(--text-primary);
+    }
+  }
+
+  .list__actions-menu {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
   }
 }
