@@ -713,3 +713,124 @@
     visibility: hidden;
   }
 }
+
+// ── Responsiveness ────────────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .timeline__toolbar {
+    gap: var(--space-md);
+  }
+
+  .timeline__meta {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: var(--space-xs);
+  }
+}
+
+@media (max-width: 768px) {
+  .timeline__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .timeline__nav {
+    justify-content: center;
+    order: 1;
+  }
+
+  .timeline__user-select {
+    order: 2;
+    .timeline__select { width: 100%; flex: 1; }
+  }
+
+  .timeline__meta {
+    order: 3;
+    margin-left: 0;
+  }
+
+  .timeline__row {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .timeline__hour-label {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-md);
+    width: 100%;
+    padding-top: 0;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: var(--space-xs);
+  }
+
+  .timeline__thumbs {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    display: grid;
+    gap: var(--space-sm);
+  }
+
+  .timeline__thumb-btn {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/10;
+  }
+
+  .lightbox__panel {
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .lightbox__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  .lightbox__meta {
+    flex-wrap: wrap;
+  }
+
+  .lightbox__title {
+    max-width: 100%;
+    order: 10;
+    width: 100%;
+  }
+
+  .lightbox__arrow {
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 0, 0, 0.6);
+    
+    &--prev { left: var(--space-sm); }
+    &--next { right: var(--space-sm); }
+  }
+
+  .lightbox__filmstrip {
+    padding: var(--space-sm);
+  }
+
+  .lightbox__film-thumb {
+    width: 60px;
+    height: 38px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline__thumbs {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+  
+  .timeline__nav-btn {
+    width: 44px; /* Larger touch target */
+    height: 44px;
+  }
+
+  .timeline__date-input {
+    height: 44px;
+    flex: 1;
+  }
+}

@@ -1,14 +1,10 @@
 <div class="reports-dashboard" @fadeIn>
   <div class="reports-dashboard__header">
-    <div>
-      <h1 class="reports-dashboard__title">Reports dashboard</h1>
-      <p class="reports-dashboard__subtitle">Charts and trends for productivity and activity.</p>
-    </div>
-
     <div class="reports-dashboard__actions">
       @if (isAdmin()) {
       <div class="reports-dashboard__employee-filter">
-        <select class="reports-dashboard__select" [value]="selectedEmployeeId()"
+        <label for="rep-emp">Member</label>
+        <select id="rep-emp" class="reports-dashboard__select" [value]="selectedEmployeeId()"
           (change)="setSelectedEmployee($any($event.target).value)">
           <option value="all">All employees</option>
           @for (emp of employees(); track emp.uid) {

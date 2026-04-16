@@ -33,7 +33,7 @@
 
 .rule-list {
   background: var(--bg-surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   overflow: hidden;
   margin-bottom: var(--space-xl);
@@ -50,8 +50,7 @@
   transition: background var(--transition-fast);
 
   @media (max-width: 1024px) {
-    grid-template-columns: 140px 1fr 120px 100px;
-    & > *:nth-child(4) { display: none; } // Hide team scope on tablets
+    grid-template-columns: 140px 1fr 120px 120px 100px;
   }
 
   &--header {
@@ -144,7 +143,7 @@
 
 .add-section {
   background: var(--bg-surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   padding: var(--space-xl);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -274,17 +273,32 @@
 
   .add-section {
     padding: var(--space-lg);
+    background: linear-gradient(165deg, var(--bg-card), rgba(255, 255, 255, 0.02));
+    border-radius: var(--radius-lg);
+    border-left-width: 6px;
+  }
+
+  .rule-list {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
   }
 
   .rule-card {
     grid-template-columns: 1fr !important;
-    gap: var(--space-sm);
-    padding: var(--space-lg);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-md);
+    gap: 0;
+    padding: 0;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border);
-    background: var(--bg-card);
-    
+    background: linear-gradient(135deg, var(--bg-card), rgba(255, 255, 255, 0.03));
+    position: relative;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+
     &--header {
       display: none;
     }
@@ -294,32 +308,49 @@
       flex-direction: column;
       align-items: flex-start !important;
       text-align: left !important;
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       
-      &:nth-child(1) { // Site Name
+      &:nth-child(1) { // Title row
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid var(--border);
+        padding: var(--space-md) var(--space-lg);
         flex-direction: row;
         justify-content: space-between;
         align-items: center !important;
         width: 100%;
-        margin-bottom: var(--space-xs);
-        
+
         strong {
           font-size: 1.125rem;
-          color: var(--accent);
+          color: var(--text-primary);
+          font-weight: 700;
         }
+
+        .rule-card__label { display: none; }
+      }
+
+      &:nth-last-child(2) {
+        border-bottom: none;
       }
     }
 
     &__label {
       display: block;
-      margin-bottom: 2px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
     }
 
     &.actions-cell {
-      flex-direction: row;
-      justify-content: flex-end;
-      padding-top: var(--space-md);
-      border-top: 1px dashed var(--border);
-      margin-top: var(--space-sm);
+      flex-direction: row !important;
+      justify-content: flex-end !important;
+      padding: var(--space-md) var(--space-lg);
+      background: rgba(0, 0, 0, 0.1);
+      border-top: 1px solid var(--border);
+      border-bottom: none;
       width: 100%;
       gap: var(--space-md);
     }

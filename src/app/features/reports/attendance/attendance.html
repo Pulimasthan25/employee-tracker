@@ -1,6 +1,5 @@
 <div class="report" @fadeIn>
   <div class="report__header">
-    <h2>Attendance report</h2>
     <app-date-range (rangeChange)="onRangeChange($event)" />
 
     @if (isAdmin()) {
