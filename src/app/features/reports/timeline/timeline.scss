@@ -36,12 +36,11 @@
     cursor: pointer;
     transition: all 0.2s ease;
     padding: 0;
-
+    
     &:hover {
       background: var(--bg-hover);
       color: var(--text-primary);
     }
-
     svg {
       width: 18px;
       height: 18px;
@@ -55,7 +54,7 @@
     color: var(--text-primary);
     font-weight: 500;
     padding: 4px;
-
+    
     &:focus {
       outline: none;
       box-shadow: none;
@@ -84,7 +83,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg, 8px);
   }
-
+  
   &__skeleton {
     padding: 24px;
   }
@@ -100,8 +99,7 @@
     min-width: 600px;
   }
 
-  &__header,
-  &__row {
+  &__header, &__row {
     display: flex;
     width: 100%;
   }
@@ -291,5 +289,5 @@
   color: #fff;
   background-color: hsl(var(--emp-hue, 0), 60%, 45%);
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255,255,255,0.1);
 }
