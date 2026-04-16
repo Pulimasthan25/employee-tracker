@@ -266,7 +266,7 @@
   font-size: 0.8125rem;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .add-form__grid {
     grid-template-columns: 1fr;
     gap: var(--space-md);
