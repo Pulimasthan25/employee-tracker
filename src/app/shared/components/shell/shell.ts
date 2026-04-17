@@ -26,7 +26,7 @@ const TITLE_MAP: Record<string, string> = {
 };
 
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
-import { routeAnimations } from '../../animations';
+import { routeAnimations, fadeIn } from '../../animations';
 
 @Component({
   selector: 'app-shell',
@@ -34,7 +34,7 @@ import { routeAnimations } from '../../animations';
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [routeAnimations]
+  animations: [routeAnimations, fadeIn]
 })
 export class Shell {
   private readonly auth = inject(AuthService);
@@ -83,12 +83,29 @@ export class Shell {
     { initialValue: 'Overview' }
   );
 
+  readonly isGlobalLoading = signal(false);
+
   toggleMenu() {
     this.isMenuOpen.update(v => !v);
   }
 
   logout() {
     this.auth.logout();
+  }
+
+  refreshCurrentPage() {
+    // Show a quick loading state for futuristic feel
+    this.isGlobalLoading.set(true);
+    setTimeout(() => {
+      this.isGlobalLoading.set(false);
+      // Actual refresh logic would go here, for now it just triggers 
+      // whatever the component is doing if we had an event bus.
+      // But just re-triggering the route can work too.
+      const currentUrl = this.router.url;
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigateByUrl(currentUrl);
+      });
+    }, 1000);
   }
 
   prepareRoute(outlet: RouterOutlet) {

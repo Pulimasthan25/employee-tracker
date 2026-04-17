@@ -1,117 +1,89 @@
 <div class="shell" [class.shell--menu-open]="isMenuOpen()">
-  @if (isMenuOpen()) {
-    <div class="shell__backdrop" (click)="toggleMenu()"></div>
-  }
-
-  <aside class="shell__sidebar">
-    <div class="shell__brand">
-      <span class="shell__logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11 21h-1l1-7H6l7-12h1l-1 7h5l-7 12z"/>
-        </svg>
-      </span>
-      <span class="shell__name">Pulse</span>
-    </div>
-    <nav class="shell__nav">
-      @for (item of visibleNav(); track item.path) {
-        <a
-          [routerLink]="item.path"
-          routerLinkActive="shell__nav-item--active"
-          [routerLinkActiveOptions]="{ exact: item.path !== '/employees' && item.path !== '/reports' }"
-          class="shell__nav-item"
-        >
-          @switch (item.icon) {
-            @case ('grid') {
-              <svg class="shell__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="7" height="7" rx="1"/>
-                <rect x="14" y="3" width="7" height="7" rx="1"/>
-                <rect x="3" y="14" width="7" height="7" rx="1"/>
-                <rect x="14" y="14" width="7" height="7" rx="1"/>
-              </svg>
-            }
-            @case ('users') {
-              <svg class="shell__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            }
-            @case ('camera') {
-              <svg class="shell__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                <circle cx="12" cy="13" r="4"/>
-              </svg>
-            }
-            @case ('chart') {
-              <svg class="shell__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="20" x2="18" y2="10"/>
-                <line x1="12" y1="20" x2="12" y2="4"/>
-                <line x1="6" y1="20" x2="6" y2="14"/>
-              </svg>
-            }
-            @case ('settings') {
-              <svg class="shell__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12.22 2h-0.44a2 2 0 0 0-2 2v0.18a2 2 0 0 1-1 1.73l-0.43 0.25a2 2 0 0 1-2 0l-0.15-0.08a2 2 0 0 0-2.73 0.73l-0.22 0.38a2 2 0 0 0 0.73 2.73l0.15 0.1a2 2 0 0 1 1 1.72v0.51a2 2 0 0 1-1 1.74l-0.15 0.09a2 2 0 0 0-0.73 2.73l0.22 0.38a2 2 0 0 0 2.73 0.73l0.15-0.08a2 2 0 0 1 2 0l0.43 0.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h0.44a2 2 0 0 0 2-2v-0.18a2 2 0 0 1 1-1.73l0.43-0.25a2 2 0 0 1 2 0l0.15 0.08a2 2 0 0 0 2.73-0.73l0.22-0.38a2 2 0 0 0-0.73-2.73l-0.15-0.1a2 2 0 0 1-1-1.72v-0.51a2 2 0 0 1 1-1.74l0.15-0.09a2 2 0 0 0 0.73-2.73l-0.22-0.38a2 2 0 0 0-2.73-0.73l-0.15 0.08a2 2 0 0 1-2 0l-0.43-0.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            }
-            @default {
-              <span class="shell__icon shell__icon--placeholder"></span>
-            }
-          }
-          <span>{{ item.label }}</span>
-        </a>
-      }
-      @if (pwaInstall.canInstall()) {
-        <button type="button" class="shell__nav-item shell__nav-item--install" (click)="pwaInstall.install()">
-          <svg class="shell__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          <span>Download App</span>
-        </button>
-      }
-    </nav>
-  </aside>
-
-  <div class="shell__main-wrap">
-    <header class="shell__topbar">
-      <div class="shell__topbar-left">
-        <button type="button" class="shell__menu-toggle" (click)="toggleMenu()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            @if (isMenuOpen()) {
-              <path d="M18 6L6 18M6 6l12 12"/>
-            } @else {
-              <path d="M3 12h18M3 6h18M3 18h18"/>
-            }
-          </svg>
-        </button>
-        <h1 class="shell__title">{{ pageTitle() }}</h1>
-      </div>
-
-      <div class="shell__topbar-right">
-        <div class="shell__topbar-user">
-          <div class="shell__avatar" [title]="displayName()">{{ avatarLetter() }}</div>
-          <button
-            type="button"
-            class="btn btn--ghost shell__logout" title="Logout"
-            (click)="logout()"
-          >
-            <svg class="shell__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-          </button>
+  
+  <!-- THE SATELLITE RAIL (Universal Floating HUB) -->
+  <header class="shell__satellite-wrap">
+    <div class="shell__satellite glass">
+      
+      <!-- Logo Unit -->
+      <div class="shell__sat-section shell__sat-section--brand">
+        <div class="shell__sat-logo">
+          <img src="/icons/favicon-32x32.png" alt="Pulse Logo">
         </div>
       </div>
-    </header>
 
-    <main class="shell__content" [@routeAnimations]="prepareRoute(outlet)">
-      <router-outlet #outlet="outlet" />
-    </main>
-  </div>
+      <div class="shell__sat-divider"></div>
+
+      <!-- Navigation Unit (Scrollable Icons+Labels) -->
+      <nav class="shell__sat-section shell__sat-section--nav">
+        <div class="shell__sat-track">
+          @for (item of visibleNav(); track item.path) {
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: item.path !== '/employees' && item.path !== '/reports' }"
+              class="shell__sat-tab"
+              [title]="item.label"
+            >
+              <div class="shell__sat-icon">
+                @switch (item.icon) {
+                  @case ('grid') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                      <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                    </svg>
+                  }
+                  @case ('users') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                    </svg>
+                  }
+                  @case ('camera') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                  }
+                  @case ('chart') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <line x1="18" y1="10" x2="18" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="6" y1="14" x2="6" y2="20"/>
+                    </svg>
+                  }
+                  @case ('settings') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M12.22 2h-0.44a2 2 0 0 0-2 2v0.18a2 2 0 0 1-1 1.73l-0.43 0.25a2 2 0 0 1-2 0l-0.15-0.08a2 2 0 0 0-2.73 0.73l-0.22 0.38a2 2 0 0 0 0.73 2.73l0.15 0.1a2 2 0 0 1 1 1.72v0.51a2 2 0 0 1-1 1.74l-0.15 0.09a2 2 0 0 0-0.73 2.73l0.22 0.38a2 2 0 0 0 2.73 0.73l-0.15-0.08a2 2 0 0 1 2 0l0.43 0.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h0.44a2 2 0 0 0 2-2v-0.18a2 2 0 0 1 1-1.73l0.43-0.25a2 2 0 0 1 2 0l0.15 0.08a2 2 0 0 0 2.73-0.73l0.22-0.38a2 2 0 0 0-0.73-2.73l-0.15-0.1a2 2 0 0 1-1-1.72v-0.51a2 2 0 0 1 1-1.74l0.15-0.09a2 2 0 0 0 0.73-2.73l-0.22-0.38a2 2 0 0 0-2.73-0.73l-0.15 0.08a2 2 0 0 1-2 0l-0.43-0.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  }
+                }
+              </div>
+              <span class="shell__sat-label">{{ item.label }}</span>
+            </a>
+          }
+        </div>
+      </nav>
+
+      <div class="shell__sat-divider"></div>
+
+      <!-- User Unit -->
+      <div class="shell__sat-section shell__sat-section--user">
+        <div class="shell__sat-avatar">{{ avatarLetter() }}</div>
+        <button type="button" class="shell__sat-logout" (click)="logout()" title="Logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Context Title -->
+  <header class="shell__context-header">
+    <div class="shell__context-pulse"></div>
+    <h1 class="shell__context-title">{{ pageTitle() }}</h1>
+  </header>
+
+  <main class="shell__viewport-pulse" [@routeAnimations]="prepareRoute(outlet)">
+    <router-outlet #outlet="outlet" />
+  </main>
+
   <app-confirm-dialog />
 </div>

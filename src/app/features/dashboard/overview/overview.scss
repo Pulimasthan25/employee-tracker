@@ -12,9 +12,9 @@
 }
 
 .overview__pill {
-  padding: var(--space-sm) var(--space-lg);
+  padding: var(--space-xs) var(--space-md);
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-secondary);
   background: var(--bg-card);
@@ -37,8 +37,8 @@
   &--date {
     background: var(--bg-surface);
     color-scheme: dark;
-    height: 48px;
-    padding: 0 var(--space-xl);
+    height: 36px;
+    padding: 0 var(--space-md);
   }
 }
 
@@ -91,7 +91,7 @@
 
 .overview__timeline-title {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -106,16 +106,18 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  padding: var(--space-md);
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
 
-  @media (max-width: 640px) {
-    padding: var(--space-md);
+  &:hover {
+    border-color: var(--accent-dim);
+    background: var(--bg-hover);
+    transform: translateY(-2px);
   }
 
   &::before {
@@ -123,17 +125,10 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 3px;
+    width: 3px;
+    height: 100%;
     background: var(--accent);
     opacity: 0.3;
-  }
-
-  /* --------------- skeleton variant --------------- */
-  &--skeleton {
-    pointer-events: none;
-
-    &::before { display: none; }
   }
 }
 
@@ -144,9 +139,9 @@
 }
 
 .overview__card-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-md);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: var(--bg-surface);
   display: flex;
   align-items: center;
@@ -155,8 +150,8 @@
   transition: all var(--transition-normal);
 
   svg {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
   }
 
   &--productivity { color: #34c98a; background: rgba(52, 201, 138, 0.1); }
@@ -167,7 +162,7 @@
 }
 
 .overview__card-label {
-  font-size: 0.9375rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   font-weight: 700;
   text-transform: uppercase;
@@ -175,14 +170,14 @@
 }
 
 .overview__card-value {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--text-primary);
   font-family: var(--font-mono, 'DM Mono', monospace);
   letter-spacing: -0.03em;
 
   @media (max-width: 480px) {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 }
 
@@ -321,7 +316,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  padding: var(--space-lg);
   box-shadow: var(--shadow-sm);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -382,18 +377,18 @@
 }
 
 .overview__table-title {
-  margin: 0 0 var(--space-lg);
-  font-size: 1.25rem;
+  margin: 0 0 var(--space-md);
+  font-size: 1rem;
   font-weight: 800;
   color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 
   &::before {
     content: '';
-    width: 4px;
-    height: 18px;
+    width: 3px;
+    height: 14px;
     background: var(--accent);
     border-radius: 2px;
   }
@@ -410,9 +405,9 @@
   display: grid;
   grid-template-columns: 2.5fr 1fr 1fr 2fr;
   gap: var(--space-xl);
-  padding: 0 var(--space-md) var(--space-md);
-  border-bottom: 2px solid var(--border);
-  font-size: 0.875rem;
+  padding: 0 var(--space-md) var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
   font-weight: 800;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -440,9 +435,9 @@
   grid-template-columns: 2.5fr 1fr 1fr 2fr;
   gap: var(--space-xl);
   align-items: center;
-  font-size: 1.0625rem;
+  font-size: 0.9375rem;
   color: var(--text-primary);
-  padding: var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
   border-bottom: 1px solid var(--border);
@@ -565,31 +560,25 @@
 }
 
 .overview__header {
-  margin-bottom: var(--space-md);
-  padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--border);
-
-  @media (max-width: 640px) {
-    margin-bottom: var(--space-sm);
-  }
-}
-
-.overview__header-main {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-xl);
-  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
 
   @media (max-width: 768px) {
-    gap: var(--space-lg);
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-md);
   }
 }
 
 .overview__header-left {
   display: flex;
   align-items: center;
-  gap: var(--space-lg);
+  gap: var(--space-md);
 
   @media (max-width: 640px) {
     gap: var(--space-sm);
@@ -678,8 +667,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 32px;
+  height: 32px;
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
@@ -708,21 +697,21 @@
   border: none;
   color: var(--text-primary);
   font-family: var(--font-mono, 'DM Mono', monospace);
-  font-size: 1.05rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  padding: 0 var(--space-md);
-  height: 42px;
+  padding: 0 var(--space-sm);
+  height: 32px;
   cursor: pointer;
   color-scheme: dark;
   outline: none;
   text-align: center;
-  width: 180px; // Increased width
+  width: 140px;
 }
 
 .overview__today-btn {
-  height: 48px;
-  padding: 0 var(--space-xl);
-  font-size: 0.875rem;
+  height: 32px;
+  padding: 0 var(--space-md);
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 800;
@@ -736,16 +725,16 @@
 }
 
 .overview__select {
-  padding: 0 var(--space-md);
+  padding: 0 var(--space-sm);
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  height: 48px;
-  width: 240px;
+  height: 36px;
+  width: 200px;
   cursor: pointer;
   color-scheme: dark;
   outline: none;
