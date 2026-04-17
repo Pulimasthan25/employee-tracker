@@ -1,7 +1,8 @@
 <div class="overview" @fadeIn>
   <div class="overview__header">
     <div class="overview__header-left">
-      <div class="overview__date-controls">
+      <div class="overview__toolbar">
+        <!-- Date Controls -->
         <div class="overview__date-nav">
           <button type="button" class="overview__nav-btn" (click)="shiftDate(-1)" aria-label="Previous day">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -17,30 +18,28 @@
             </svg>
           </button>
         </div>
+
         @if (!isToday()) {
-          <button type="button" class="btn btn--ghost overview__today-btn" (click)="goToday()" @scaleIn>Today</button>
+          <button type="button" class="overview__today-pill" (click)="goToday()" @scaleIn>Today</button>
+        }
+
+        <div class="overview__toolbar-divider"></div>
+
+        <!-- Employee Filter -->
+        @if (isAdmin()) {
+          <div class="overview__filter-wrap">
+            <select id="employee-select" class="overview__select" [value]="selectedEmployeeId()"
+              (change)="setSelectedEmployee($any($event.target).value)">
+              <option value="all">All employees</option>
+              @for (emp of employees(); track emp.uid) {
+                <option [value]="emp.uid">
+                  {{ emp.displayName || emp.email }}
+                </option>
+              }
+            </select>
+          </div>
         }
       </div>
-
-      @if (isAdmin()) {
-        <div class="overview__filter-wrap">
-          <select id="employee-select" class="overview__select" [value]="selectedEmployeeId()"
-            (change)="setSelectedEmployee($any($event.target).value)">
-            <option value="all">All employees</option>
-            @for (emp of employees(); track emp.uid) {
-              <option [value]="emp.uid">
-                {{ emp.displayName || emp.email }}
-              </option>
-            }
-          </select>
-        </div>
-      }
-    </div>
-
-    <div class="overview__header-right">
-      @if (lastUpdated()) {
-        <span class="overview__last-updated-tag">Updated {{ lastUpdated() }}</span>
-      }
     </div>
   </div>
 

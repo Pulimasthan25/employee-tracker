@@ -169,6 +169,98 @@
   letter-spacing: 0.05em;
 }
 
+.overview__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.overview__date-nav {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  height: 42px;
+}
+
+.overview__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  svg { width: 16px; height: 16px; }
+  &:hover:not(:disabled) { background: var(--bg-hover); color: #fff; }
+  &:disabled { opacity: 0.15; cursor: not-allowed; }
+}
+
+.overview__date-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 0 0.75rem;
+  height: 34px;
+  cursor: pointer;
+  color-scheme: dark;
+  outline: none;
+  text-align: center;
+  width: 145px;
+}
+
+.overview__today-pill {
+  height: 42px;
+  padding: 0 1.25rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 12px var(--accent-glow);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px var(--accent-glow);
+    filter: brightness(1.1);
+  }
+  &:active { transform: scale(0.95); }
+}
+
+.overview__toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 0.5rem;
+}
+
+.overview__filter-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.overview__select {
+  /* This component specific class will now benefit from the global select style */
+  height: 42px !important;
+}
+
 .overview__card-value {
   font-size: 1.5rem;
   font-weight: 800;

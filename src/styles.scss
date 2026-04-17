@@ -446,16 +446,56 @@ body {
     display: block;
   }
 }
-// styles.scss
-.shell__main-wrap .shell__content {
+/* ── PREMIUM SELECT UI (FORCED) ────────────────────────────────────────── */
+::ng-deep select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  
+  /* Layout & Sizing */
+  height: 42px !important;
+  padding: 0 3.5rem 0 1.25rem !important;
+  min-width: 160px !important;
+  
+  /* Typography */
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff !important;
+  line-height: normal;
+  
+  /* Aesthetics */
+  background-color: rgba(255, 255, 255, 0.035) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: calc(100% - 1.5rem) center !important;
+  background-size: 16px !important;
+  
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all var(--transition-normal);
 
-  select {
-    appearance: none;
-  -webkit-appearance: none;
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3) !important;
+  }
 
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  cursor: pointer;
-}
+  &:focus {
+    border-color: var(--accent) !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 0 20px var(--accent-glow) !important;
+  }
+
+  option {
+    background-color: #1e2333 !important;
+    color: #fff !important;
+    padding: 12px;
+  }
 }
