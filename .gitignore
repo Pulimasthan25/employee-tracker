@@ -44,6 +44,16 @@ package-lock.json
 # System files
 .DS_Store
 Thumbs.db
+
 # Environment files
+src/environments/environment.ts
 src/environments/environment.production.ts
 supabase/.temp/
+
+# Firebase
+emulator-data
+service-account.json
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
