@@ -1,19 +1,16 @@
 <div class="shell" [class.shell--menu-open]="isMenuOpen()">
   
-  <!-- THE SATELLITE RAIL (Universal Floating HUB) -->
-  <header class="shell__satellite-wrap">
+  <!-- THE TOP RAIL -->
+  <header class="shell__top-rail">
+    
+    <!-- Left: Brand (Glass Pill) -->
+    <div class="shell__brand glass">
+      <img src="/icons/favicon-32x32.png" alt="Pulse Logo">
+      <span class="shell__brand-text">Pulse</span>
+    </div>
+
+    <!-- Center: Navigation Pill (Glass) -->
     <div class="shell__satellite glass">
-      
-      <!-- Logo Unit -->
-      <div class="shell__sat-section shell__sat-section--brand">
-        <div class="shell__sat-logo">
-          <img src="/icons/favicon-32x32.png" alt="Pulse Logo">
-        </div>
-      </div>
-
-      <div class="shell__sat-divider"></div>
-
-      <!-- Navigation Unit (Scrollable Icons+Labels) -->
       <nav class="shell__sat-section shell__sat-section--nav">
         <div class="shell__sat-track">
           @for (item of visibleNav(); track item.path) {
@@ -60,16 +57,31 @@
           }
         </div>
       </nav>
+    </div>
 
-      <div class="shell__sat-divider"></div>
-
-      <!-- User Unit -->
-      <div class="shell__sat-section shell__sat-section--user">
+    <!-- Right: User Menu -->
+    <div class="shell__user-menu group">
+      <button class="shell__user-trigger glass">
+        <span class="shell__user-name-label">{{ displayName() }}</span>
         <div class="shell__sat-avatar">{{ avatarLetter() }}</div>
-        <button type="button" class="shell__sat-logout" (click)="logout()" title="Logout">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/>
+        <svg class="shell__user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <div class="shell__dropdown glass">
+        <div class="shell__dropdown-header">
+          <div class="shell__dropdown-name">{{ displayName() }}</div>
+          <div class="shell__dropdown-email">{{ userEmail() }}</div>
+        </div>
+        <div class="shell__dropdown-divider"></div>
+        <button class="shell__dropdown-action" (click)="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
           </svg>
+          <span>Sign out</span>
         </button>
       </div>
     </div>

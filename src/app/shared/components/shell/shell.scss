@@ -4,23 +4,159 @@
   min-height: 100dvh;
 }
 
-/* ──── THE SATELLITE RAIL (UNIVERSAL HUB) ──── */
-.shell__satellite-wrap {
+/* ──── THE TOP RAIL ──── */
+.shell__top-rail {
   position: fixed;
   top: 1.25rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 2.5rem);
-  max-width: 1400px;
+  left: 0;
+  width: 100%;
+  padding: 0 2rem;
   z-index: 2000;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
   pointer-events: none;
 
-  @media (max-width: 1024px) { top: 0.75rem; width: calc(100% - 1.5rem); }
+  @media (max-width: 1024px) { top: 0.75rem; padding: 0 1rem; }
+}
+
+/* Brand (Left) */
+.shell__brand {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 52px;
+  padding: 0 1rem 0 0.5rem;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+}
+
+.shell__brand-text {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  @media (max-width: 768px) { display: none; }
+}
+
+/* User Menu (Right) */
+.shell__user-menu {
+  pointer-events: auto;
+  position: relative;
+}
+
+.shell__user-trigger {
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  height: 52px;
+  padding: 0 0.75rem 0 1rem;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05); /* Optional brightener */
+  }
+}
+
+.shell__user-name-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+  @media (max-width: 1024px) { display: none; }
+}
+
+.shell__user-chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.shell__dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 220px;
+  border-radius: 14px;
+  padding: 0.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.shell__user-menu.group:hover .shell__dropdown,
+.shell__user-menu.group:focus-within .shell__dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.shell__dropdown-header {
+  padding: 0.75rem;
+}
+
+.shell__dropdown-name {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.shell__dropdown-email {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-top: 0.125rem;
+}
+
+.shell__dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0.5rem 0;
+}
+
+.shell__dropdown-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 .shell__satellite {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
   pointer-events: auto;
   height: 52px;
   border-radius: 14px;
@@ -29,38 +165,23 @@
   align-items: center;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
   max-width: 100%;
+  z-index: 2000;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @media (max-width: 768px) {
+    position: fixed;
+    top: auto;
+    bottom: 2rem;
+    padding: 0 0.5rem;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .shell__sat-section {
   display: flex;
   align-items: center;
   height: 100%;
-}
-
-.shell__sat-divider {
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 0 0.5rem;
-}
-
-/* Brand Section */
-.shell__sat-section--brand {
-  padding: 0 0.5rem;
-}
-
-.shell__sat-logo {
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  img {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
-    border-radius: 8px; /* Matching the UI curvature */
-  }
 }
 
 /* Navigation Section */
@@ -91,21 +212,27 @@
   color: var(--text-muted);
   text-decoration: none;
   white-space: nowrap;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @media (max-width: 768px) {
+    padding: 0 0.75rem;
+    height: 42px; /* Slightly taller for mobile touch targets */
+    border-radius: 12px;
+  }
 
   &:hover {
     color: #fff;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   &.active {
     background: #fff;
     color: #000 !important;
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
-    .shell__sat-icon { color: #000; }
-    
-    @media (max-width: 768px) {
-      .shell__sat-label { display: block; } /* Show label only for active item on mobile */
+    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
+    .shell__sat-icon { 
+      color: #000;
+      transform: scale(1.1);
     }
   }
 }
@@ -116,6 +243,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   svg { width: 100%; height: 100%; }
 }
 
@@ -125,14 +253,8 @@
   letter-spacing: -0.01em;
 
   @media (max-width: 768px) {
-    display: none; /* Hide labels by default on mobile */
+    display: none !important;
   }
-}
-
-/* User Section */
-.shell__sat-section--user {
-  gap: 0.25rem;
-  padding-right: 0.25rem;
 }
 
 .shell__sat-avatar {
@@ -149,25 +271,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.shell__sat-logout {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    color: var(--danger);
-    background: rgba(239, 68, 68, 0.1);
-  }
-  svg { width: 16px; height: 16px; }
-}
+/* avatar is kept, logout was deleted since dropdown covers it */
 
 /* ──── CONTEXT HEADER ──── */
 .shell__context-header {
