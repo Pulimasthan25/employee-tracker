@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Shell } from '../../shared/components/shell/shell';
+import { SettingsLayout } from './settings-layout';
 
 export const SETTINGS_ROUTES: Routes = [
   {
@@ -8,7 +9,31 @@ export const SETTINGS_ROUTES: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./settings').then((m) => m.Settings),
+        component: SettingsLayout,
+        children: [
+          { path: '', redirectTo: 'employees', pathMatch: 'full' },
+          {
+            path: 'employees',
+            children: [
+              {
+                path: '',
+                loadComponent: () => import('../employees/list/list').then((m) => m.List),
+              },
+              {
+                path: 'invite',
+                loadComponent: () => import('../employees/invite/invite').then((m) => m.Invite),
+              },
+              {
+                path: ':id',
+                loadComponent: () => import('../employees/detail/detail').then((m) => m.Detail),
+              },
+            ],
+          },
+          {
+            path: 'productivity',
+            loadComponent: () => import('./productivity-rules').then((m) => m.ProductivityRules),
+          },
+        ],
       },
     ],
   },

@@ -206,7 +206,7 @@ export class Detail {
         try {
           await this.employeeService.delete(emp.uid);
           this.toastService.show('Employee deleted successfully.', 'success');
-          this.router.navigate(['/employees']);
+          this.router.navigate(['..'], { relativeTo: this.route });
         } catch {
           this.toastService.show('Failed to delete employee.', 'error');
         }

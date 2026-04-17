@@ -6,7 +6,9 @@ import {
   effect,
   untracked,
   ChangeDetectionStrategy,
-  HostListener
+  HostListener,
+  OnInit,
+  OnDestroy
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -14,6 +16,7 @@ import { EmployeeService } from '../../../core/services/employee.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
+import { SettingsService } from '../../../core/services/settings.service';
 import type { AppUser } from '../../../core/services/auth.service';
 import { fadeIn, slideInUp, staggerFadeIn } from '../../../shared/animations';
 
@@ -38,11 +41,12 @@ export type SortDir = 'asc' | 'desc';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeIn, slideInUp, staggerFadeIn]
 })
-export class List {
+export class List implements OnInit, OnDestroy {
   private readonly employeeService = inject(EmployeeService);
   private readonly auth = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly settingsService = inject(SettingsService);
 
   readonly loading = signal(true);
   readonly connectionError = signal(false);
@@ -52,6 +56,18 @@ export class List {
   readonly sortDir = signal<SortDir>('asc');
   
   readonly openActionMenu = signal<string | null>(null);
+
+  ngOnInit() {
+    this.settingsService.setPrimaryAction({
+      label: 'Invite employee',
+      icon: 'plus',
+      routerLink: '/settings/employees/invite'
+    });
+  }
+
+  ngOnDestroy() {
+    this.settingsService.setPrimaryAction(null);
+  }
 
   readonly sortedEmployees = computed(() => {
     const list = [...this.employees()];

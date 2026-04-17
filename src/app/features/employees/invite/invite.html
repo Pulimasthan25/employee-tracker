@@ -1,6 +1,6 @@
 <div class="invite">
   <div class="invite__header">
-    <a routerLink="/employees" class="invite__back">
+    <a routerLink=".." class="invite__back">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="15 18 9 12 15 6"/>
       </svg>
@@ -50,7 +50,7 @@
           </svg>
           Download
         </a>
-        <a routerLink="/employees" class="btn btn--ghost" style="flex: 1; justify-content: center;">Return to list</a>
+        <a routerLink=".." class="btn btn--ghost" style="flex: 1; justify-content: center;">Return to list</a>
       </div>
     </div>
   } @else {
@@ -150,7 +150,7 @@
         >
           {{ submitting() ? 'Inviting…' : 'Invite' }}
         </button>
-        <a routerLink="/employees" class="btn btn--ghost">Cancel</a>
+        <a routerLink=".." class="btn btn--ghost">Cancel</a>
       </div>
     </form>
   }

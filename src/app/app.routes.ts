@@ -15,12 +15,6 @@ export const routes: Routes = [
     data: { animation: 'DashboardPage' }
   },
   {
-    path: 'employees',
-    loadChildren: () => import('./features/employees/employees.routes').then(m => m.EMPLOYEE_ROUTES),
-    canActivate: [authGuard, adminGuard],
-    data: { animation: 'EmployeesPage' }
-  },
-  {
     path: 'screenshots',
     loadChildren: () => import('./features/screenshots/screenshots.routes').then(m => m.SCREENSHOT_ROUTES),
     canActivate: [authGuard],

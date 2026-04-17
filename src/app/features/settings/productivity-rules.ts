@@ -1,28 +1,36 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SiteRuleService, SiteRule } from '../../core/services/site-rule.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { EmployeeService } from '../../core/services/employee.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../shared/animations';
 
 @Component({
-  selector: 'app-settings',
+  selector: 'app-productivity-rules',
   imports: [CommonModule, FormsModule],
-  templateUrl: './settings.html',
-  styleUrl: './settings.scss',
+  templateUrl: './productivity-rules.html',
+  styleUrl: './productivity-rules.scss',
   animations: [fadeIn, staggerFadeIn, scaleIn, slideInUp]
 })
-export class Settings implements OnInit {
+export class ProductivityRules implements OnInit, OnDestroy {
   private readonly siteRuleService = inject(SiteRuleService);
   private readonly confirmService = inject(ConfirmService);
   private readonly employeeService = inject(EmployeeService);
+  private readonly settingsService = inject(SettingsService);
 
   readonly rules = this.siteRuleService.rules;
   readonly rulesLoading = this.siteRuleService.loading;
   readonly availableTeams = signal<string[]>([]);
 
   async ngOnInit() {
+    this.settingsService.setPrimaryAction({
+      label: 'Add Rule',
+      icon: 'plus',
+      callback: () => this.toggleForm()
+    });
+
     // Bypass the 5-min cache so we always see the latest teams.
     this.employeeService.invalidateCache();
     const employees = await this.employeeService.getAll();
@@ -31,6 +39,10 @@ export class Settings implements OnInit {
       if (e.teamId) teams.add(e.teamId);
     });
     this.availableTeams.set(Array.from(teams).sort());
+  }
+
+  ngOnDestroy() {
+    this.settingsService.setPrimaryAction(null);
   }
 
   // Show/Hide Form

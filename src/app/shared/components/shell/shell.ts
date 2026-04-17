@@ -20,9 +20,9 @@ interface NavItem {
 
 const TITLE_MAP: Record<string, string> = {
   '/dashboard': 'Overview',
-  '/employees': 'Employees',
   '/screenshots': 'Screenshots',
   '/reports': 'Reports',
+  '/settings': 'Configurations',
 };
 
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
@@ -45,10 +45,9 @@ export class Shell {
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', path: '/dashboard', icon: 'grid' },
-    { label: 'Employees', path: '/employees', icon: 'users', adminOnly: true },
     { label: 'Screenshots', path: '/screenshots', icon: 'camera' },
     { label: 'Reports', path: '/reports', icon: 'chart' },
-    { label: 'Settings', path: '/settings', icon: 'settings', adminOnly: true },
+    { label: 'Configurations', path: '/settings', icon: 'settings', adminOnly: true },
   ];
 
   constructor() {

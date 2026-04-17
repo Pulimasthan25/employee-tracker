@@ -1,15 +1,5 @@
 <div class="list" @fadeIn>
-  <div class="list__header">
-    <div class="list__header-actions">
-      <a routerLink="/employees/invite" class="btn btn--primary">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        <span>Invite employee</span>
-      </a>
-    </div>
-  </div>
+
 
   @if (connectionError()) {
     <div class="list__error">
@@ -140,7 +130,7 @@
         <!-- Removed staggerFadeIn to reduce animation noise -->
         <div class="list__rows-container">
           @for (emp of sortedEmployees(); track emp.uid) {
-            <a [routerLink]="['/employees', emp.uid]" class="list__table-row list__table-row--link" [class.list__table-row--active]="emp.active" [class.list__table-row--inactive]="!emp.active">
+            <a [routerLink]="[emp.uid]" class="list__table-row list__table-row--link" [class.list__table-row--active]="emp.active" [class.list__table-row--inactive]="!emp.active">
               <span class="list__table-cell list__table-cell--name">
                 <div class="list__avatar-mini" [style.--team-hue]="getTeamHue(emp.teamId)">{{ (emp.displayName || emp.email)[0].toUpperCase() }}</div>
                 {{ emp.displayName || '—' }}
