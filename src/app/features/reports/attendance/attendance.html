@@ -43,9 +43,21 @@
         @if (loading()) {
           @for (i of [1,2,3,4,5]; track i) {
             <tr>
-              <td [attr.colspan]="isAdmin() ? 8 : 7">
-                <div class="skeleton-row"></div>
-              </td>
+              <td><div class="sk-frosted sk-text" style="width: 90px; margin: 0;"></div></td>
+              @if (isAdmin()) {
+                <td>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <div class="sk-frosted sk-circle" style="width: 24px; height: 24px; flex-shrink: 0;"></div>
+                    <div class="sk-frosted sk-text" style="width: 110px; margin: 0;"></div>
+                  </div>
+                </td>
+              }
+              <td><div class="sk-frosted sk-text" style="width: 70px; margin: 0;"></div></td>
+              <td><div class="sk-frosted sk-text" style="width: 70px; margin: 0;"></div></td>
+              <td><div class="sk-frosted sk-text" style="width: 65px; margin: 0;"></div></td>
+              <td><div class="sk-frosted sk-text" style="width: 65px; margin: 0;"></div></td>
+              <td><div class="sk-frosted sk-text" style="width: 65px; margin: 0;"></div></td>
+              <td><div class="sk-frosted" style="width: 70px; height: 26px; border-radius: 13px;"></div></td>
             </tr>
           }
         } @else {
