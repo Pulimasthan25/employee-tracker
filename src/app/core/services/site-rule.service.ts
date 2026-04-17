@@ -23,7 +23,9 @@ export interface SiteRule {
 @Injectable({ providedIn: 'root' })
 export class SiteRuleService {
   private readonly rulesSignal = signal<SiteRule[]>([]);
+  private readonly loadingSignal = signal<boolean>(true);
   readonly rules = this.rulesSignal.asReadonly();
+  readonly loading = this.loadingSignal.asReadonly();
 
   constructor() {
     this.listenToRules();
@@ -38,6 +40,7 @@ export class SiteRuleService {
         ...(d.data() as any),
       }));
       this.rulesSignal.set(rules);
+      this.loadingSignal.set(false);
     });
   }
 

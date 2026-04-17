@@ -33,8 +33,20 @@
   <div class="card timeline-report__card">
     @if (loading()) {
     <div class="timeline-report__skeleton">
-      @for (i of [1,2,3,4]; track i) {
-      <div class="skeleton-row" style="height: 48px; border-radius: 8px; margin-bottom: 8px; background: var(--border-color); opacity: 0.1"></div>
+      @for (i of [1,2,3]; track i) {
+      <div class="timeline-skeleton-row">
+        <div class="ts-user-col">
+          <div class="ts-avatar"></div>
+          <div class="ts-name-wrap">
+            <div class="ts-line ts-line--name"></div>
+            <div class="ts-line ts-line--meta"></div>
+          </div>
+        </div>
+        <div class="ts-graph-col">
+          <div class="ts-bar" [style.width.%]="30 + (i * 15)"></div>
+          <div class="ts-bar" [style.width.%]="10 + (i * 8)"></div>
+        </div>
+      </div>
       }
     </div>
     } @else {

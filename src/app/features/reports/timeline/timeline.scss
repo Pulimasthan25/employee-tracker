@@ -85,7 +85,80 @@
   }
   
   &__skeleton {
-    padding: 24px;
+    padding: 0;
+  }
+}
+
+/* ── Timeline skeleton shimmer ─────────────────────────────────────────── */
+@keyframes timeline-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.timeline-skeleton-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  height: 72px;
+
+  &:last-child { border-bottom: none; }
+
+  .ts-user-col {
+    width: 280px;
+    flex-shrink: 0;
+    padding: 16px 20px;
+    background: var(--bg-surface);
+    border-right: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+
+    .ts-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-card) 50%, var(--bg-hover) 75%);
+      background-size: 200% 100%;
+      animation: timeline-shimmer 1.6s infinite linear;
+    }
+
+    .ts-name-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ts-line {
+      height: 12px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-card) 50%, var(--bg-hover) 75%);
+      background-size: 200% 100%;
+      animation: timeline-shimmer 1.6s infinite linear;
+
+      &--name { width: 70%; }
+      &--meta { width: 50%; }
+    }
+  }
+
+  .ts-graph-col {
+    flex: 1;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+
+    .ts-bar {
+      height: 20px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-card) 50%, var(--bg-hover) 75%);
+      background-size: 200% 100%;
+      animation: timeline-shimmer 1.6s infinite linear;
+    }
   }
 }
 

@@ -63,9 +63,28 @@
     Unable to reach the database. If you have an ad blocker, please disable it for localhost and refresh.
   </div>
   } @else if (loading() && !hasLoadedOnce()) {
+  <!-- ── First-load skeleton ─────────────────────────────────── -->
   <div class="overview__stats">
     @for (i of [1,2,3,4]; track i) {
-    <div class="overview__card overview__card--skeleton"></div>
+    <div class="overview__card overview__card--skeleton">
+      <div class="overview__card-header">
+        <div class="sk-block sk-block--icon"></div>
+        <div class="sk-block sk-block--label"></div>
+      </div>
+      <div class="sk-block sk-block--value"></div>
+    </div>
+    }
+  </div>
+  <!-- ── Table skeleton ──────────────────────────────────────── -->
+  <div class="overview__table-wrap overview__table-wrap--skeleton">
+    <div class="sk-block sk-block--title"></div>
+    @for (i of [1,2,3,4,5]; track i) {
+    <div class="overview__table-row--skeleton-row">
+      <div class="sk-block sk-block--cell-lg"></div>
+      <div class="sk-block sk-block--cell-sm"></div>
+      <div class="sk-block sk-block--cell-md"></div>
+      <div class="sk-block sk-block--cell-md"></div>
+    </div>
     }
   </div>
   } @else {
@@ -152,7 +171,10 @@
   </section>
 
   <!-- top apps table -->
-  <div class="overview__table-wrap">
+  <div class="overview__table-wrap" [class.overview__table-wrap--refreshing]="loading() && hasLoadedOnce()">
+    @if (loading() && hasLoadedOnce()) {
+    <div class="loading-overlay"><div class="loading-spinner"></div></div>
+    }
     <h3 class="overview__table-title">Top apps</h3>
     <div class="overview__table">
       <div class="overview__table-header">

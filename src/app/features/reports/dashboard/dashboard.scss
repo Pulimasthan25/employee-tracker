@@ -208,12 +208,8 @@
 }
 
 @keyframes skeleton-pulse {
-  from {
-    background-position: 200% 0;
-  }
-  to {
-    background-position: -200% 0;
-  }
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
 }
 
 .reports-dashboard__card-label {
@@ -296,13 +292,21 @@
 }
 
 @keyframes overview-skeleton {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.reports-dashboard__chart--skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card)  25%,
+    var(--bg-hover) 50%,
+    var(--bg-card)  75%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: overview-skeleton 1.6s infinite linear !important;
+  border-color: transparent !important;
+  pointer-events: none;
 }
 
 .reports-dashboard__chart-header {
@@ -319,3 +323,15 @@
   letter-spacing: 0.05em;
 }
 
+.reports-dashboard__data-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+
+  &.is-refreshing {
+    > *:not(.loading-overlay) {
+      opacity: 0.45;
+      transition: opacity 0.2s;
+    }
+  }
+}

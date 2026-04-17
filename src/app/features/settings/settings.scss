@@ -362,3 +362,26 @@
     justify-content: flex-end !important;
   }
 }
+
+/* --- Settings skeleton -------------------------------------------- */
+@keyframes settings-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.rule-card--skeleton {
+  pointer-events: none;
+}
+
+.sk-inline {
+  height: 14px;
+  border-radius: 999px;
+  width: 100px;
+  background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-card) 50%, var(--bg-hover) 75%);
+  background-size: 200% 100%;
+  animation: settings-shimmer 1.6s infinite linear;
+
+  &--wide   { width: 180px; }
+  &--badge  { width: 72px; height: 22px; border-radius: var(--radius-sm); }
+  &--actions { width: 64px; }
+}

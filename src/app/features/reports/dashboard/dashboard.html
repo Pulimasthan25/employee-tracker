@@ -76,6 +76,11 @@
     <div class="reports-dashboard__chart reports-dashboard__chart--skeleton"></div>
   </div>
   } @else {
+  <!-- refreshing overlay when re-fetching -->
+  <div class="reports-dashboard__data-wrap" [class.is-refreshing]="loading() && hasLoadedOnce()" style="position:relative">
+    @if (loading() && hasLoadedOnce()) {
+    <div class="loading-overlay"><div class="loading-spinner"></div></div>
+    }
   <div class="reports-dashboard__stats" [@staggerFadeIn]="logs().length">
     <div class="reports-dashboard__card">
       <div class="reports-dashboard__card-label">Productivity score</div>
@@ -120,6 +125,7 @@
       </div>
       <canvas id="activity-chart"></canvas>
     </div>
+  </div>
   </div>
   }
 </div>

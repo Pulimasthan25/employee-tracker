@@ -200,11 +200,33 @@ $cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr 50px;
   }
 
   &--skeleton {
-    height: 1rem;
-    background: var(--bg-hover);
+    height: 14px;
     border-radius: var(--radius-sm);
-    animation: list-skeleton 1.2s ease-in-out infinite;
+    background: linear-gradient(
+      90deg,
+      var(--bg-hover) 25%,
+      var(--bg-surface) 50%,
+      var(--bg-hover) 75%
+    );
+    background-size: 200% 100%;
+    animation: list-skeleton 1.6s infinite linear;
   }
+}
+
+@keyframes list-skeleton {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* stagger each skeleton row */ 
+.list__table-row--skeleton {
+  min-height: 52px;
+
+  &:nth-child(1) .list__table-cell--skeleton { animation-delay: 0ms; }
+  &:nth-child(2) .list__table-cell--skeleton { animation-delay: 80ms; }
+  &:nth-child(3) .list__table-cell--skeleton { animation-delay: 160ms; }
+  &:nth-child(4) .list__table-cell--skeleton { animation-delay: 240ms; }
+  &:nth-child(5) .list__table-cell--skeleton { animation-delay: 320ms; }
 }
 
 .list__actions-menu {

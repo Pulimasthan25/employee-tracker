@@ -19,6 +19,7 @@ export class Settings implements OnInit {
   private readonly employeeService = inject(EmployeeService);
 
   readonly rules = this.siteRuleService.rules;
+  readonly rulesLoading = this.siteRuleService.loading;
   readonly availableTeams = signal<string[]>([]);
 
   async ngOnInit() {

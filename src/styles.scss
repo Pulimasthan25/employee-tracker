@@ -216,6 +216,52 @@ body {
   50% { opacity: 0.7; }
 }
 
+/* ─── Global Skeleton / Shimmer ─────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Reusable shimmer mixin-style class */
+.skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--bg-card)   25%,
+    var(--bg-hover)  50%,
+    var(--bg-card)   75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+/* Full-page / section loading overlay */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 17, 23, 0.55);
+  backdrop-filter: blur(2px);
+  border-radius: inherit;
+  z-index: 20;
+  pointer-events: none;
+
+  .loading-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
 .hover-slide {
   transition: transform var(--transition-normal);
 }
