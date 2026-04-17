@@ -76,6 +76,11 @@
     }
   </div>
 
+  <section class="overview__timeline-section">
+    <div class="sk-frosted sk-text" style="width: 180px; height: 20px; margin-bottom: 12px;"></div>
+    <app-timeline [hideToolbar]="true" [externalLoading]="true"></app-timeline>
+  </section>
+
   <div class="overview__table-wrap">
     <div class="sk-frosted sk-text" style="width: 140px; height: 24px; margin-bottom: 24px;"></div>
     <div class="overview__table">
@@ -90,10 +95,6 @@
     </div>
   </div>
 
-  <section class="overview__timeline-section">
-    <div class="sk-frosted sk-text" style="width: 180px; height: 20px; margin-bottom: 12px;"></div>
-    <app-timeline [hideToolbar]="true" [externalLoading]="true"></app-timeline>
-  </section>
   } @else {
   <!-- stat cards row -->
   <div class="overview__stats" [@staggerFadeIn]="logs().length">
