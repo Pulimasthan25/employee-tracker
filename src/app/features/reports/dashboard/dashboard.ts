@@ -180,15 +180,18 @@ export class ReportsDashboard implements OnDestroy {
     });
 
     effect(() => {
+      // Only destroy/return if it's the initial skeleton load where canvases don't exist
       if (this.loading() && !this.hasLoadedOnce()) return;
+
       if (this.logs().length === 0) {
         untracked(() => this.destroyCharts());
         return;
       }
+      
       if (this.productivityChart && this.activityChart) return;
+
       afterNextRender(
         () => {
-          this.destroyCharts();
           this.renderProductivityChart();
           this.renderActivityChart();
         },
@@ -199,8 +202,10 @@ export class ReportsDashboard implements OnDestroy {
     effect(() => {
       const _logs = this.logs();
       const _range = this.selectedRange();
-      if (this.loading() && !this.hasLoadedOnce()) return;
+      
+      if (this.loading()) return;
       if (!this.productivityChart || !this.activityChart) return;
+      
       untracked(() => this.updateCharts());
     });
   }
