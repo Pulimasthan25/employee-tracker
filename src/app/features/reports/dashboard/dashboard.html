@@ -33,32 +33,7 @@
   </div>
 
   <div class="reports-dashboard__range">
-    <button type="button" class="reports-dashboard__pill"
-      [class.reports-dashboard__pill--active]="selectedRange() === 'today'" (click)="setRange('today')">
-      Today
-    </button>
-    <button type="button" class="reports-dashboard__pill"
-      [class.reports-dashboard__pill--active]="selectedRange() === '7d'" (click)="setRange('7d')">
-      7 days
-    </button>
-    <button type="button" class="reports-dashboard__pill"
-      [class.reports-dashboard__pill--active]="selectedRange() === '30d'" (click)="setRange('30d')">
-      30 days
-    </button>
-    <button type="button" class="reports-dashboard__pill"
-      [class.reports-dashboard__pill--active]="selectedRange() === 'custom'" (click)="setRange('custom')">
-      Custom
-    </button>
-
-    @if (selectedRange() === 'custom') {
-    <div class="reports-dashboard__custom-date">
-      <input type="date" class="reports-dashboard__pill reports-dashboard__pill--date" [value]="customStart()"
-        (change)="setCustomStart($any($event.target).value)">
-      <span class="reports-dashboard__date-sep">to</span>
-      <input type="date" class="reports-dashboard__pill reports-dashboard__pill--date" [value]="customEnd()"
-        (change)="setCustomEnd($any($event.target).value)">
-    </div>
-    }
+    <app-date-range (rangeChange)="onRangeChange($event)"></app-date-range>
   </div>
 
   @if (connectionError()) {
@@ -81,52 +56,51 @@
   } @else {
   <!-- refreshing container -->
   <div class="reports-dashboard__data-wrap">
-  <div class="reports-dashboard__stats" [@staggerFadeIn]="logs().length">
-    <div class="reports-dashboard__card">
-      <div class="reports-dashboard__card-label">Productivity score</div>
-      <div class="reports-dashboard__card-value-row">
-        <div class="reports-dashboard__card-value" [style.color]="
+    <div class="reports-dashboard__stats" [@staggerFadeIn]="logs().length">
+      <div class="reports-dashboard__card">
+        <div class="reports-dashboard__card-label">Productivity score</div>
+        <div class="reports-dashboard__card-value-row">
+          <div class="reports-dashboard__card-value" [style.color]="
               productivityScore() > 70
                 ? '#34c98a'
                 : productivityScore() >= 40
                    ? '#f5a623'
                    : '#f05252'
             ">
-          {{ productivityScore() }}%
+            {{ productivityScore() }}%
+          </div>
+          <div class="reports-dashboard__card-subvalue">{{ formattedProductiveTime() }}</div>
         </div>
-        <div class="reports-dashboard__card-subvalue">{{ formattedProductiveTime() }}</div>
+      </div>
+      <div class="reports-dashboard__card">
+        <div class="reports-dashboard__card-label">Tracked usage</div>
+        <div class="reports-dashboard__card-value">{{ formattedActiveTime() }}</div>
+      </div>
+      <div class="reports-dashboard__card">
+        <div class="reports-dashboard__card-label">Active apps / sites</div>
+        <div class="reports-dashboard__card-value" style="color: var(--text-muted)">
+          {{ logs().length }}
+        </div>
+      </div>
+      <div class="reports-dashboard__card" @slideInUp>
+        <div class="reports-dashboard__card-label">Range</div>
+        <div class="reports-dashboard__card-value reports-dashboard__card-value--sm" style="color: var(--text-muted)">
+          {{ selectedRange() }}
+        </div>
       </div>
     </div>
-    <div class="reports-dashboard__card">
-      <div class="reports-dashboard__card-label">Tracked usage</div>
-      <div class="reports-dashboard__card-value">{{ formattedActiveTime() }}</div>
-    </div>
-    <div class="reports-dashboard__card">
-      <div class="reports-dashboard__card-label">Active apps / sites</div>
-      <div class="reports-dashboard__card-value" style="color: var(--text-muted)">
-        {{ logs().length }}
-      </div>
-    </div>
-    <div class="reports-dashboard__card" @slideInUp>
-      <div class="reports-dashboard__card-label">Range</div>
-      <div class="reports-dashboard__card-value reports-dashboard__card-value--sm" style="color: var(--text-muted)">
-        {{ selectedRange() }}
-      </div>
-    </div>
-  </div>
 
-  <div class="reports-dashboard__charts">
-    <div class="reports-dashboard__chart reports-dashboard__chart--doughnut" @scaleIn>
-      <canvas id="productivity-chart"></canvas>
-    </div>
-    <div class="reports-dashboard__chart reports-dashboard__chart--bar" @scaleIn>
-      <div class="reports-dashboard__chart-header">
-        <span class="reports-dashboard__chart-title">{{ chartTitle() }}</span>
+    <div class="reports-dashboard__charts">
+      <div class="reports-dashboard__chart reports-dashboard__chart--doughnut" @scaleIn>
+        <canvas id="productivity-chart"></canvas>
       </div>
-      <canvas id="activity-chart"></canvas>
+      <div class="reports-dashboard__chart reports-dashboard__chart--bar" @scaleIn>
+        <div class="reports-dashboard__chart-header">
+          <span class="reports-dashboard__chart-title">{{ chartTitle() }}</span>
+        </div>
+        <canvas id="activity-chart"></canvas>
+      </div>
     </div>
-  </div>
   </div>
   }
 </div>
-

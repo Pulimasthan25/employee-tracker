@@ -1,54 +1,74 @@
 .date-range {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-md);
   flex-wrap: wrap;
 }
-.date-range__pills {
-  display: flex;
-  background: var(--bg-1, #1e1e24);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md, 8px);
-  padding: 2px;
-}
-.date-range__btn {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  padding: 6px 12px;
-  border-radius: var(--radius-sm, 6px);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
 
-  &:hover {
-    color: var(--text-primary);
-  }
-  &--active {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  }
-}
-.date-range__custom {
+.date-range__tabs {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: var(--text-muted);
-  font-size: 13px;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  height: 40px;
 }
-.date-range__input {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md, 8px);
-  padding: 6px 10px;
-  color: var(--text-primary);
-  font-size: 13px;
+
+.date-range__tab {
+  padding: 0 1.25rem;
+  height: 32px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &.is-active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:hover:not(.is-active) {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.date-range__custom-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-left: 1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  height: 40px;
+}
+
+.date-range__date-input {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  height: 32px;
+  border-radius: 6px;
+  padding: 0 0.5rem;
   color-scheme: dark;
   outline: none;
-  
-  &:focus {
-    border-color: var(--accent);
-  }
+  &:focus { border-color: var(--accent); }
+}
+
+.date-range__sep {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }

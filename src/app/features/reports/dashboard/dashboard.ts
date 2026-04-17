@@ -19,6 +19,7 @@ import { EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
 import { fadeIn, slideInUp, staggerFadeIn, scaleIn } from '../../../shared/animations';
+import { DateRange } from '../../../shared/components/date-range/date-range';
 
 function formatDuration(seconds: number): string {
   if (seconds <= 0) return '0s';
@@ -67,7 +68,7 @@ function getDateRange(
 @Component({
   selector: 'app-reports-dashboard',
   standalone: true,
-  imports: [],
+  imports: [DateRange],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -90,10 +91,9 @@ export class ReportsDashboard implements OnDestroy {
   connectionError = signal(false);
 
   selectedRange = signal<'today' | '7d' | '30d' | 'custom'>('today');
-  customStart = signal<string>(new Date().toISOString().split('T')[0]);
-  customEnd = signal<string>(new Date().toISOString().split('T')[0]);
+  currentRangeDates = signal<{ from: Date; to: Date }>(getDateRange('today'));
+  
   selectedEmployeeId = signal<'all' | string>('all');
-
   lastUpdated = signal('');
 
   productivityScore = computed(() =>
@@ -136,9 +136,7 @@ export class ReportsDashboard implements OnDestroy {
   );
 
   dailyData = computed(() => {
-    const range = this.selectedRange();
-    if (range === 'today') return [];
-    const { from, to } = getDateRange(range, this.customStart(), this.customEnd());
+    const { from, to } = this.currentRangeDates();
     return this.activityService.groupByDay(this.logs(), from, to);
   });
 
@@ -177,13 +175,6 @@ export class ReportsDashboard implements OnDestroy {
   constructor() {
     effect(() => {
       const ready = this.authService.authReady();
-      const _range = this.selectedRange();
-      if (!ready) return;
-      untracked(() => this.loadData());
-    });
-
-    effect(() => {
-      const ready = this.authService.authReady();
       if (!ready) return;
       untracked(() => void this.loadEmployees());
     });
@@ -218,31 +209,26 @@ export class ReportsDashboard implements OnDestroy {
     this.destroyCharts();
   }
 
-  refreshData(): void {
+  onRangeChange(range: { from: Date; to: Date }) {
+    this.currentRangeDates.set(range);
+    // Determine the range string for the label display in cards
+    const diff = Math.abs(range.to.getTime() - range.from.getTime());
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days <= 1) this.selectedRange.set('today');
+    else if (days <= 8) this.selectedRange.set('7d');
+    else if (days <= 31) this.selectedRange.set('30d');
+    else this.selectedRange.set('custom');
+
+    untracked(() => this.loadData());
+  }
+
+  refreshData() {
     untracked(() => this.loadData());
   }
 
   setSelectedEmployee(id: string): void {
     this.selectedEmployeeId.set(id === 'all' ? 'all' : id);
     this.applyEmployeeFilter();
-  }
-
-  setRange(range: 'today' | '7d' | '30d' | 'custom'): void {
-    this.selectedRange.set(range);
-  }
-
-  setCustomStart(val: string): void {
-    this.customStart.set(val);
-    if (this.selectedRange() === 'custom') {
-      untracked(() => this.loadData());
-    }
-  }
-
-  setCustomEnd(val: string): void {
-    this.customEnd.set(val);
-    if (this.selectedRange() === 'custom') {
-      untracked(() => this.loadData());
-    }
   }
 
   private async loadEmployees(): Promise<void> {
@@ -259,7 +245,7 @@ export class ReportsDashboard implements OnDestroy {
   private async loadData(): Promise<void> {
     this.loading.set(true);
     this.connectionError.set(false);
-    const { from, to } = getDateRange(this.selectedRange(), this.customStart(), this.customEnd());
+    const { from, to } = this.currentRangeDates();
 
     try {
       if (this.isAdmin()) {
@@ -278,12 +264,6 @@ export class ReportsDashboard implements OnDestroy {
       }
       this.hasLoadedOnce.set(true);
       this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-
-      // this.toast.show(
-      //   'We are facing the database read limit issue, so loading only some data in the UI.',
-      //   'warning',
-      //   8000
-      // );
     } catch (e) {
       console.error('[ReportsDashboard] Failed to load activity:', e);
       this.connectionError.set(true);
@@ -440,4 +420,3 @@ export class ReportsDashboard implements OnDestroy {
     this.activityChart = null;
   }
 }
-
