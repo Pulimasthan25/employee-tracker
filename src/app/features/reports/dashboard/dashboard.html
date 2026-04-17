@@ -2,7 +2,7 @@
   <div class="reports-dashboard__header">
     <div class="reports-dashboard__toolbar">
       <div class="reports-dashboard__toolbar-left">
-        <h2 class="reports-dashboard__title">Dashboard</h2>
+        <!-- <h2 class="reports-dashboard__title">Dashboard</h2> -->
         <div class="reports-dashboard__range">
           <app-date-range (rangeChange)="onRangeChange($event)"></app-date-range>
         </div>
@@ -10,7 +10,7 @@
 
       @if (isAdmin()) {
       <div class="reports-dashboard__employee-filter">
-        <label for="rep-emp">Member</label>
+        <!-- <label for="rep-emp">Member</label> -->
         <select id="rep-emp" class="reports-dashboard__select" [value]="selectedEmployeeId()"
           (change)="setSelectedEmployee($any($event.target).value)">
           <option value="all">All employees</option>

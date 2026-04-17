@@ -1,12 +1,12 @@
 <div class="report" @fadeIn>
   <div class="report__header">
-    <h2>Productivity report</h2>
+    <!-- <h2>Productivity report</h2> -->
     <app-date-range (rangeChange)="onRangeChange($event)" />
     <button class="export-btn" (click)="exportCsv()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
       Export CSV
     </button>
@@ -24,56 +24,84 @@
       </thead>
       <tbody [@staggerFadeIn]="employees().length">
         @if (loading()) {
-          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
-          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
-          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
-          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
-          <tr><td colspan="5"><div class="skeleton-row"></div></td></tr>
+        <tr>
+          <td colspan="5">
+            <div class="skeleton-row"></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="5">
+            <div class="skeleton-row"></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="5">
+            <div class="skeleton-row"></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="5">
+            <div class="skeleton-row"></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="5">
+            <div class="skeleton-row"></div>
+          </td>
+        </tr>
         } @else {
-          @for (emp of employees(); track emp.user.uid) {
-            <tr>
-              <td>
-                <div style="display: flex; flex-direction: column;">
-                  <span style="font-weight: 500;">{{ emp.user.displayName }}</span>
-                  <span style="font-size: 12px; color: var(--text-muted);">{{ emp.user.email }}</span>
-                </div>
-              </td>
-              <td [style.color]="getScoreColor(emp.productivityScore)" style="font-weight: 600;">{{ emp.productivityScore }}%</td>
-              <td>{{ formatDurationStr(emp.activeSeconds) }}</td>
-              <td>{{ emp.topApp }}</td>
-              <td>{{ emp.sessions }}</td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="5" class="empty-state-cell">
-                <div class="empty-state">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                  </svg>
-                  <p>No productivity data found for this period.</p>
-                </div>
-              </td>
-            </tr>
-          }
+        @for (emp of employees(); track emp.user.uid) {
+        <tr>
+          <td>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-weight: 500;">{{ emp.user.displayName }}</span>
+              <span style="font-size: 12px; color: var(--text-muted);">{{ emp.user.email }}</span>
+            </div>
+          </td>
+          <td [style.color]="getScoreColor(emp.productivityScore)" style="font-weight: 600;">{{ emp.productivityScore
+            }}%</td>
+          <td>{{ formatDurationStr(emp.activeSeconds) }}</td>
+          <td>{{ emp.topApp }}</td>
+          <td>{{ emp.sessions }}</td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="5" class="empty-state-cell">
+            <div class="empty-state">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              <p>No productivity data found for this period.</p>
+            </div>
+          </td>
+        </tr>
+        }
         }
       </tbody>
     </table>
   </div>
 
-  <div class="report__legend" style="margin-top: 2rem; padding: 1.5rem; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+  <div class="report__legend"
+    style="margin-top: 2rem; padding: 1.5rem; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
     <div class="legend-item">
       <h4 style="color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
         Tracked usage
       </h4>
-      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">The actual time recorded by computer activity (mouse/keyboard). This excludes idle periods and breaks.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">The actual time recorded by computer
+        activity (mouse/keyboard). This excludes idle periods and breaks.</p>
     </div>
     <div class="legend-item">
       <h4 style="color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
         Productivity Score
       </h4>
-      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">The percentage of "Tracked usage" that was spent on applications and websites marked as "Productive" in settings.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">The percentage of "Tracked usage" that
+        was spent on applications and websites marked as "Productive" in settings.</p>
     </div>
   </div>
 </div>

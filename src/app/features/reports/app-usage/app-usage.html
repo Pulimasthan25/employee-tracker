@@ -1,38 +1,35 @@
 <div class="report" @fadeIn>
   <div class="report__header">
-    <h2>App usage report</h2>
+    <!-- <h2>App usage report</h2> -->
     <app-date-range (rangeChange)="onRangeChange($event)" />
-    
+
     @if (isAdmin()) {
-      <select
-        class="form-select report__employee-select"
-        [ngModel]="selectedEmployee()"
-        (ngModelChange)="selectedEmployee.set($event)"
-      >
-        <option value="all">All employees</option>
-        @for (emp of employees(); track emp.uid) {
-          <option [value]="emp.uid">{{ emp.displayName }}</option>
-        }
-      </select>
+    <select class="form-select report__employee-select" [ngModel]="selectedEmployee()"
+      (ngModelChange)="selectedEmployee.set($event)">
+      <option value="all">All employees</option>
+      @for (emp of employees(); track emp.uid) {
+      <option [value]="emp.uid">{{ emp.displayName }}</option>
+      }
+    </select>
     }
   </div>
 
   <div class="report__card" style="padding: 24px;" @scaleIn>
     <div style="height: 300px; width: 100%;">
       @if (loading()) {
-        <div class="chart-placeholder loading">
-          <span>Loading chart...</span>
-        </div>
+      <div class="chart-placeholder loading">
+        <span>Loading chart...</span>
+      </div>
       } @else if (chartRows().length === 0) {
-        <div class="chart-placeholder">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M3 3v18h18" />
-            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-          </svg>
-          <span>No usage data to visualize</span>
-        </div>
+      <div class="chart-placeholder">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 3v18h18" />
+          <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+        </svg>
+        <span>No usage data to visualize</span>
+      </div>
       } @else {
-        <canvas #chartCanvas></canvas>
+      <canvas #chartCanvas></canvas>
       }
     </div>
   </div>
@@ -49,79 +46,86 @@
       </thead>
       <tbody [@staggerFadeIn]="data().length">
         @if (loading()) {
-          <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
-          <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
-          <tr><td colspan="4"><div class="skeleton-row"></div></td></tr>
+        <tr>
+          <td colspan="4">
+            <div class="skeleton-row"></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <div class="skeleton-row"></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <div class="skeleton-row"></div>
+          </td>
+        </tr>
         } @else {
-          @for (row of data(); track row.appName) {
-            <tr
-              [class.report__table-row--browser]="row.type === 'browser'"
-              (click)="row.type === 'browser' && row.children.length > 0
-                         ? toggleBrowser(row.appName) : null"
-            >
-              <td style="font-weight: 500;">
-                <span style="display:flex;align-items:center">
-                  @if (row.type === 'browser' && row.children.length > 0) {
-                    <span class="report__chevron"
-                      [class.report__chevron--open]="isExpanded(row.appName)">
-                      <svg width="11" height="11" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"/>
-                      </svg>
-                    </span>
-                  } @else {
-                    <span class="report__chevron-placeholder"></span>
-                  }
-                  {{ row.appName }}
-                  @if (row.type === 'browser' && row.siteCount > 0) {
-                    <span class="report__site-count">{{ row.siteCount }}</span>
-                  }
-                </span>
-              </td>
-              <td>
-                <span class="badge badge--{{ row.category }}">
-                  {{ row.category }}
-                </span>
-              </td>
-              <td>{{ formatDurationStr(row.totalSeconds) }}</td>
-              <td>{{ getPercentage(row.totalSeconds) }}</td>
-            </tr>
-
-            @if (row.type === 'browser' && isExpanded(row.appName)) {
-              @for (child of row.children; track child.appName) {
-                <tr class="report__table-row--child">
-                  <td>
-                    <span style="display:flex;align-items:center">
-                      <span class="report__group-line"></span>
-                      {{ child.appName }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge badge--{{ child.category }}">
-                      {{ child.category }}
-                    </span>
-                  </td>
-                  <td>{{ formatDurationStr(child.totalSeconds) }}</td>
-                  <td>{{ child.percentOfTotal }}%</td>
-                </tr>
+        @for (row of data(); track row.appName) {
+        <tr [class.report__table-row--browser]="row.type === 'browser'" (click)="row.type === 'browser' && row.children.length > 0
+                         ? toggleBrowser(row.appName) : null">
+          <td style="font-weight: 500;">
+            <span style="display:flex;align-items:center">
+              @if (row.type === 'browser' && row.children.length > 0) {
+              <span class="report__chevron" [class.report__chevron--open]="isExpanded(row.appName)">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
+              } @else {
+              <span class="report__chevron-placeholder"></span>
               }
-            }
-          } @empty {
-            <tr>
-              <td colspan="4" class="empty-state-cell">
-                <div class="empty-state">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                  </svg>
-                  <p>No app usage recorded for this period.</p>
-                </div>
-              </td>
-            </tr>
-          }
+              {{ row.appName }}
+              @if (row.type === 'browser' && row.siteCount > 0) {
+              <span class="report__site-count">{{ row.siteCount }}</span>
+              }
+            </span>
+          </td>
+          <td>
+            <span class="badge badge--{{ row.category }}">
+              {{ row.category }}
+            </span>
+          </td>
+          <td>{{ formatDurationStr(row.totalSeconds) }}</td>
+          <td>{{ getPercentage(row.totalSeconds) }}</td>
+        </tr>
+
+        @if (row.type === 'browser' && isExpanded(row.appName)) {
+        @for (child of row.children; track child.appName) {
+        <tr class="report__table-row--child">
+          <td>
+            <span style="display:flex;align-items:center">
+              <span class="report__group-line"></span>
+              {{ child.appName }}
+            </span>
+          </td>
+          <td>
+            <span class="badge badge--{{ child.category }}">
+              {{ child.category }}
+            </span>
+          </td>
+          <td>{{ formatDurationStr(child.totalSeconds) }}</td>
+          <td>{{ child.percentOfTotal }}%</td>
+        </tr>
+        }
+        }
+        } @empty {
+        <tr>
+          <td colspan="4" class="empty-state-cell">
+            <div class="empty-state">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              <p>No app usage recorded for this period.</p>
+            </div>
+          </td>
+        </tr>
+        }
         }
       </tbody>
     </table>

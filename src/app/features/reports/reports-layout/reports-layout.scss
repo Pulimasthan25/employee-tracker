@@ -14,58 +14,81 @@
   }
 }
 
+.reports-layout__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: 32px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .reports-layout__tabs {
   display: flex;
   gap: 8px;
-  padding: 0 0 16px 0;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 24px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  
-  &::-webkit-scrollbar { display: none; }
-  
-  @media (max-width: 640px) {
-    margin: 0 calc(var(--space-md) * -1);
-    padding: var(--space-xs) var(--space-md);
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  width: fit-content;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
 .reports-layout__tab {
   display: flex;
   align-items: center;
-  padding: 0 1.25rem;
-  height: 40px;
-  font-family: inherit;
+  padding: 10px 20px;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  cursor: pointer;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 
-  &:hover:not(.reports-layout__tab--active) {
-    background: rgba(255, 255, 255, 0.06);
+  svg {
+    opacity: 0.6;
+    transition: transform 0.25s ease;
+  }
+
+  &:hover {
     color: var(--text-primary);
-    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.05);
+
+    svg {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
   }
 
   &--active {
-    background: rgba(255, 255, 255, 0.08);
     color: white;
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    font-weight: 800;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    svg {
+      opacity: 1;
+      color: #fbbf24; // Matching the highlight in settings
+    }
   }
 
   @media (max-width: 768px) {
-    padding: var(--space-sm) var(--space-md);
+    flex: 1;
+    justify-content: center;
+    padding: 8px 12px;
     font-size: 0.8125rem;
   }
 }
