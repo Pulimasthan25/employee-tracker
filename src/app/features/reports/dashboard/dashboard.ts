@@ -278,12 +278,12 @@ export class ReportsDashboard implements OnDestroy {
       }
       this.hasLoadedOnce.set(true);
       this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-      
-      this.toast.show(
-        'We are facing the database read limit issue, so loading only some data in the UI.',
-        'warning',
-        8000
-      );
+
+      // this.toast.show(
+      //   'We are facing the database read limit issue, so loading only some data in the UI.',
+      //   'warning',
+      //   8000
+      // );
     } catch (e) {
       console.error('[ReportsDashboard] Failed to load activity:', e);
       this.connectionError.set(true);

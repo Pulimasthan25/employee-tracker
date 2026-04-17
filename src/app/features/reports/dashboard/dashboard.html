@@ -65,22 +65,22 @@
   <div class="connection-error">
     Unable to reach the database. If you have an ad blocker, please disable it for localhost and refresh.
   </div>
-  } @else if (loading() && !hasLoadedOnce()) {
+  } @else if (loading()) {
   <div class="reports-dashboard__stats">
     @for (i of [1,2,3,4]; track i) {
-    <div class="reports-dashboard__card reports-dashboard__card--skeleton"></div>
+    <div class="reports-dashboard__card" style="border-color:transparent; background:transparent">
+      <div class="sk-frosted sk-text" style="width: 100px; height: 14px;"></div>
+      <div class="sk-frosted sk-value" style="width: 130px; margin-top: 8px;"></div>
+    </div>
     }
   </div>
   <div class="reports-dashboard__charts">
-    <div class="reports-dashboard__chart reports-dashboard__chart--skeleton"></div>
-    <div class="reports-dashboard__chart reports-dashboard__chart--skeleton"></div>
+    <div class="reports-dashboard__chart sk-frosted" style="min-height: 260px;"></div>
+    <div class="reports-dashboard__chart sk-frosted" style="min-height: 260px;"></div>
   </div>
   } @else {
-  <!-- refreshing overlay when re-fetching -->
-  <div class="reports-dashboard__data-wrap" [class.is-refreshing]="loading() && hasLoadedOnce()" style="position:relative">
-    @if (loading() && hasLoadedOnce()) {
-    <div class="loading-overlay"><div class="loading-spinner"></div></div>
-    }
+  <!-- refreshing container -->
+  <div class="reports-dashboard__data-wrap">
   <div class="reports-dashboard__stats" [@staggerFadeIn]="logs().length">
     <div class="reports-dashboard__card">
       <div class="reports-dashboard__card-label">Productivity score</div>

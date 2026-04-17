@@ -329,7 +329,7 @@
   gap: var(--space-xl);
 
   &.is-refreshing {
-    > *:not(.loading-overlay) {
+    > *:not(.premium-loader) {
       opacity: 0.45;
       transition: opacity 0.2s;
     }

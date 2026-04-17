@@ -239,28 +239,50 @@ body {
   animation: shimmer 1.6s infinite linear;
 }
 
-/* Full-page / section loading overlay */
-.loading-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(15, 17, 23, 0.55);
-  backdrop-filter: blur(2px);
-  border-radius: inherit;
-  z-index: 20;
-  pointer-events: none;
+/* ── Futuristic Loading / Processing ──────────────────────────────────── */
+@keyframes neon-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
 
-  .loading-spinner {
-    width: 28px;
-    height: 28px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+@keyframes scanning {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Universal Frosted Skeleton base (the "Correct" high-end skeleton) */
+.sk-frosted {
+  position: relative;
+  background: rgba(255, 255, 255, 0.035);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: sk-shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
+
+@keyframes sk-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+.sk-circle { border-radius: 50%; }
+.sk-text   { height: 12px; margin-bottom: 8px; border-radius: 4px; }
+.sk-value  { height: 32px; border-radius: 6px; }
 
 .hover-slide {
   transition: transform var(--transition-normal);

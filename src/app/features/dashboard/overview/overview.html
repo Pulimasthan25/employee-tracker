@@ -62,31 +62,38 @@
   <div class="connection-error">
     Unable to reach the database. If you have an ad blocker, please disable it for localhost and refresh.
   </div>
-  } @else if (loading() && !hasLoadedOnce()) {
-  <!-- ── First-load skeleton ─────────────────────────────────── -->
+  } @else if (loading()) {
+  <!-- ── High-fidelity "Correct" Skeletons ──────────────────────── -->
   <div class="overview__stats">
     @for (i of [1,2,3,4]; track i) {
-    <div class="overview__card overview__card--skeleton">
+    <div class="overview__card sk-card">
       <div class="overview__card-header">
-        <div class="sk-block sk-block--icon"></div>
-        <div class="sk-block sk-block--label"></div>
+        <div class="sk-frosted sk-circle" style="width: 36px; height: 36px;"></div>
+        <div class="sk-frosted sk-text" style="width: 100px; margin-bottom: 0;"></div>
       </div>
-      <div class="sk-block sk-block--value"></div>
+      <div class="sk-frosted sk-value" style="width: 120px; margin-top: 12px;"></div>
     </div>
     }
   </div>
-  <!-- ── Table skeleton ──────────────────────────────────────── -->
-  <div class="overview__table-wrap overview__table-wrap--skeleton">
-    <div class="sk-block sk-block--title"></div>
-    @for (i of [1,2,3,4,5]; track i) {
-    <div class="overview__table-row--skeleton-row">
-      <div class="sk-block sk-block--cell-lg"></div>
-      <div class="sk-block sk-block--cell-sm"></div>
-      <div class="sk-block sk-block--cell-md"></div>
-      <div class="sk-block sk-block--cell-md"></div>
+
+  <div class="overview__table-wrap">
+    <div class="sk-frosted sk-text" style="width: 140px; height: 24px; margin-bottom: 24px;"></div>
+    <div class="overview__table">
+      @for (i of [1,2,3,4,5]; track i) {
+      <div class="overview__table-row" style="background:transparent; border-bottom: 1px solid var(--border);">
+        <div class="sk-frosted sk-text" style="flex: 2.5; margin-bottom: 0;"></div>
+        <div class="sk-frosted sk-text" style="flex: 1; margin-bottom: 0;"></div>
+        <div class="sk-frosted sk-text" style="flex: 1; margin-bottom: 0;"></div>
+        <div class="sk-frosted sk-text" style="flex: 2; margin-bottom: 0;"></div>
+      </div>
+      }
     </div>
-    }
   </div>
+
+  <section class="overview__timeline-section">
+    <div class="sk-frosted sk-text" style="width: 180px; height: 20px; margin-bottom: 12px;"></div>
+    <app-timeline [hideToolbar]="true" [externalLoading]="true"></app-timeline>
+  </section>
   } @else {
   <!-- stat cards row -->
   <div class="overview__stats" [@staggerFadeIn]="logs().length">
@@ -165,16 +172,13 @@
       <h3 class="overview__timeline-title">Productive timeline</h3>
       <span class="overview__timeline-date">{{ timelineDate() }}</span>
     </div>
-    <app-timeline [hideToolbar]="true" [externalActivities]="logs()" [externalEmployees]="employees()"
+    <app-timeline [hideToolbar]="true" [externalLoading]="loading()" [externalActivities]="logs()" [externalEmployees]="employees()"
       [externalSelectedDate]="timelineDate()" [externalSelectedUserId]="selectedEmployeeId()">
     </app-timeline>
   </section>
 
   <!-- top apps table -->
-  <div class="overview__table-wrap" [class.overview__table-wrap--refreshing]="loading() && hasLoadedOnce()">
-    @if (loading() && hasLoadedOnce()) {
-    <div class="loading-overlay"><div class="loading-spinner"></div></div>
-    }
+  <div class="overview__table-wrap">
     <h3 class="overview__table-title">Top apps</h3>
     <div class="overview__table">
       <div class="overview__table-header">

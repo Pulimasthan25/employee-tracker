@@ -31,7 +31,7 @@
   }
 
   <div class="card timeline-report__card">
-    @if (loading()) {
+    @if (isLoading()) {
     <div class="timeline-report__skeleton">
       @for (i of [1,2,3]; track i) {
       <div class="timeline-skeleton-row">

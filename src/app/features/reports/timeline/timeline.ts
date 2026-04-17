@@ -59,8 +59,9 @@ export class TimelineReport {
   readonly externalEmployees = input<AppUser[] | null>(null);
   readonly externalSelectedDate = input<string | null>(null);
   readonly externalSelectedUserId = input<string | null>(null);
+  readonly externalLoading = input<boolean | null>(null);
   readonly hideToolbar = input<boolean>(false);
-  
+
   readonly isAdmin = this.auth.isAdmin;
   readonly isControlled = computed(() =>
     this.externalActivities() !== null
@@ -72,10 +73,14 @@ export class TimelineReport {
   readonly effectiveUserId = computed(() => this.externalSelectedUserId() ?? this.selectedUserId());
   readonly effectiveEmployees = computed(() => this.externalEmployees() ?? this.employees());
   readonly isAllMode = computed(() => this.effectiveUserId() === 'all');
-  
+  readonly isLoading = computed(() => {
+    const ext = this.externalLoading();
+    return ext !== null ? ext : this.loading();
+  });
+
   readonly timelineRows = signal<TimelineRow[]>([]);
   // Hours 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
-  readonly hours = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]; 
+  readonly hours = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
 
   private loadSeq = 0;
 
@@ -121,7 +126,7 @@ export class TimelineReport {
   }
 
   private async init(): Promise<void> {
-    this.toast.show('We are facing the database read limit issue, so loading only some data in the UI.', 'warning', 8000);
+    // this.toast.show('We are facing the database read limit issue, so loading only some data in the UI.', 'warning', 8000);
 
     if (this.auth.isAdmin()) {
       try {
@@ -144,12 +149,12 @@ export class TimelineReport {
 
     const seq = ++this.loadSeq;
     this.loading.set(true);
-    
+
     const selectedDate = this.effectiveDate();
     const [y, m, d] = selectedDate.split('-').map(Number);
     const from = new Date(y, m - 1, d, 0, 0, 0, 0);
     const to = new Date(y, m - 1, d, 23, 59, 59, 999);
-    
+
     try {
       let activities: ActivityLog[];
       if (uid === 'all') {
@@ -278,7 +283,7 @@ export class TimelineReport {
     const m = String(d.getMinutes()).padStart(2, '0');
     const ampm = h >= 12 ? 'PM' : 'AM';
     h = h % 12;
-    h = h ? h : 12; 
+    h = h ? h : 12;
     return `${h}:${m} ${ampm}`;
   }
 

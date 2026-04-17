@@ -43,7 +43,7 @@ export class Overview {
   private employeeService = inject(EmployeeService);
   private idleService = inject(IdleService);
   private shiftService = inject(ShiftService);
-  private toast = inject(ToastService);
+  // private toast = inject(ToastService);
 
   readonly isAdmin = this.authService.isAdmin;
 
@@ -237,13 +237,13 @@ export class Overview {
         this.loading.set(false);
         this.hasLoadedOnce.set(true);
         this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-        
-        this.toast.show(
-          'We are facing the database read limit issue, so loading only some data in the UI.',
-          'warning',
-          8000
-        );
-        
+
+        // this.toast.show(
+        //   'We are facing the database read limit issue, so loading only some data in the UI.',
+        //   'warning',
+        //   8000
+        // );
+
         void this.loadIdleSessions(from, to);
       } else {
         const uid = this.authService.firebaseUser()?.uid;
