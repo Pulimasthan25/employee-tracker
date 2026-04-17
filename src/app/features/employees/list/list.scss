@@ -304,6 +304,25 @@ $cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr 50px;
   border: 1px solid hsla(var(--team-hue), 70%, 50%, 0.3) !important;
 }
 
+.list__avatar-mini {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: hsla(var(--team-hue, 210), 70%, 50%, 0.2);
+  color: hsl(var(--team-hue, 210), 85%, 80%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: 2px solid hsla(var(--team-hue, 210), 70%, 50%, 0.4);
+  flex-shrink: 0;
+
+  @media (min-width: 1025px) {
+    display: none;
+  }
+}
+
 .list__text-muted {
   color: var(--text-muted);
 }
@@ -341,6 +360,12 @@ $cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr 50px;
     display: none;
   }
 
+  .list__rows-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+
   .list__table-row {
     display: flex;
     flex-direction: column;
@@ -351,13 +376,14 @@ $cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr 50px;
     gap: 0;
     position: relative;
     margin-bottom: 0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    background: linear-gradient(165deg, var(--bg-card), rgba(255, 255, 255, 0.01));
 
     &:hover {
       transform: translateY(-4px);
-      border-color: var(--accent);
-      box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(165deg, var(--bg-card), rgba(255, 255, 255, 0.03));
     }
   }
 
@@ -387,16 +413,18 @@ $cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr 50px;
       letter-spacing: 0.05em;
     }
 
-    &--name {
-      font-size: 1.25rem;
-      font-weight: 700;
-      justify-content: flex-start;
-      margin-bottom: 0;
-      padding-top: 0;
-      color: var(--text-primary);
-      border-bottom: none;
-      &::before { display: none; }
-    }
+      &--name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        justify-content: flex-start;
+        align-items: center;
+        gap: var(--space-md);
+        margin-bottom: 0;
+        padding-top: 0;
+        color: var(--text-primary);
+        border-bottom: none;
+        &::before { display: none; }
+      }
 
     &--email {
       justify-content: flex-start;
