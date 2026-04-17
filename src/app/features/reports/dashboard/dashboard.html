@@ -78,15 +78,25 @@
     </div>
 
     <div class="reports-dashboard__charts">
-      <div class="reports-dashboard__chart reports-dashboard__chart--doughnut" @scaleIn>
-        <canvas id="productivity-chart"></canvas>
-      </div>
-      <div class="reports-dashboard__chart reports-dashboard__chart--bar" @scaleIn>
-        <div class="reports-dashboard__chart-header">
-          <span class="reports-dashboard__chart-title">{{ chartTitle() }}</span>
+      @if (logs().length === 0) {
+        <div class="chart-placeholder" style="grid-column: 1 / -1; min-height: 280px; gap: 16px;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 3v18h18" />
+            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+          </svg>
+          <span>No usage data to visualize</span>
         </div>
-        <canvas id="activity-chart"></canvas>
-      </div>
+      } @else {
+        <div class="reports-dashboard__chart reports-dashboard__chart--doughnut" @scaleIn>
+          <canvas id="productivity-chart"></canvas>
+        </div>
+        <div class="reports-dashboard__chart reports-dashboard__chart--bar" @scaleIn>
+          <div class="reports-dashboard__chart-header">
+            <span class="reports-dashboard__chart-title">{{ chartTitle() }}</span>
+          </div>
+          <canvas id="activity-chart"></canvas>
+        </div>
+      }
     </div>
 
     @if (loading()) {
