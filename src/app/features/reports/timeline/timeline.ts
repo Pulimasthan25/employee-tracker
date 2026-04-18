@@ -130,17 +130,19 @@ export class TimelineReport {
   }
 
   private async init(): Promise<void> {
-    // this.toast.show('We are facing the database read limit issue, so loading only some data in the UI.', 'warning', 8000);
+  if (this.auth.isAdmin()) {
+    try {
+      const all = await this.employeeApi.getAll();
+      this.employees.set(all);
+    } catch {}
+  } else {
+    const user = this.auth.appUser();
 
-    if (this.auth.isAdmin()) {
-      try {
-        const all = await this.employeeApi.getAll();
-        this.employees.set(all);
-      } catch {}
-    } else {
-      const uid = this.auth.firebaseUser()?.uid ?? '';
-      this.selectedUserId.set(uid);
+    if (user) {
+      this.employees.set([user]);
+      this.selectedUserId.set(user.uid);
     }
+  }
   }
 
   async loadData(): Promise<void> {
