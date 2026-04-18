@@ -38,7 +38,7 @@ function toDate(val: unknown): Date {
 export class ScreenshotService {
   private cache = new Map<string, { data: Screenshot[]; ts: number }>();
   private signedUrlCache = new Map<string, { url: string; expiresAt: number }>();
-  private readonly signedUrlTtlSeconds = 120;
+  private readonly signedUrlTtlSeconds = 1800;
   private readonly cacheDriftMs = 5_000;
 
   private async resolveScreenshotUrls(items: Screenshot[]): Promise<Screenshot[]> {
@@ -98,7 +98,7 @@ export class ScreenshotService {
             apikey: supabaseAnonKey,
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ paths: batch }),
+          body: JSON.stringify({ paths: batch, expiresIn: this.signedUrlTtlSeconds }),
         });
 
         if (!response.ok) {
