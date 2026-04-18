@@ -8,11 +8,13 @@ import {
   ChangeDetectionStrategy,
   ViewChild,
   ElementRef,
+  OnDestroy,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, CommonModule } from '@angular/common';
 import type { ActivityLog } from '../../../core/services/activity.service';
 import type { DisplayRow } from '../../../core/services/activity.service';
 import { ActivityService } from '../../../core/services/activity.service';
+import { RealtimeService } from '../../../core/services/realtime.service';
 import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { IdleService, type IdleSession } from '../../../core/services/idle.service';
@@ -34,13 +36,13 @@ function formatDuration(seconds: number): string {
 
 @Component({
   selector: 'app-overview',
-  imports: [TimelineReport, DatePipe],
+  imports: [TimelineReport, DatePipe, CommonModule],
   templateUrl: './overview.html',
   styleUrl: './overview.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeIn, slideInUp, staggerFadeIn, scaleIn, expandVertical]
 })
-export class Overview {
+export class Overview implements OnDestroy {
   @ViewChild('datePickerInput') datePickerInput!: ElementRef<HTMLInputElement>;
 
   private activityService = inject(ActivityService);
@@ -48,9 +50,36 @@ export class Overview {
   private employeeService = inject(EmployeeService);
   private idleService = inject(IdleService);
   private shiftService = inject(ShiftService);
-  // private toast = inject(ToastService);
+  private realtime = inject(RealtimeService);
 
   readonly isAdmin = this.authService.isAdmin;
+  readonly liveLoading = this.realtime.feedLoading;
+  
+  // LIVE Telemetry — last activity per user (admin: all users, employee: own)
+  readonly liveNowPerUser = computed(() => {
+    if (!this.isToday()) return [];
+
+    const feed = this.realtime.liveFeed();
+    const userMap = new Map<string, any>();
+
+    // Take ONLY the latest record per user (feed is ordered desc)
+    [...feed].forEach(item => {
+      if (!userMap.has(item.userId)) {
+        userMap.set(item.userId, item);
+      }
+    });
+
+    if (this.isAdmin()) {
+      // Admin: show last activity for every user
+      return Array.from(userMap.values());
+    }
+
+    // Employee: show only their own last activity
+    const uid = this.authService.firebaseUser()?.uid;
+    if (!uid) return [];
+    const own = userMap.get(uid);
+    return own ? [own] : [];
+  });
 
   logs = signal<ActivityLog[]>([]);
   private allLogs = signal<ActivityLog[]>([]);
@@ -58,7 +87,7 @@ export class Overview {
   loading = signal(true);
   hasLoadedOnce = signal(false);
   connectionError = signal(false);
-  selectedDate = signal<string>(new Date().toISOString().split('T')[0]);
+  selectedDate = signal<string>(this.todayString());
   selectedEmployeeId = signal<'all' | string>('all');
   readonly activeShift = signal<ShiftSession | null>(null);
   readonly idleSessions = signal<IdleSession[]>([]);
@@ -208,6 +237,10 @@ export class Overview {
     });
   }
 
+  ngOnDestroy(): void {
+    this.realtime.destroy();
+  }
+
   private todayString(): string {
     const d = new Date();
     const y = d.getFullYear();
@@ -275,6 +308,7 @@ export class Overview {
         this.loading.set(false);
         this.hasLoadedOnce.set(true);
         this.lastUpdated.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        void this.loadEmployees();
         void this.loadIdleSessions(from, to);
       }
     } catch (e) {
@@ -312,11 +346,36 @@ export class Overview {
   }
 
   private async loadEmployees(): Promise<void> {
-    if (!this.isAdmin()) return;
-    if (this.employees().length > 0) return;
+    const isToday = this.isToday();
+
+    if (!this.isAdmin()) {
+      // For employees, just init realtime if it's today
+      if (isToday) {
+        const user = this.authService.appUser();
+        if (user) {
+          const nameMap = new Map([[user.uid, user.displayName ?? 'Unknown']]);
+          void this.realtime.init(nameMap);
+        }
+      }
+      return;
+    }
+
+    // Admin path: If employees are already cached, still ensure realtime is initialized
+    if (this.employees().length > 0) {
+      if (isToday) {
+        const nameMap = new Map(this.employees().map(e => [e.uid, e.displayName ?? 'Unknown'] as const));
+        void this.realtime.init(nameMap);
+      }
+      return;
+    }
+
     try {
       const all = await this.employeeService.getAll();
       this.employees.set(all);
+      if (isToday) {
+        const nameMap = new Map(all.map(e => [e.uid, e.displayName ?? 'Unknown'] as const));
+        void this.realtime.init(nameMap);
+      }
     } catch {
       // non-fatal
     }

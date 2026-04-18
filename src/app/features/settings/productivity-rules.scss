@@ -4,20 +4,20 @@
   width: 100%;
 }
 
-.settings-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+// .settings-container {
+//   max-width: 1200px;
+//   margin: 0 auto;
+// }
 
 .settings-header {
   margin-bottom: var(--space-xl);
-  
+
   &__title {
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0 0 var(--space-xs);
     color: var(--text-primary);
-    
+
     @media (max-width: 640px) {
       font-size: 1.25rem;
     }
@@ -76,13 +76,13 @@
 
       &:hover {
         color: var(--text-primary);
-        
+
         .sort-icon {
           opacity: 1;
         }
       }
     }
-    
+
     .sort-icon {
       display: inline-flex;
       align-items: center;
@@ -120,7 +120,8 @@
   }
 
   &__group {
-    display: contents; /* Default for desktop */
+    display: contents;
+    /* Default for desktop */
   }
 }
 
@@ -229,8 +230,9 @@
   background: transparent;
   color: var(--danger);
   padding: 0 var(--space-sm);
-  &:hover:not(:disabled) { 
-    background: rgba(239, 68, 68, 0.1); 
+
+  &:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
   }
 }
 
@@ -238,7 +240,8 @@
   background: transparent;
   color: var(--text-secondary);
   padding: 0 var(--space-sm);
-  &:hover:not(:disabled) { 
+
+  &:hover:not(:disabled) {
     background: var(--bg-hover);
     color: var(--text-primary);
   }
@@ -258,7 +261,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  
+
   svg {
     width: 18px;
     height: 18px;
@@ -352,13 +355,17 @@
       align-items: flex-start !important;
       text-align: left !important;
       padding: var(--space-md) var(--space-lg);
-      
-      &:nth-child(1) { // Title row container
+
+      &:nth-child(1) {
+        // Title row container
         background: rgba(255, 255, 255, 0.015);
         border-bottom: 1px solid var(--border);
         padding: var(--space-md) var(--space-lg);
         width: 100%;
-        .rule-card__label { display: none; }
+
+        .rule-card__label {
+          display: none;
+        }
       }
     }
 
@@ -392,8 +399,13 @@
 
 /* --- Settings skeleton -------------------------------------------- */
 @keyframes settings-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .rule-card--skeleton {
@@ -408,7 +420,17 @@
   background-size: 200% 100%;
   animation: settings-shimmer 1.6s infinite linear;
 
-  &--wide   { width: 180px; }
-  &--badge  { width: 72px; height: 22px; border-radius: var(--radius-sm); }
-  &--actions { width: 64px; }
+  &--wide {
+    width: 180px;
+  }
+
+  &--badge {
+    width: 72px;
+    height: 22px;
+    border-radius: var(--radius-sm);
+  }
+
+  &--actions {
+    width: 64px;
+  }
 }

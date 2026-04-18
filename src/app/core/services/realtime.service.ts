@@ -42,24 +42,38 @@ export class RealtimeService {
 
   readonly agents = signal<AgentStatus[]>([]);
   readonly liveFeed = signal<LiveActivity[]>([]);
+  readonly feedLoading = signal(false);
 
   private unsubscribeAgents?: () => void;
   private unsubscribeFeed?: () => void;
+  private initialized = false;
 
-  async init() {
-    // Get all employees for name mapping once
+  /**
+   * Start Firestore real-time listeners.
+   * Pass a pre-built nameMap (from already-loaded employees) to avoid a
+   * duplicate Firestore read. The listeners are WebSocket-based — they do NOT
+   * poll; updates are pushed by Firestore automatically.
+   */
+  async init(nameMap?: Map<string, string>) {
+    if (this.initialized) return;   // already subscribed — no-op
+    this.initialized = true;
+    this.feedLoading.set(true);
+
+    const map = nameMap ?? await this.buildNameMap();
+    this.listenToAgents(map);
+    this.listenToFeed(map);
+  }
+
+  private async buildNameMap(): Promise<Map<string, string>> {
     const employees = await this.employeeRepo.getAll();
-    const nameMap = new Map<string, string>(
-      employees.map((e) => [e.uid, e.displayName || 'Unknown'])
-    );
-
-    this.listenToAgents(nameMap);
-    this.listenToFeed(nameMap);
+    return new Map(employees.map((e) => [e.uid, e.displayName || 'Unknown']));
   }
 
   destroy() {
     this.unsubscribeAgents?.();
     this.unsubscribeFeed?.();
+    this.initialized = false;  // allow re-init on next dashboard visit
+    this.feedLoading.set(false);
   }
 
   private listenToAgents(nameMap: Map<string, string>) {
@@ -108,6 +122,7 @@ export class RealtimeService {
         } as LiveActivity;
       });
       this.liveFeed.set(feed);
+      this.feedLoading.set(false);
     });
   }
 }

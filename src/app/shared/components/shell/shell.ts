@@ -20,7 +20,6 @@ interface NavItem {
 
 const TITLE_MAP: Record<string, string> = {
   '/dashboard': 'Overview',
-  '/realtime': 'Real-time Hub',
   '/screenshots': 'Screenshots',
   '/reports': 'Reports',
   '/settings': 'Configurations',
@@ -46,7 +45,6 @@ export class Shell {
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', path: '/dashboard', icon: 'grid' },
-    { label: 'Live Feed', path: '/realtime', icon: 'zap', adminOnly: true },
     { label: 'Screenshots', path: '/screenshots', icon: 'camera' },
     { label: 'Reports', path: '/reports', icon: 'chart' },
     { label: 'Configurations', path: '/settings', icon: 'settings', adminOnly: true },

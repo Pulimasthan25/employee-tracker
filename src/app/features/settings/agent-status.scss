@@ -1,6 +1,6 @@
-.agent-matrix {
-  padding: 1rem 0;
-}
+// .agent-matrix {
+//   padding: 1rem 0;
+// }
 
 .matrix-grid {
   display: grid;
@@ -171,6 +171,13 @@
 }
 
 @keyframes tooltipFade {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

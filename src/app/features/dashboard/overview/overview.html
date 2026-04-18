@@ -76,6 +76,26 @@
     }
   </div>
 
+  @if (isToday()) {
+  <div class="overview__live-section">
+    <div class="overview__live-header">
+      <div class="sk-frosted sk-circle" style="width:8px;height:8px;flex-shrink:0;"></div>
+      <div class="sk-frosted sk-text" style="width:72px;height:13px;margin-bottom:0;"></div>
+    </div>
+    <div class="overview__live-grid">
+      @for (i of [1,2,3,4]; track i) {
+      <div class="live-card live-card--skeleton">
+        <div class="live-card__accent live-card__accent--sk"></div>
+        <div class="live-card__body">
+          <div class="sk-frosted sk-text" style="width:88px;height:12px;margin-bottom:6px;"></div>
+          <div class="sk-frosted sk-text" style="width:120px;height:10px;"></div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
   <section class="overview__timeline-section">
     <div class="overview__timeline-header">
       <div class="sk-frosted sk-text" style="width: 180px; height: 20px; margin-bottom: 0;"></div>
@@ -193,6 +213,58 @@
     </div>
     }
   </div>
+
+  <!-- Live Now — only on today's view, after stat cards -->
+  @if (isToday()) {
+    @if (liveLoading()) {
+    <section class="overview__live-section">
+      <div class="overview__live-header">
+        <div class="sk-frosted sk-circle" style="width:8px;height:8px;flex-shrink:0;"></div>
+        <div class="sk-frosted sk-text" style="width:72px;height:13px;margin-bottom:0;"></div>
+      </div>
+      <div class="overview__live-grid">
+        @for (i of [1,2,3,4]; track i) {
+        <div class="live-card live-card--skeleton">
+          <div class="live-card__accent live-card__accent--sk"></div>
+          <div class="live-card__body">
+            <div class="sk-frosted sk-text" style="width:88px;height:12px;margin-bottom:6px;"></div>
+            <div class="sk-frosted sk-text" style="width:120px;height:10px;"></div>
+          </div>
+        </div>
+        }
+      </div>
+    </section>
+    } @else if (liveNowPerUser().length > 0) {
+    <section class="overview__live-section" @fadeIn>
+      <div class="overview__live-header">
+        <span class="pulse-dot-alive"></span>
+        <h3 class="overview__live-title">Live Now</h3>
+        <span class="overview__live-badge">{{ liveNowPerUser().length }} active</span>
+      </div>
+      <div class="overview__live-grid">
+        @for (item of liveNowPerUser(); track item.userId) {
+        <div class="live-card" [attr.data-category]="item.category">
+          <div class="live-card__accent"></div>
+          <div class="live-card__body"
+            [attr.data-tooltip]="item.userName + ' · ' + item.appName + (item.windowTitle ? ' — ' + item.windowTitle : '')">
+            <div class="live-card__top">
+              <span class="live-card__name" [title]="item.userName">{{ item.userName }}</span>
+              <span class="live-card__badge" [attr.data-category]="item.category">{{ item.category }}</span>
+            </div>
+            <div class="live-card__meta">
+              <span class="live-card__app" [title]="item.appName">{{ item.appName }}</span>
+              @if (item.windowTitle) {
+              <span class="live-card__sep">·</span>
+              <span class="live-card__win" [title]="item.windowTitle">{{ item.windowTitle }}</span>
+              }
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </section>
+    }
+  }
 
   <section class="overview__timeline-section">
     <div class="overview__timeline-header">

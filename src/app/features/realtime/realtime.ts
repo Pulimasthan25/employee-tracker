@@ -38,8 +38,8 @@ export class RealtimeComponent implements OnInit, OnDestroy {
   isOnline(lastSeen: Date | null): boolean {
     if (!lastSeen) return false;
     const now = new Date();
-    // Consider online if seen in the last 2 minutes
-    return (now.getTime() - lastSeen.getTime()) < 120000;
+    // Heartbeat is every 5 mins. Stay safe by allowing 6 mins.
+    return (now.getTime() - lastSeen.getTime()) < 360000;
   }
 
   formatLastSeen(date: Date | null): string {
