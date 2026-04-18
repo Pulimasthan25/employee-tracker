@@ -5,7 +5,12 @@
     
     <!-- Left: Brand (Glass Pill) -->
     <div class="shell__brand glass">
-      <img src="/icons/favicon-32x32.png" alt="Pulse Logo">
+      <!-- Inline SVG avoids PWA standalone PNG transparency/color issues -->
+      <div class="shell__brand-icon" aria-label="Pulse Logo">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 2L4.5 13.5H11L9.5 22L19.5 10H13L13 2Z" fill="#ffffff" stroke="#ffffff" stroke-width="0.5" stroke-linejoin="round"/>
+        </svg>
+      </div>
       <span class="shell__brand-text">Pulse</span>
     </div>
 

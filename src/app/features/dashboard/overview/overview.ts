@@ -6,7 +6,10 @@ import {
   effect,
   untracked,
   ChangeDetectionStrategy,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import type { ActivityLog } from '../../../core/services/activity.service';
 import type { DisplayRow } from '../../../core/services/activity.service';
 import { ActivityService } from '../../../core/services/activity.service';
@@ -31,13 +34,15 @@ function formatDuration(seconds: number): string {
 
 @Component({
   selector: 'app-overview',
-  imports: [TimelineReport],
+  imports: [TimelineReport, DatePipe],
   templateUrl: './overview.html',
   styleUrl: './overview.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeIn, slideInUp, staggerFadeIn, scaleIn, expandVertical]
 })
 export class Overview {
+  @ViewChild('datePickerInput') datePickerInput!: ElementRef<HTMLInputElement>;
+
   private activityService = inject(ActivityService);
   private authService = inject(AuthService);
   private employeeService = inject(EmployeeService);
@@ -383,6 +388,19 @@ export class Overview {
   setDate(val: string): void {
     const max = this.todayString();
     this.selectedDate.set(val > max ? max : val);
+  }
+
+  openDatePicker(): void {
+    const input = this.datePickerInput?.nativeElement;
+    if (!input) return;
+    try {
+      // showPicker() is available in modern browsers and PWA standalone contexts
+      (input as any).showPicker();
+    } catch {
+      // Fallback — directly focus and click the input
+      input.focus();
+      input.click();
+    }
   }
 
   formatAppTime(seconds: number): string {

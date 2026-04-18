@@ -30,11 +30,28 @@
   padding: 0 1rem 0 0.5rem;
   border-radius: 14px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-  img {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    border-radius: 8px;
+
+  @media (max-width: 768px) {
+    padding: 0 0.5rem;
+    gap: 0;
+  }
+}
+
+.shell__brand-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  /* Explicit gradient — renders identically in browser, mobile browser, PWA standalone */
+  background: linear-gradient(135deg, #4f8ef7 0%, #3b6fd4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(79, 142, 247, 0.4);
+
+  svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
