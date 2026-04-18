@@ -13,8 +13,6 @@ export const REPORT_ROUTES: Routes = [
           { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
           { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard').then(m => m.ReportsDashboard) },
           { path: 'productivity', loadComponent: () => import('./productivity/productivity').then(m => m.Productivity) },
-          { path: 'timeline', redirectTo: 'dashboard', pathMatch: 'full' },
-          { path: 'urls', loadComponent: () => import('./url-usage/url-usage').then(m => m.UrlUsage) },
           {
             path: 'attendance',
             loadComponent: () =>

@@ -21,6 +21,7 @@ import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
 import { fadeIn, slideInUp, staggerFadeIn, scaleIn, expandVertical } from '../../../shared/animations';
 import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AppUsage } from '../app-usage/app-usage';
+import { UrlUsage } from '../url-usage/url-usage';
 
 function formatDuration(seconds: number): string {
   if (!seconds) return '0s';
@@ -68,7 +69,7 @@ function getDateRange(
 @Component({
   selector: 'app-reports-dashboard',
   standalone: true,
-  imports: [DateRange, AppUsage],
+  imports: [DateRange, AppUsage, UrlUsage],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

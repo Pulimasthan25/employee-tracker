@@ -1107,16 +1107,16 @@
   font-weight: 800;
   color: var(--text-primary);
 
-  &::before {
-    content: '';
-    display: inline-block;
-    width: 3px;
-    height: 14px;
-    background: var(--success);
-    border-radius: 2px;
-    margin-right: var(--space-sm);
-    vertical-align: middle;
-  }
+  // &::before {
+  //   content: '';
+  //   display: inline-block;
+  //   width: 3px;
+  //   height: 14px;
+  //   background: var(--success);
+  //   border-radius: 2px;
+  //   margin-right: var(--space-sm);
+  //   vertical-align: middle;
+  // }
 }
 
 .overview__live-badge {

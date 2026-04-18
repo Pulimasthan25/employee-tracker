@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, effect, untracked } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, effect, untracked, input, computed } from '@angular/core';
 import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AuthService, AppUser } from '../../../core/services/auth.service';
 import { ActivityService, ActivityLog } from '../../../core/services/activity.service';
@@ -15,6 +15,7 @@ function formatDuration(seconds: number): string {
 
 @Component({
   selector: 'app-url-usage',
+  standalone: true,
   imports: [DateRange, FormsModule],
   templateUrl: './url-usage.html',
   styleUrl: './url-usage.scss',
@@ -26,8 +27,25 @@ export class UrlUsage {
   private readonly activity = inject(ActivityService);
   private readonly employee = inject(EmployeeService);
 
-  readonly data = signal<{ domain: string; totalSeconds: number; visitCount: number; category: ActivityLog['category'] }[]>([]);
-  readonly loading = signal(true);
+  // Optional inputs for when used as a child component
+  externalLogs = input<ActivityLog[] | null>(null);
+  externalLoading = input<boolean | null>(null);
+  hideHeader = input<boolean>(false);
+  title = input<string>("URL Usage");
+
+  private readonly _internalData = signal<{ domain: string; totalSeconds: number; visitCount: number; category: ActivityLog['category'] }[]>([]);
+  readonly data = computed(() => {
+    const ext = this.externalLogs();
+    if (ext !== null) return this.activity.groupByDomain(ext);
+    return this._internalData();
+  });
+
+  private readonly _internalLoading = signal(true);
+  readonly loading = computed(() => {
+    const ext = this.externalLoading();
+    return ext !== null ? ext : this._internalLoading();
+  });
+
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
   readonly selectedEmployee = signal<string>('all');
   readonly employees = signal<AppUser[]>([]);
@@ -38,9 +56,9 @@ export class UrlUsage {
     effect(() => {
       const ready = this.auth.authReady();
       const range = this.dateRange();
-      const selEmp = this.selectedEmployee();
+      const extLogs = this.externalLogs();
 
-      if (ready && range) {
+      if (ready && range && extLogs === null) {
         untracked(() => {
           this.loadData();
         });
@@ -49,7 +67,7 @@ export class UrlUsage {
   }
 
   async loadData() {
-    this.loading.set(true);
+    this._internalLoading.set(true);
     try {
       if (this.auth.isAdmin() && this.employees().length === 0) {
         const users = await this.employee.getAll();
@@ -74,10 +92,9 @@ export class UrlUsage {
         }
       }
 
-      const grouped = this.activity.groupByDomain(logs);
-      this.data.set(grouped);
+      this._internalData.set(this.activity.groupByDomain(logs));
     } finally {
-      this.loading.set(false);
+      this._internalLoading.set(false);
     }
   }
 
@@ -91,5 +108,15 @@ export class UrlUsage {
 
   formatDomain(domain: string): string {
     return domain.replace(/\.tracked\/?$/, '');
+  }
+
+  getTotalSeconds(): number {
+    return this.data().reduce((acc, r) => acc + r.totalSeconds, 0);
+  }
+
+  getPercentage(seconds: number): string {
+    const total = this.getTotalSeconds();
+    if (total === 0) return '0%';
+    return Math.round((seconds / total) * 100) + '%';
   }
 }

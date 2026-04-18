@@ -1,63 +1,81 @@
 <div class="report" @fadeIn>
-  <div class="report__header">
-    <app-date-range (rangeChange)="onRangeChange($event)" />
-    
-    @if (isAdmin()) {
-      <select class="form-select" [ngModel]="selectedEmployee()" (ngModelChange)="selectedEmployee.set($event)" style="margin-left: auto; max-width: 200px;">
-        <option value="all">All employees</option>
-        @for (emp of employees(); track emp.uid) {
-          <option [value]="emp.uid">{{ emp.displayName }}</option>
-        }
-      </select>
-    }
-  </div>
+  @if (!hideHeader()) {
+    <div class="report__header">
+      <h2 class="report__title">{{ title() }}</h2>
+      <app-date-range (rangeChange)="onRangeChange($event)" />
+      
+      @if (isAdmin()) {
+        <select class="form-select" [ngModel]="selectedEmployee()" (ngModelChange)="selectedEmployee.set($event)" style="margin-left: auto; max-width: 200px;">
+          <option value="all">All employees</option>
+          @for (emp of employees(); track emp.uid) {
+            <option [value]="emp.uid">{{ emp.displayName }}</option>
+          }
+        </select>
+      }
+    </div>
+  }
 
-  <div class="report__card" @scaleIn>
-    <table class="report__table">
-      <thead>
-        <tr>
-          <th>Domain / URL</th>
-          <th>Category</th>
-          <th>Time spent</th>
-          <th>Visits</th>
-        </tr>
-      </thead>
-      <tbody [@staggerFadeIn]="data().length">
+  <div class="report__table-wrap" @scaleIn>
+    @if (title()) {
+      <h3 class="report__table-title">{{ title() }}</h3>
+    }
+    <div class="report__table">
+      <!-- Header -->
+      <div class="report__table-header">
+        <span class="report__table-cell">Domain / URL</span>
+        <span class="report__table-cell">Category</span>
+        <span class="report__table-cell">Time spent</span>
+        <span class="report__table-cell report__table-cell--bar">% of total</span>
+      </div>
+
+      <!-- Body -->
+      <div [@staggerFadeIn]="data().length">
         @if (loading()) {
           @for (i of [1,2,3,4,5]; track i) {
-            <tr>
-              <td><div class="sk-frosted sk-text" style="width: 150px; margin: 0;"></div></td>
-              <td><div class="sk-frosted" style="width: 80px; height: 26px; border-radius: 13px;"></div></td>
-              <td><div class="sk-frosted sk-text" style="width: 60px; margin: 0;"></div></td>
-              <td><div class="sk-frosted sk-text" style="width: 40px; margin: 0;"></div></td>
-            </tr>
+            <div class="report__table-row report__table-row--skeleton">
+              <div class="skeleton-block" style="flex: 2.5"></div>
+              <div class="skeleton-block" style="flex: 1"></div>
+              <div class="skeleton-block" style="flex: 1"></div>
+              <div class="skeleton-block" style="flex: 2"></div>
+            </div>
           }
         } @else {
           @for (item of data(); track item.domain) {
-            <tr>
-              <td style="font-weight: 500;">{{ formatDomain(item.domain) }}</td>
-              <td>
+            <div class="report__table-row">
+              <span class="report__table-cell report__table-cell--name">
+                <span class="report__chevron-placeholder"></span>
+                {{ formatDomain(item.domain) }}
+                @if (item.visitCount > 1) {
+                  <span class="report__site-count">{{ item.visitCount }}</span>
+                }
+              </span>
+              <span class="report__table-cell">
                 <span class="badge badge--{{ item.category }}">{{ item.category }}</span>
-              </td>
-              <td>{{ formatDurationStr(item.totalSeconds) }}</td>
-              <td>{{ item.visitCount }}</td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="4" class="empty-state-cell">
-                <div class="empty-state">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="2" y1="12" x2="22" y2="12" />
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                  </svg>
-                  <p>No URL usage recorded for this period.</p>
+              </span>
+              <span class="report__table-cell report__table-cell--time">
+                {{ formatDurationStr(item.totalSeconds) }}
+              </span>
+              <span class="report__table-cell report__table-cell--bar">
+                <div class="report__progress-wrap">
+                  <div class="report__progress-fill" [style.width]="getPercentage(item.totalSeconds)"></div>
                 </div>
-              </td>
-            </tr>
+                <span class="report__progress-label">
+                  {{ getPercentage(item.totalSeconds) }}
+                </span>
+              </span>
+            </div>
+          } @empty {
+            <div class="report__empty-state">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+              <p>No URL usage recorded for this period.</p>
+            </div>
           }
         }
-      </tbody>
-    </table>
+      </div>
+    </div>
   </div>
 </div>
