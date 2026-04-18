@@ -9,10 +9,15 @@
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 1rem;
+
+  @media (max-width: 768px) {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
 }
 
 .agent-node {
@@ -190,10 +195,10 @@
 /* ── Skeleton Loading ──────────────────────── */
 .skeleton {
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 1;
 
   .sk-text {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 6px;
     position: relative;
     overflow: hidden;
@@ -204,7 +209,7 @@
       top: 0; right: 0; bottom: 0; left: 0;
       background: linear-gradient(90deg, 
         transparent, 
-        rgba(255, 255, 255, 0.06), 
+        rgba(255, 255, 255, 0.12), 
         transparent
       );
       animation: shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
@@ -212,7 +217,7 @@
   }
 
   .sk-pill {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 4px;
     position: relative;
     overflow: hidden;
@@ -223,7 +228,7 @@
       top: 0; right: 0; bottom: 0; left: 0;
       background: linear-gradient(90deg, 
         transparent, 
-        rgba(255, 255, 255, 0.06), 
+        rgba(255, 255, 255, 0.12), 
         transparent
       );
       animation: shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
@@ -236,12 +241,12 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
   padding: 0.85rem;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 0.85rem;
 
   .sk-detail {
     height: 24px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 4px;
     position: relative;
     overflow: hidden;
@@ -252,7 +257,7 @@
       top: 0; right: 0; bottom: 0; left: 0;
       background: linear-gradient(90deg, 
         transparent, 
-        rgba(255, 255, 255, 0.06), 
+        rgba(255, 255, 255, 0.12), 
         transparent
       );
       animation: shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);

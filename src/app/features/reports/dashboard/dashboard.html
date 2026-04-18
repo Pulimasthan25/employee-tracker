@@ -30,9 +30,9 @@
   } @else if (loading() && !hasLoadedOnce()) {
   <div class="reports-dashboard__stats">
     @for (i of [1,2,3,4]; track i) {
-    <div class="reports-dashboard__card" style="border-color:transparent; background:transparent">
-      <div class="sk-frosted sk-text" style="width: 100px; height: 14px;"></div>
-      <div class="sk-frosted sk-value" style="width: 130px; margin-top: 8px;"></div>
+    <div class="reports-dashboard__card reports-dashboard__card--skeleton">
+      <div class="sk-frosted sk-text" style="width: 80px; height: 14px;"></div>
+      <div class="sk-frosted sk-value" style="width: 110px; margin-top: 8px;"></div>
     </div>
     }
   </div>

@@ -303,7 +303,7 @@ body {
 /* Universal Frosted Skeleton base (the "Correct" high-end skeleton) */
 .sk-frosted {
   position: relative;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.08); // Increased from 0.035
   border-radius: var(--radius-md);
   overflow: hidden;
 
@@ -314,7 +314,7 @@ body {
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.12), // Increased from 0.06
       transparent
     );
     transform: translateX(-100%);
