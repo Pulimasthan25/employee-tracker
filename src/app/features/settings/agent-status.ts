@@ -1,16 +1,19 @@
 import { Component, inject, OnInit, OnDestroy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RealtimeService } from '../../core/services/realtime.service';
+import { staggerFadeIn, fadeIn } from '../../shared/animations';
 
 @Component({
   selector: 'app-agent-status',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './agent-status.html',
-  styleUrl: './agent-status.scss'
+  styleUrl: './agent-status.scss',
+  animations: [staggerFadeIn, fadeIn]
 })
 export class AgentStatusComponent implements OnInit, OnDestroy {
   public readonly realtime = inject(RealtimeService);
+  public readonly loading = this.realtime.feedLoading;
   
   // Alphabetical sorting of agents by name
   readonly sortedAgents = computed(() => {

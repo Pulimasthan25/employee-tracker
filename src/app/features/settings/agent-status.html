@@ -1,53 +1,77 @@
-<div class="agent-matrix">
-  <div class="matrix-grid">
-    @for (agent of sortedAgents(); track agent.userId) {
-    <div class="agent-node glass" [class.agent-node--active]="isOnline(agent.lastSeenAt)">
-
-      <div class="node-header">
-        <div class="node-identity">
-          <div class="node-name-group">
-            <span class="node-name">{{ agent.userName }}</span>
-            <span class="node-host">{{ agent.hostname }}</span>
+<div class="agent-matrix" @fadeIn>
+  @if (loading()) {
+    <div class="matrix-grid">
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="agent-node glass skeleton">
+          <div class="node-header">
+            <div class="node-identity">
+              <div class="sk-text" style="width: 120px; height: 1.2rem; margin-bottom: 8px;"></div>
+              <div class="sk-text" style="width: 80px; height: 0.7rem;"></div>
+            </div>
+            <div class="sk-pill" style="width: 60px; height: 1.2rem;"></div>
+          </div>
+          <div class="node-details-skeleton">
+            <div class="sk-detail"></div>
+            <div class="sk-detail"></div>
+            <div class="sk-detail"></div>
           </div>
         </div>
-
-        <div class="node-status">
-          <!-- Warning Icon with Tooltip if error exists -->
-          @if (agent.lastError) {
-          <div class="diagnostic-trigger" [attr.data-tooltip]="simplifyError(agent.lastError)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
+      }
+    </div>
+  } @else {
+    <div class="matrix-grid" [@staggerFadeIn]="sortedAgents().length">
+      @for (agent of sortedAgents(); track agent.userId) {
+      <div class="agent-node glass" [class.agent-node--active]="isOnline(agent.lastSeenAt)">
+  
+        <div class="node-header">
+          <div class="node-identity">
+            <div class="node-name-group">
+              <span class="node-name">{{ agent.userName }}</span>
+              <span class="node-host">{{ agent.hostname }}</span>
+            </div>
           </div>
-          }
-
-          <span class="status-pill" [class.status-pill--online]="isOnline(agent.lastSeenAt)">
-            {{ isOnline(agent.lastSeenAt) ? (agent.trackingPaused ? 'PAUSED' : 'ONLINE') : 'OFFLINE' }}
-          </span>
+  
+          <div class="node-status">
+            <!-- Warning Icon with Tooltip if error exists -->
+            @if (agent.lastError) {
+            <div class="diagnostic-trigger" [attr.data-tooltip]="simplifyError(agent.lastError)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            }
+  
+            <span class="status-pill" [class.status-pill--online]="isOnline(agent.lastSeenAt)">
+              @if (isOnline(agent.lastSeenAt)) {
+                <span class="pulse-dot"></span>
+              }
+              {{ isOnline(agent.lastSeenAt) ? (agent.trackingPaused ? 'PAUSED' : 'ONLINE') : 'OFFLINE' }}
+            </span>
+          </div>
+        </div>
+  
+        <div class="node-details">
+          <div class="detail-item">
+            <div class="detail-label">Client</div>
+            <div class="detail-value">v{{ agent.version }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">OS</div>
+            <div class="detail-value">{{ agent.platform }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Heartbeat</div>
+            <div class="detail-value">{{ formatLastSeen(agent.lastSeenAt) }}</div>
+          </div>
         </div>
       </div>
-
-      <div class="node-details">
-        <div class="detail-item">
-          <div class="detail-label">Client</div>
-          <div class="detail-value">v{{ agent.version }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">OS</div>
-          <div class="detail-value">{{ agent.platform }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">Heartbeat</div>
-          <div class="detail-value">{{ formatLastSeen(agent.lastSeenAt) }}</div>
-        </div>
+      } @empty {
+      <div class="matrix-empty">
+        <p>No active agent nodes detected.</p>
       </div>
+      }
     </div>
-    } @empty {
-    <div class="matrix-empty">
-      <p>No active agent nodes detected.</p>
-    </div>
-    }
-  </div>
+  }
 </div>
