@@ -63,6 +63,14 @@ export class EmployeeService {
     const col = collection(db, 'users');
     const snap = await getDocs(col);
     const mapped = snap.docs.map((d) => toAppUser(d.id, d.data() as Record<string, unknown>));
+
+    // Sort alphabetically by name
+    mapped.sort((a, b) => {
+      const nameA = (a.displayName || a.email || '').toLowerCase();
+      const nameB = (b.displayName || b.email || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
     this.cache.set(key, { data: mapped, ts: now });
     return mapped;
   }
