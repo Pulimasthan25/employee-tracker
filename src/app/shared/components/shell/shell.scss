@@ -240,9 +240,11 @@
     border-radius: 12px;
   }
 
-  &:hover:not(.active) {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.05);
+  @media (hover: hover) {
+    &:hover:not(.active) {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
   }
 
   &.active {
