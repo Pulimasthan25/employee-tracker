@@ -31,7 +31,7 @@
   }
 }
 
-/* ── HUD card — pure flex column, no absolute layout children ── */
+/* ── HUD card — pure flex column ── */
 .il-hud {
   position: relative;
   padding: 44px 52px;
@@ -40,21 +40,6 @@
   align-items: center;
   gap: 0;
 }
-
-/* Four corner L-brackets via pseudo + extra spans */
-.il-hud::before,
-.il-hud::after,
-.il-corner {
-  content: '';
-  position: absolute;
-  width: 20px; height: 20px;
-  border-color: rgba(79, 142, 247, 0.5);
-  border-style: solid;
-}
-.il-hud::before   { top: 0;    left: 0;  border-width: 2px 0 0 2px; }
-.il-hud::after    { top: 0;    right: 0; border-width: 2px 2px 0 0; }
-.il-corner--br    { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
-.il-corner--bl    { bottom: 0; left: 0;  border-width: 0 0 2px 2px; }
 
 /* ── Logo icon ── */
 .il-logo-wrap {

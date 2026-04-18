@@ -12,8 +12,6 @@ import { filter } from 'rxjs';
     @if (!authService.authReady() || isInitialLoading()) {
       <div class="initial-loader">
         <div class="il-hud">
-          <span class="il-corner il-corner--br"></span>
-          <span class="il-corner il-corner--bl"></span>
 
           <div class="il-logo-wrap">
             <svg class="il-logo-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

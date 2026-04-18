@@ -7,7 +7,10 @@ import {
   untracked,
   computed,
   input,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, type AppUser } from '../../../core/services/auth.service';
@@ -39,13 +42,14 @@ interface TimelineRow {
 @Component({
   selector: 'app-timeline',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DatePipe],
   templateUrl: './timeline.html',
   styleUrl: './timeline.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeIn, staggerFadeIn, scaleIn]
 })
 export class TimelineReport {
+  @ViewChild('datePickerInput') datePickerInput!: ElementRef<HTMLInputElement>;
   private readonly auth = inject(AuthService);
   private readonly employeeApi = inject(EmployeeService);
   private readonly activityService = inject(ActivityService);
@@ -298,4 +302,10 @@ export class TimelineReport {
 
   setDate(val: string): void { this.selectedDate.set(val); }
   setUser(val: string): void { this.selectedUserId.set(val); }
+
+  openDatePicker(): void {
+    const input = this.datePickerInput?.nativeElement;
+    if (!input) return;
+    try { (input as any).showPicker(); } catch { input.focus(); input.click(); }
+  }
 }

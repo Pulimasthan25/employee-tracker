@@ -7,7 +7,10 @@ import {
   untracked,
   ChangeDetectionStrategy,
   HostListener,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScreenshotService, Screenshot } from '../../../core/services/screenshot.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -17,13 +20,14 @@ import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../../shared/anima
 
 @Component({
   selector: 'app-timeline',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './timeline.html',
   styleUrl: './timeline.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeIn, staggerFadeIn, scaleIn, slideInUp]
 })
 export class Timeline {
+  @ViewChild('datePickerInput') datePickerInput!: ElementRef<HTMLInputElement>;
   private readonly screenshotService = inject(ScreenshotService);
   private readonly auth = inject(AuthService);
   private readonly employeeService = inject(EmployeeService);
@@ -186,6 +190,12 @@ export class Timeline {
 
   setDate(val: string): void { this.selectedDate.set(val); }
   setUser(val: string): void { this.selectedUserId.set(val); }
+
+  openDatePicker(): void {
+    const input = this.datePickerInput?.nativeElement;
+    if (!input) return;
+    try { (input as any).showPicker(); } catch { input.focus(); input.click(); }
+  }
 
   shiftDate(delta: number): void {
     const [y, m, d] = this.selectedDate().split('-').map(Number);

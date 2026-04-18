@@ -53,7 +53,7 @@
         bottom: 15%; right: 20%;
       }
 
-      /* ── HUD corner brackets ── */
+      /* ── HUD card — pure flex column ── */
       .ps-hud {
         position: relative;
         padding: 44px 52px;
@@ -62,20 +62,6 @@
         align-items: center;
         gap: 0;
       }
-
-      /* four corner L-brackets */
-      .ps-hud::before, .ps-hud::after,
-      .ps-corner-br, .ps-corner-bl {
-        content: '';
-        position: absolute;
-        width: 20px; height: 20px;
-        border-color: rgba(79,142,247,0.5);
-        border-style: solid;
-      }
-      .ps-hud::before  { top:0;    left:0;  border-width: 2px 0 0 2px; }
-      .ps-hud::after   { top:0;    right:0; border-width: 2px 2px 0 0; }
-      .ps-corner-br    { bottom:0; right:0; border-width: 0 2px 2px 0; }
-      .ps-corner-bl    { bottom:0; left:0;  border-width: 0 0 2px 2px; }
 
       /* ── Logo icon — SVG draw-on animation ── */
       .ps-logo-wrap {
@@ -216,8 +202,6 @@
 
     <div id="ps">
       <div class="ps-hud">
-        <span class="ps-corner-br"></span>
-        <span class="ps-corner-bl"></span>
 
         <!-- Logo with SVG draw-on bolt -->
         <div class="ps-logo-wrap">
