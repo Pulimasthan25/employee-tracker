@@ -194,6 +194,13 @@ export class Overview {
     effect(() => {
       const ready = this.authService.authReady();
       if (!ready) return;
+      
+      // For non-admins, ensure the selected ID is their own
+      if (!this.isAdmin()) {
+        const uid = this.authService.firebaseUser()?.uid;
+        if (uid) untracked(() => this.selectedEmployeeId.set(uid));
+      }
+
       untracked(() => {
         void this.loadEmployees();
         void this.loadActiveShift();

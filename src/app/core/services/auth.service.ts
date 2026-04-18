@@ -44,7 +44,16 @@ export class AuthService {
       this.firebaseUser.set(user);
       if (user) {
         const snap = await getDoc(doc(db, 'users', user.uid));
-        this.appUser.set(snap.exists() ? snap.data() as AppUser : null);
+        if (snap.exists()) {
+          const data = snap.data() as any;
+          this.appUser.set({
+            ...data,
+            uid: snap.id,
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt)
+          } as AppUser);
+        } else {
+          this.appUser.set(null);
+        }
         // Align Auth custom claims with Firestore role (promote/demote) without manual scripts.
         void this.claimsSync.syncSelf();
       } else {

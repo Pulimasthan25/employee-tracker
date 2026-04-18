@@ -201,9 +201,11 @@ export class TimelineReport {
 
     const rows: TimelineRow[] = [];
     const usersToProcess = uid === 'all' ? [...employees] : employees.filter((e) => e.uid === uid);
-    if (usersToProcess.length === 0 && uid !== 'all') {
+    if (usersToProcess.length === 0) {
       const u = this.auth.appUser();
-      if (u) usersToProcess.push(u);
+      if (u && (uid === u.uid || (uid === 'all' && !this.isAdmin()))) {
+        usersToProcess.push(u);
+      }
     }
 
     for (const user of usersToProcess) {
