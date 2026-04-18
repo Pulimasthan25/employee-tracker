@@ -106,7 +106,7 @@
         &::before {
           content: '';
           position: absolute;
-          bottom: calc(100% + 4px);
+          bottom: calc(100%);
           right: 12px;
           border: 6px solid transparent;
           border-top-color: rgba(15, 17, 23, 0.95);
@@ -152,9 +152,11 @@
     0% {
       box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
     }
+
     70% {
       box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
     }
+
     100% {
       box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
     }
@@ -206,12 +208,14 @@
     &::after {
       content: "";
       position: absolute;
-      top: 0; right: 0; bottom: 0; left: 0;
-      background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 255, 255, 0.12), 
-        transparent
-      );
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(255, 255, 255, 0.12),
+          transparent);
       animation: shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
@@ -225,12 +229,14 @@
     &::after {
       content: "";
       position: absolute;
-      top: 0; right: 0; bottom: 0; left: 0;
-      background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 255, 255, 0.12), 
-        transparent
-      );
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(255, 255, 255, 0.12),
+          transparent);
       animation: shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
@@ -254,20 +260,27 @@
     &::after {
       content: "";
       position: absolute;
-      top: 0; right: 0; bottom: 0; left: 0;
-      background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 255, 255, 0.12), 
-        transparent
-      );
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(255, 255, 255, 0.12),
+          transparent);
       animation: shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 
