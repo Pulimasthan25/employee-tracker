@@ -41,6 +41,8 @@
     width: 100%;
     overflow-x: auto;
     border-radius: 12px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.05);
 
     &::-webkit-scrollbar {
       display: none;
@@ -89,8 +91,19 @@
   @media (max-width: 768px) {
     flex: 1;
     justify-content: center;
-    padding: 8px 12px;
+    padding: 10px 14px;
     font-size: 0.8125rem;
+    border-radius: 10px;
+
+    &--active {
+      background: var(--accent, #4f8ef7);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+      svg {
+        color: #fff;
+      }
+    }
   }
 }
 

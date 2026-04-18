@@ -62,8 +62,11 @@
   </div>
 
   <section class="overview__timeline-section">
-    <div class="sk-frosted sk-text" style="width: 180px; height: 20px; margin-bottom: 12px;"></div>
-    <app-timeline [hideToolbar]="true" [externalLoading]="true"></app-timeline>
+    <div class="overview__timeline-header">
+      <div class="sk-frosted sk-text" style="width: 180px; height: 20px; margin-bottom: 0;"></div>
+      <div class="sk-frosted sk-text" style="width: 100px; height: 16px; margin-bottom: 0;"></div>
+    </div>
+    <app-timeline [hideToolbar]="true" [externalLoading]="true" [externalActivities]="[]"></app-timeline>
   </section>
 
   <div class="overview__table-wrap">

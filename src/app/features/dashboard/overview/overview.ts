@@ -231,7 +231,12 @@ export class Overview {
 
     try {
       if (this.isAdmin()) {
-        const logs = await this.activityService.getTeamActivitySummary(from, to);
+        // Wait for both logs and employees if we haven't loaded them yet
+        const [logs] = await Promise.all([
+          this.activityService.getTeamActivitySummary(from, to),
+          this.loadEmployees()
+        ]);
+
         this.allLogs.set(logs);
         this.applyEmployeeFilter();
         this.loading.set(false);
