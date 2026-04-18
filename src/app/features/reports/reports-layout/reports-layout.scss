@@ -96,12 +96,12 @@
     border-radius: 10px;
 
     &--active {
-      background: var(--accent, #4f8ef7);
+      background: rgba(255, 255, 255, 0.12);
       color: #fff;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 
       svg {
-        color: #fff;
+        color: #fbbf24;
       }
     }
   }

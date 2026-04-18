@@ -3,10 +3,9 @@
   <!-- Toolbar -->
   <div class="timeline__toolbar">
     <div class="timeline__filters">
-      <div class="timeline__nav">
+      <div class="timeline__date-nav">
         <button type="button" class="timeline__nav-btn" (click)="shiftDate(-1)" aria-label="Previous day">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
@@ -19,31 +18,30 @@
             </svg>
           </button>
           <input #datePickerInput type="date" class="timeline__date-input"
-            [value]="selectedDate()" (change)="setDate($any($event.target).value)" aria-label="Select date" />
+            [value]="selectedDate()" [max]="todayMax()" (change)="setDate($any($event.target).value)" aria-label="Select date" />
         </div>
         <button type="button" class="timeline__nav-btn" (click)="shiftDate(1)" [disabled]="isToday()"
           aria-label="Next day">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </button>
-        @if (!isToday()) {
-        <button type="button" class="btn btn--ghost timeline__today-btn" (click)="goToday()" @scaleIn>Today</button>
-        }
       </div>
 
+      @if (!isToday()) {
+        <button type="button" class="timeline__today-pill" (click)="goToday()" @scaleIn>Today</button>
+      }
+
       @if (isAdmin()) {
-      <div class="timeline__user-select">
-        <label for="employee-select" class="timeline__select-label">Employee</label>
-        <select id="employee-select" class="timeline__select" [value]="selectedUserId()"
-          (change)="setUser($any($event.target).value)">
-          <option value="all">All employees</option>
-          @for (emp of employees(); track emp.uid) {
-          <option [value]="emp.uid">{{ emp.displayName || emp.email }}</option>
-          }
-        </select>
-      </div>
+        <div class="timeline__user-select">
+          <select id="employee-select" class="timeline__select" [value]="selectedUserId()"
+            (change)="setUser($any($event.target).value)">
+            <option value="all">All employees</option>
+            @for (emp of employees(); track emp.uid) {
+              <option [value]="emp.uid">{{ emp.displayName || emp.email }}</option>
+            }
+          </select>
+        </div>
       }
     </div>
 

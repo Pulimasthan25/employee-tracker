@@ -155,6 +155,10 @@ export class Timeline {
     return `${y}-${m}-${day}`;
   }
 
+  todayMax(): string {
+    return this.todayString();
+  }
+
   // ── Public helpers ────────────────────────────────────────────────────────
 
   getEmployeeName(userId: string): string {
@@ -188,27 +192,40 @@ export class Timeline {
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
-  setDate(val: string): void { this.selectedDate.set(val); }
+  setDate(val: string): void { 
+    const max = this.todayString();
+    this.selectedDate.set(val > max ? max : val);
+  }
   setUser(val: string): void { this.selectedUserId.set(val); }
 
   openDatePicker(): void {
     const input = this.datePickerInput?.nativeElement;
     if (!input) return;
-    try { (input as any).showPicker(); } catch { input.focus(); input.click(); }
+    try {
+      (input as any).showPicker();
+    } catch {
+      input.focus();
+      input.click();
+    }
   }
 
   shiftDate(delta: number): void {
+    if (delta > 0 && this.isToday()) return;
     const [y, m, d] = this.selectedDate().split('-').map(Number);
     const date = new Date(y, m - 1, d + delta);
     const yy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
-    this.selectedDate.set(`${yy}-${mm}-${dd}`);
+    const next = `${yy}-${mm}-${dd}`;
+    const max = this.todayString();
+    this.selectedDate.set(next > max ? max : next);
   }
 
   goToday(): void { this.selectedDate.set(this.todayString()); }
 
-  isToday(): boolean { return this.selectedDate() === this.todayString(); }
+  isToday(): boolean { 
+    return this.selectedDate() === this.todayString();
+  }
 
   openLightbox(shot: Screenshot): void {
     const shots = this.byHour().get(shot.capturedAt.getHours()) ?? [];
