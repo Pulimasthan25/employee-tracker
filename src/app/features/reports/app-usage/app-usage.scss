@@ -18,13 +18,115 @@
   width: 200px;
 }
 
-.report__table-row--browser {
-  cursor: pointer;
-  &:hover td { background: var(--bg-hover); }
+.report__table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
-.report__table-row--child td {
-  background: var(--bg-surface);
+.report__table {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+}
+
+.report__table-header {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 1fr 2fr;
+  gap: var(--space-xl);
+  padding: 0 var(--space-md) var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 2fr 1fr 1.5fr;
+    & > *:last-child { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr auto;
+    gap: var(--space-md);
+    padding: 0;
+    & > *:nth-child(2),
+    & > *:nth-child(4) { display: none; }
+  }
+}
+
+.report__table-row {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 1fr 2fr;
+  gap: var(--space-xl);
+  align-items: center;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  padding: var(--space-sm) var(--space-md);
+  transition: all var(--transition-fast);
+  border-bottom: 1px solid var(--border);
+  cursor: default;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--browser {
+    cursor: pointer;
+    &:hover { background: var(--bg-hover); }
+  }
+
+  &--child {
+    background: var(--bg-surface);
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 2fr 1fr 1.5fr;
+    .report__table-cell--bar { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr auto;
+    padding: var(--space-md) 0;
+    & > *:nth-child(2),
+    & > *:nth-child(4) { display: none; }
+  }
+}
+
+.report__table-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+
+  &--name {
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  &--time {
+    font-family: 'DM Mono', monospace;
+    color: var(--text-secondary);
+  }
+
+  &--bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  &--indented {
+    padding-left: 0;
+  }
 }
 
 .report__chevron {
@@ -51,7 +153,7 @@
   &::before {
     content: '';
     position: absolute;
-    left: 14px; top: 0; bottom: 0;
+    left: 14px; top: -14px; bottom: 0;
     width: 1px;
     background: var(--border);
   }
@@ -72,4 +174,74 @@
   font-size: 0.6875rem;
   font-family: 'DM Mono', monospace;
   color: var(--text-muted);
+}
+
+.report__progress-wrap {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-hover);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.report__progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-normal);
+
+  &--child {
+    background: var(--text-muted);
+  }
+}
+
+.report__progress-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  min-width: 3rem;
+}
+
+.report__table-title {
+  margin: 0 0 var(--space-md);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+
+  &::before {
+    content: '';
+    width: 3px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+}
+
+.report__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 4rem var(--space-lg);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.report__table-row--skeleton {
+  pointer-events: none;
+  .skeleton-block {
+    height: 14px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-card) 50%, var(--bg-hover) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite linear;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

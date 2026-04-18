@@ -70,32 +70,32 @@
         </div>
       </div>
       <div class="reports-dashboard__card" @slideInUp>
-        <div class="reports-dashboard__card-label">Range</div>
-        <div class="reports-dashboard__card-value reports-dashboard__card-value--sm" style="color: var(--text-muted)">
-          {{ selectedRange() }}
+        <div class="reports-dashboard__card-label">Unique Apps</div>
+        <div class="reports-dashboard__card-value" style="color: var(--text-muted)">
+          {{ uniqueAppsCount() }}
         </div>
       </div>
     </div>
 
     <div class="reports-dashboard__charts">
       @if (logs().length === 0) {
-        <div class="chart-placeholder" style="grid-column: 1 / -1; min-height: 280px; gap: 16px;">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M3 3v18h18" />
-            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-          </svg>
-          <span>No usage data to visualize</span>
-        </div>
+      <div class="chart-placeholder" style="grid-column: 1 / -1; min-height: 280px; gap: 16px;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 3v18h18" />
+          <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+        </svg>
+        <span>No usage data to visualize</span>
+      </div>
       } @else {
-        <div class="reports-dashboard__chart reports-dashboard__chart--doughnut" @scaleIn>
-          <canvas id="productivity-chart"></canvas>
+      <div class="reports-dashboard__chart reports-dashboard__chart--doughnut" @scaleIn>
+        <canvas id="productivity-chart"></canvas>
+      </div>
+      <div class="reports-dashboard__chart reports-dashboard__chart--bar" @scaleIn>
+        <div class="reports-dashboard__chart-header">
+          <span class="reports-dashboard__chart-title">{{ chartTitle() }}</span>
         </div>
-        <div class="reports-dashboard__chart reports-dashboard__chart--bar" @scaleIn>
-          <div class="reports-dashboard__chart-header">
-            <span class="reports-dashboard__chart-title">{{ chartTitle() }}</span>
-          </div>
-          <canvas id="activity-chart"></canvas>
-        </div>
+        <canvas id="activity-chart"></canvas>
+      </div>
       }
     </div>
 
@@ -106,4 +106,6 @@
     }
   </div>
   }
+  <app-app-usage [externalLogs]="logs()" [externalLoading]="loading()" [hideHeader]="true" title="Top apps">
+  </app-app-usage>
 </div>

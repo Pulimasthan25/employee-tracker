@@ -1,10 +1,10 @@
-import { Component, ChangeDetectionStrategy, signal, computed, inject, effect, untracked, ElementRef, viewChild, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, effect, untracked, ElementRef, viewChild, OnDestroy, input } from '@angular/core';
 import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AuthService, AppUser } from '../../../core/services/auth.service';
 import { ActivityService, type ActivityLog, type DisplayRow } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { FormsModule } from '@angular/forms';
-import { fadeIn, staggerFadeIn, scaleIn } from '../../../shared/animations';
+import { fadeIn, staggerFadeIn, scaleIn, expandVertical } from '../../../shared/animations';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -12,10 +12,17 @@ Chart.register(...registerables);
 type ChartRow = { appName: string; totalSeconds: number; category: 'productive' | 'unproductive' | 'neutral' };
 
 function formatDuration(seconds: number): string {
-  if (!seconds) return '0h 0m';
+  if (!seconds) return '0s';
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  return `${h}h ${m}m`;
+  const s = Math.floor(seconds % 60);
+  
+  const parts: string[] = [];
+  if (h > 0) parts.push(`${h}h`);
+  if (m > 0) parts.push(`${m}m`);
+  if (s > 0 || (h === 0 && m === 0)) parts.push(`${s}s`);
+  
+  return parts.join(' ');
 }
 
 @Component({
@@ -24,7 +31,7 @@ function formatDuration(seconds: number): string {
   templateUrl: './app-usage.html',
   styleUrl: './app-usage.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeIn, staggerFadeIn, scaleIn]
+  animations: [fadeIn, staggerFadeIn, scaleIn, expandVertical]
 })
 export class AppUsage implements OnDestroy {
   private readonly auth = inject(AuthService);
@@ -34,7 +41,19 @@ export class AppUsage implements OnDestroy {
   readonly chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
   private chartInstance: Chart | null = null;
 
-  readonly data = signal<DisplayRow[]>([]);
+  // Optional inputs for when used as a child component
+  externalLogs = input<ActivityLog[] | null>(null);
+  externalLoading = input<boolean | null>(null);
+  hideHeader = input<boolean>(false);
+  title = input<string>("");
+
+  readonly _internalData = signal<DisplayRow[]>([]);
+  readonly data = computed(() => {
+    const ext = this.externalLogs();
+    if (ext !== null) return this.activity.groupForDisplay(ext);
+    return this._internalData();
+  });
+
   readonly chartRows = computed(() =>
     this.data()
       .flatMap((row) =>
@@ -55,7 +74,13 @@ export class AppUsage implements OnDestroy {
       .sort((a, b) => b.totalSeconds - a.totalSeconds)
       .slice(0, 10)
   );
-  readonly loading = signal(true);
+
+  readonly _internalLoading = signal(true);
+  readonly loading = computed(() => {
+    const ext = this.externalLoading();
+    return ext !== null ? ext : this._internalLoading();
+  });
+
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
   readonly selectedEmployee = signal<string>('all');
   readonly employees = signal<AppUser[]>([]);
@@ -68,8 +93,9 @@ export class AppUsage implements OnDestroy {
       const ready = this.auth.authReady();
       const range = this.dateRange();
       const selEmp = this.selectedEmployee();
+      const extLogs = this.externalLogs();
       
-      if (ready && range) {
+      if (ready && range && extLogs === null) {
         untracked(() => {
           this.loadData();
         });
@@ -88,7 +114,7 @@ export class AppUsage implements OnDestroy {
   }
 
   async loadData() {
-    this.loading.set(true);
+    this._internalLoading.set(true);
     try {
       if (this.auth.isAdmin() && this.employees().length === 0) {
         const users = await this.employee.getAll();
@@ -113,9 +139,9 @@ export class AppUsage implements OnDestroy {
         }
       }
 
-      this.data.set(this.activity.groupForDisplay(logs));
+      this._internalData.set(this.activity.groupForDisplay(logs));
     } finally {
-      this.loading.set(false);
+      this._internalLoading.set(false);
     }
   }
 

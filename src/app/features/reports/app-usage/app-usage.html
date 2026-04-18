@@ -1,6 +1,6 @@
 <div class="report" @fadeIn>
+@if (!hideHeader()) {
   <div class="report__header">
-    <!-- <h2>App usage report</h2> -->
     <app-date-range (rangeChange)="onRangeChange($event)" />
 
     @if (isAdmin()) {
@@ -13,6 +13,7 @@
     </select>
     }
   </div>
+}
 
   <div class="report__card" style="padding: 24px;" @scaleIn>
     <div style="height: 300px; width: 100%;">
@@ -34,100 +35,112 @@
     </div>
   </div>
 
-  <div class="report__card" @scaleIn>
-    <table class="report__table">
-      <thead>
-        <tr>
-          <th>App / Site</th>
-          <th>Category</th>
-          <th>Total time</th>
-          <th>% of total</th>
-        </tr>
-      </thead>
-      <tbody [@staggerFadeIn]="data().length">
+  <div class="report__table-wrap" @scaleIn>
+    @if (title()) {
+      <h3 class="report__table-title">{{ title() }}</h3>
+    }
+    <div class="report__table">
+      <!-- Header -->
+      <div class="report__table-header">
+        <span class="report__table-cell">App / Site</span>
+        <span class="report__table-cell">Category</span>
+        <span class="report__table-cell">Time</span>
+        <span class="report__table-cell report__table-cell--bar">% of total</span>
+      </div>
+
+      <!-- Body -->
+      <div [@staggerFadeIn]="data().length">
         @if (loading()) {
-        <tr>
-          <td colspan="4">
-            <div class="skeleton-row"></div>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="4">
-            <div class="skeleton-row"></div>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="4">
-            <div class="skeleton-row"></div>
-          </td>
-        </tr>
+        @for (i of [1,2,3]; track i) {
+        <div class="report__table-row report__table-row--skeleton">
+          <div class="skeleton-block" style="flex: 2.5"></div>
+          <div class="skeleton-block" style="flex: 1"></div>
+          <div class="skeleton-block" style="flex: 1"></div>
+          <div class="skeleton-block" style="flex: 2"></div>
+        </div>
+        }
         } @else {
         @for (row of data(); track row.appName) {
-        <tr [class.report__table-row--browser]="row.type === 'browser'" (click)="row.type === 'browser' && row.children.length > 0
-                         ? toggleBrowser(row.appName) : null">
-          <td style="font-weight: 500;">
-            <span style="display:flex;align-items:center">
-              @if (row.type === 'browser' && row.children.length > 0) {
-              <span class="report__chevron" [class.report__chevron--open]="isExpanded(row.appName)">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </span>
-              } @else {
-              <span class="report__chevron-placeholder"></span>
-              }
-              {{ row.appName }}
-              @if (row.type === 'browser' && row.siteCount > 0) {
-              <span class="report__site-count">{{ row.siteCount }}</span>
-              }
+        <div class="report__table-row" [class.report__table-row--browser]="row.type === 'browser'"
+          [class.report__table-row--expanded]="isExpanded(row.appName)" (click)="row.type === 'browser' && row.children.length > 0
+                           ? toggleBrowser(row.appName) : null">
+          <span class="report__table-cell report__table-cell--name">
+            @if (row.type === 'browser' && row.children.length > 0) {
+            <span class="report__chevron" [class.report__chevron--open]="isExpanded(row.appName)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </span>
-          </td>
-          <td>
+            } @else {
+            <span class="report__chevron-placeholder"></span>
+            }
+            {{ row.appName }}
+            @if (row.type === 'browser' && row.siteCount > 0) {
+            <span class="report__site-count">{{ row.siteCount }}</span>
+            }
+          </span>
+          <span class="report__table-cell">
             <span class="badge badge--{{ row.category }}">
               {{ row.category }}
             </span>
-          </td>
-          <td>{{ formatDurationStr(row.totalSeconds) }}</td>
-          <td>{{ getPercentage(row.totalSeconds) }}</td>
-        </tr>
+          </span>
+          <span class="report__table-cell report__table-cell--time">
+            {{ formatDurationStr(row.totalSeconds) }}
+          </span>
+          <span class="report__table-cell report__table-cell--bar">
+            <div class="report__progress-wrap">
+              <div class="report__progress-fill" [style.width]="getPercentage(row.totalSeconds)"></div>
+            </div>
+            <span class="report__progress-label">
+              {{ getPercentage(row.totalSeconds) }}
+            </span>
+          </span>
+        </div>
 
         @if (row.type === 'browser' && isExpanded(row.appName)) {
-        @for (child of row.children; track child.appName) {
-        <tr class="report__table-row--child">
-          <td>
-            <span style="display:flex;align-items:center">
+        <div class="report__child-rows" @expandVertical>
+          @for (child of row.children; track child.appName) {
+          <div class="report__table-row report__table-row--child">
+            <span class="report__table-cell report__table-cell--name
+                                   report__table-cell--indented">
               <span class="report__group-line"></span>
               {{ child.appName }}
             </span>
-          </td>
-          <td>
-            <span class="badge badge--{{ child.category }}">
-              {{ child.category }}
+            <span class="report__table-cell">
+              <span class="badge badge--{{ child.category }}">
+                {{ child.category }}
+              </span>
             </span>
-          </td>
-          <td>{{ formatDurationStr(child.totalSeconds) }}</td>
-          <td>{{ child.percentOfTotal }}%</td>
-        </tr>
-        }
+            <span class="report__table-cell report__table-cell--time">
+              {{ formatDurationStr(child.totalSeconds) }}
+            </span>
+            <span class="report__table-cell report__table-cell--bar">
+              <div class="report__progress-wrap">
+                <div class="report__progress-fill report__progress-fill--child"
+                  [style.width.%]="child.percentOfTotal"></div>
+              </div>
+              <span class="report__progress-label">
+                {{ child.percentOfTotal }}%
+              </span>
+            </span>
+          </div>
+          }
+        </div>
         }
         } @empty {
-        <tr>
-          <td colspan="4" class="empty-state-cell">
-            <div class="empty-state">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-              </svg>
-              <p>No app usage recorded for this period.</p>
-            </div>
-          </td>
-        </tr>
+        <div class="report__empty-state">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <p>No app usage recorded for this period.</p>
+        </div>
         }
         }
-      </tbody>
-    </table>
+      </div>
+    </div>
   </div>
 </div>

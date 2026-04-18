@@ -14,7 +14,6 @@ export const REPORT_ROUTES: Routes = [
           { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard').then(m => m.ReportsDashboard) },
           { path: 'productivity', loadComponent: () => import('./productivity/productivity').then(m => m.Productivity) },
           { path: 'timeline', redirectTo: 'dashboard', pathMatch: 'full' },
-          { path: 'apps', loadComponent: () => import('./app-usage/app-usage').then(m => m.AppUsage) },
           { path: 'urls', loadComponent: () => import('./url-usage/url-usage').then(m => m.UrlUsage) },
           {
             path: 'attendance',

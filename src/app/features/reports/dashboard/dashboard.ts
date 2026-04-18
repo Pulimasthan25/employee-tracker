@@ -12,32 +12,32 @@ import {
 } from '@angular/core';
 import Chart from 'chart.js/auto';
 
-import type { ActivityLog } from '../../../core/services/activity.service';
+import type { ActivityLog, DisplayRow } from '../../../core/services/activity.service';
 import { ActivityService } from '../../../core/services/activity.service';
 import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
-import { fadeIn, slideInUp, staggerFadeIn, scaleIn } from '../../../shared/animations';
+import { fadeIn, slideInUp, staggerFadeIn, scaleIn, expandVertical } from '../../../shared/animations';
 import { DateRange } from '../../../shared/components/date-range/date-range';
+import { AppUsage } from '../app-usage/app-usage';
 
 function formatDuration(seconds: number): string {
-  if (seconds <= 0) return '0s';
-  if (seconds < 60) return `${Math.round(seconds)}s`;
+  if (!seconds) return '0s';
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.round(seconds % 60);
-  if (h === 0) return s > 0 ? `${m}m ${s}s` : `${m}m`;
-  return s > 0 ? `${h}h ${m}m ${s}s` : (m > 0 ? `${h}h ${m}m` : `${h}h`);
+  const s = Math.floor(seconds % 60);
+  
+  const parts: string[] = [];
+  if (h > 0) parts.push(`${h}h`);
+  if (m > 0) parts.push(`${m}m`);
+  if (s > 0 || (h === 0 && m === 0)) parts.push(`${s}s`);
+  
+  return parts.join(' ');
 }
 
 function formatHours(seconds: number): string {
-  if (seconds <= 0) return '0s';
-  if (seconds < 60) return `${Math.round(seconds)}s`;
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h === 0) return `${m}m`;
-  return `${h}h ${m > 0 ? m + 'm' : ''}`;
+  return formatDuration(seconds);
 }
 
 function getDateRange(
@@ -68,11 +68,11 @@ function getDateRange(
 @Component({
   selector: 'app-reports-dashboard',
   standalone: true,
-  imports: [DateRange],
+  imports: [DateRange, AppUsage],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeIn, slideInUp, staggerFadeIn, scaleIn]
+  animations: [fadeIn, slideInUp, staggerFadeIn, scaleIn, expandVertical]
 })
 export class ReportsDashboard implements OnDestroy {
   private activityService = inject(ActivityService);
@@ -138,6 +138,11 @@ export class ReportsDashboard implements OnDestroy {
   dailyData = computed(() => {
     const { from, to } = this.currentRangeDates();
     return this.activityService.groupByDay(this.logs(), from, to);
+  });
+
+  uniqueAppsCount = computed(() => {
+    const groups = this.activityService.groupForDisplay(this.logs());
+    return groups.length;
   });
 
   chartLabels = computed(() => {
