@@ -29,7 +29,7 @@ export class SettingsLayout {
 
   readonly showTabs = computed(() => {
     const url = this.currentUrl();
-    return url === '/settings/employees' || url === '/settings/productivity';
+    return url === '/settings/employees' || url === '/settings/productivity' || url === '/settings/agents';
   });
 
   readonly primaryAction = this.settingsService.primaryAction;

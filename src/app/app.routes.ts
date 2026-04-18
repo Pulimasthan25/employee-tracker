@@ -27,6 +27,12 @@ export const routes: Routes = [
     data: { animation: 'ReportsPage' }
   },
   {
+    path: 'realtime',
+    loadChildren: () => import('./features/realtime/realtime.routes').then(m => m.REALTIME_ROUTES),
+    canActivate: [authGuard, adminGuard],
+    data: { animation: 'RealtimePage' }
+  },
+  {
     path: 'settings',
     loadChildren: () => import('./features/settings/settings.routes').then(m => m.SETTINGS_ROUTES),
     canActivate: [authGuard, adminGuard],

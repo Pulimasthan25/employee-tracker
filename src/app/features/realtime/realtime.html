@@ -1,0 +1,39 @@
+<div class="real-stream-page">
+  <header class="stream-header">
+    <div class="title-box">
+      <div class="live-dot pulse"></div>
+      <h2>Live Operations Stream</h2>
+    </div>
+    <div class="stream-meta glass">
+      <span class="meta-label">Monitoring</span>
+      <span class="meta-value">{{ agents().length }} Active Nodes</span>
+    </div>
+  </header>
+
+  <div class="stream-layout glass">
+    <div class="stream-container">
+      @for (item of feed(); track item.id) {
+        <div class="stream-row" [class.new-item]="true">
+          <div class="stream-row__time">{{ item.timestamp | date:'HH:mm:ss' }}</div>
+          <div class="stream-row__details">
+            <div class="stream-row__user">{{ item.userName }}</div>
+            <div class="stream-row__action">
+              <span class="app-tag">{{ item.appName }}</span>
+              <span class="window-title">{{ item.windowTitle || 'System Activity' }}</span>
+            </div>
+          </div>
+          <div class="stream-row__status">
+            <div class="cat-indicator" [attr.data-category]="item.category" [title]="item.category"></div>
+          </div>
+        </div>
+      } @empty {
+        <div class="stream-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <p>Waiting for live agent telemetry...</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
