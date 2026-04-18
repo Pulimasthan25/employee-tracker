@@ -17,39 +17,241 @@
 
 <body>
   <app-root>
-    <div style="
-          position: fixed;
-          inset: 0;
-          background: #0f1117;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          gap: 16px;
-        ">
-      <div style="
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #4f8ef7;
-            box-shadow: 0 0 12px #4f8ef7;
-            animation: p 1.2s ease-in-out infinite;
-          "></div>
-      <style>
-        @keyframes p {
+    <style>
+      /* ── Reset ── */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-          0%,
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
+      /* ── Full-screen shell ── */
+      #ps {
+        position: fixed;
+        inset: 0;
+        background: #0b0d14;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Courier New', monospace;
+        overflow: hidden;
+      }
 
-          50% {
-            opacity: 0.3;
-            transform: scale(0.7);
-          }
-        }
-      </style>
+      /* ── Ambient glow blobs ── */
+      #ps::before, #ps::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        pointer-events: none;
+      }
+      #ps::before {
+        width: 400px; height: 400px;
+        background: rgba(79,142,247,0.07);
+        top: 50%; left: 50%;
+        transform: translate(-50%, -60%);
+      }
+      #ps::after {
+        width: 300px; height: 200px;
+        background: rgba(168,85,247,0.05);
+        bottom: 15%; right: 20%;
+      }
+
+      /* ── HUD corner brackets ── */
+      .ps-hud {
+        position: relative;
+        padding: 44px 52px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      /* four corner L-brackets */
+      .ps-hud::before, .ps-hud::after,
+      .ps-corner-br, .ps-corner-bl {
+        content: '';
+        position: absolute;
+        width: 20px; height: 20px;
+        border-color: rgba(79,142,247,0.5);
+        border-style: solid;
+      }
+      .ps-hud::before  { top:0;    left:0;  border-width: 2px 0 0 2px; }
+      .ps-hud::after   { top:0;    right:0; border-width: 2px 2px 0 0; }
+      .ps-corner-br    { bottom:0; right:0; border-width: 0 2px 2px 0; }
+      .ps-corner-bl    { bottom:0; left:0;  border-width: 0 0 2px 2px; }
+
+      /* ── Logo icon — SVG draw-on animation ── */
+      .ps-logo-wrap {
+        width: 72px; height: 72px;
+        border-radius: 20px;
+        background: linear-gradient(145deg, #3b7de8 0%, #2557c7 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 0 0 1px rgba(79,142,247,0.3),
+          0 0 24px rgba(79,142,247,0.35),
+          0 0 60px rgba(79,142,247,0.10);
+        animation: logo-breathe 2.6s ease-in-out infinite;
+      }
+
+      @keyframes logo-breathe {
+        0%,100% { box-shadow: 0 0 0 1px rgba(79,142,247,0.3), 0 0 24px rgba(79,142,247,0.35), 0 0 60px rgba(79,142,247,0.10); }
+        50%      { box-shadow: 0 0 0 1px rgba(79,142,247,0.5), 0 0 36px rgba(79,142,247,0.55), 0 0 90px rgba(79,142,247,0.18); }
+      }
+
+      .ps-logo-svg {
+        width: 36px; height: 36px;
+      }
+
+      /* Stroke draw-on for the bolt */
+      .ps-bolt {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 60;
+        stroke-dashoffset: 60;
+        animation: bolt-draw 0.8s cubic-bezier(0.4,0,0.2,1) 0.15s forwards;
+      }
+
+      /* After drawing, fill fades in */
+      .ps-bolt-fill {
+        fill: #fff;
+        opacity: 0;
+        animation: fill-in 0.4s ease 0.9s forwards;
+      }
+
+      @keyframes bolt-draw { to { stroke-dashoffset: 0; } }
+      @keyframes fill-in   { to { opacity: 1; } }
+
+      /* ── Wordmark ── */
+      .ps-name {
+        margin-top: 22px;
+        font-size: 1.75rem;
+        font-weight: 900;
+        letter-spacing: 0.5em;
+        text-indent: 0.5em; /* compensate for letter-spacing on last char */
+        color: #fff;
+        opacity: 0;
+        animation: fade-up 0.5s ease 0.7s forwards;
+      }
+
+      /* ── Waveform bars ── */
+      .ps-wave {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 20px;
+        height: 24px;
+        opacity: 0;
+        animation: fade-up 0.5s ease 0.85s forwards;
+      }
+
+      .ps-bar {
+        width: 3px;
+        border-radius: 2px;
+        background: #4f8ef7;
+        animation: bar-wave var(--d, 0.9s) ease-in-out var(--delay, 0s) infinite alternate;
+      }
+
+      .ps-bar:nth-child(1)  { --d:0.7s; --delay:0.0s; height:6px;  }
+      .ps-bar:nth-child(2)  { --d:0.9s; --delay:0.1s; height:14px; }
+      .ps-bar:nth-child(3)  { --d:0.6s; --delay:0.2s; height:20px; background:#7cb4fb; }
+      .ps-bar:nth-child(4)  { --d:1.1s; --delay:0.05s;height:10px; }
+      .ps-bar:nth-child(5)  { --d:0.8s; --delay:0.15s;height:18px; background:#7cb4fb; }
+      .ps-bar:nth-child(6)  { --d:0.7s; --delay:0.25s;height:8px;  }
+      .ps-bar:nth-child(7)  { --d:0.9s; --delay:0.0s; height:22px; }
+      .ps-bar:nth-child(8)  { --d:0.6s; --delay:0.2s; height:12px; background:#5a9cf8; }
+      .ps-bar:nth-child(9)  { --d:1.0s; --delay:0.1s; height:6px;  }
+      .ps-bar:nth-child(10) { --d:0.8s; --delay:0.3s; height:16px; }
+
+      @keyframes bar-wave {
+        from { transform: scaleY(0.3); opacity: 0.5; }
+        to   { transform: scaleY(1);   opacity: 1;   }
+      }
+
+      /* ── Status text ── */
+      .ps-status {
+        margin-top: 18px;
+        font-size: 0.6rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: rgba(79,142,247,0.6);
+        opacity: 0;
+        animation: fade-up 0.5s ease 1s forwards, status-flicker 4s linear 1.5s infinite;
+      }
+
+      @keyframes status-flicker {
+        0%,92%,100% { opacity:1;   }
+        93%          { opacity:0.3; }
+        94%          { opacity:1;   }
+        95%          { opacity:0.5; }
+        96%          { opacity:1;   }
+      }
+
+      /* ── Bottom sweep bar ── */
+      .ps-sweep {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(79,142,247,0.8) 50%,
+          transparent 100%);
+        animation: sweep 2s ease-in-out infinite;
+      }
+
+      @keyframes sweep {
+        0%   { transform: translateX(-100%); opacity:0; }
+        20%  { opacity:1; }
+        80%  { opacity:1; }
+        100% { transform: translateX(100%);  opacity:0; }
+      }
+
+      /* ── Shared fade-up ── */
+      @keyframes fade-up {
+        from { opacity:0; transform:translateY(6px); }
+        to   { opacity:1; transform:translateY(0);   }
+      }
+    </style>
+
+    <div id="ps">
+      <div class="ps-hud">
+        <span class="ps-corner-br"></span>
+        <span class="ps-corner-bl"></span>
+
+        <!-- Logo with SVG draw-on bolt -->
+        <div class="ps-logo-wrap">
+          <svg class="ps-logo-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <!-- fill layer (fades in after stroke draws) -->
+            <path class="ps-bolt-fill" d="M13 2L4.5 13.5H11L9.5 22L19.5 10H13L13 2Z"/>
+            <!-- stroke draw-on layer -->
+            <path class="ps-bolt" d="M13 2L4.5 13.5H11L9.5 22L19.5 10H13L13 2Z"/>
+          </svg>
+        </div>
+
+        <!-- Brand -->
+        <div class="ps-name">PULSE</div>
+
+        <!-- Audio waveform bars -->
+        <div class="ps-wave">
+          <div class="ps-bar"></div>
+          <div class="ps-bar"></div>
+          <div class="ps-bar"></div>
+          <div class="ps-bar"></div>
+          <div class="ps-bar"></div>
+          <div class="ps-bar"></div>
+          <div class="ps-bar"></div>
+          <div class="ps-bar"></div>
+          <div class="ps-bar"></div>
+          <div class="ps-bar"></div>
+        </div>
+
+        <!-- Status -->
+        <div class="ps-status">Authenticating&nbsp;&nbsp;•&nbsp;&nbsp;Please wait</div>
+      </div>
+
+      <!-- Bottom sweep -->
+      <div class="ps-sweep"></div>
     </div>
   </app-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>

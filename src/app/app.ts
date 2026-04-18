@@ -11,7 +11,36 @@ import { filter } from 'rxjs';
   template: `
     @if (!authService.authReady() || isInitialLoading()) {
       <div class="initial-loader">
-        <div class="dot"></div>
+        <div class="il-hud">
+          <span class="il-corner il-corner--br"></span>
+          <span class="il-corner il-corner--bl"></span>
+
+          <div class="il-logo-wrap">
+            <svg class="il-logo-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path class="il-bolt-fill" d="M13 2L4.5 13.5H11L9.5 22L19.5 10H13L13 2Z"/>
+              <path class="il-bolt"      d="M13 2L4.5 13.5H11L9.5 22L19.5 10H13L13 2Z"/>
+            </svg>
+          </div>
+
+          <div class="il-name">PULSE</div>
+
+          <div class="il-wave">
+            <div class="il-bar"></div>
+            <div class="il-bar"></div>
+            <div class="il-bar"></div>
+            <div class="il-bar"></div>
+            <div class="il-bar"></div>
+            <div class="il-bar"></div>
+            <div class="il-bar"></div>
+            <div class="il-bar"></div>
+            <div class="il-bar"></div>
+            <div class="il-bar"></div>
+          </div>
+
+          <div class="il-status">Authenticated&nbsp;&nbsp;•&nbsp;&nbsp;Loading</div>
+        </div>
+
+        <div class="il-sweep"></div>
       </div>
     }
 

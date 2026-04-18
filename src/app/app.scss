@@ -3,44 +3,187 @@
   min-height: 100dvh;
 }
 
+/* ══════════════════════════════════════════
+   INITIAL LOADER — HUD + Waveform
+   ══════════════════════════════════════════ */
 .initial-loader {
   position: fixed;
   inset: 0;
-  background: #0f1117;
+  background: #0b0d14;
   display: flex;
-  flex-direction: column;
-  gap: 16px;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
   z-index: 9999;
 
-  .dot {
-    width: 10px;
-    height: 10px;
+  /* Ambient glow */
+  &::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
     border-radius: 50%;
-    background: #4f8ef7;
-    box-shadow: 0 0 12px #4f8ef7;
-    animation: p-loader 1.2s ease-in-out infinite;
-  }
-
-  .loader-text {
-    color: #4f8ef7;
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.2rem;
-    text-transform: uppercase;
-    opacity: 0.8;
+    background: rgba(79, 142, 247, 0.07);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -60%);
+    filter: blur(80px);
+    pointer-events: none;
   }
 }
 
-@keyframes p-loader {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.3;
-    transform: scale(0.7);
-  }
+/* ── HUD card — pure flex column, no absolute layout children ── */
+.il-hud {
+  position: relative;
+  padding: 44px 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* Four corner L-brackets via pseudo + extra spans */
+.il-hud::before,
+.il-hud::after,
+.il-corner {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  border-color: rgba(79, 142, 247, 0.5);
+  border-style: solid;
+}
+.il-hud::before   { top: 0;    left: 0;  border-width: 2px 0 0 2px; }
+.il-hud::after    { top: 0;    right: 0; border-width: 2px 2px 0 0; }
+.il-corner--br    { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+.il-corner--bl    { bottom: 0; left: 0;  border-width: 0 0 2px 2px; }
+
+/* ── Logo icon ── */
+.il-logo-wrap {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #3b7de8 0%, #2557c7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 0 0 1px rgba(79, 142, 247, 0.3),
+    0 0 24px rgba(79, 142, 247, 0.35),
+    0 0 60px rgba(79, 142, 247, 0.10);
+  animation: il-breathe 2.6s ease-in-out infinite;
+}
+
+.il-logo-svg {
+  width: 36px; height: 36px;
+}
+
+/* SVG bolt — stroke draws on first, then fill fades in */
+.il-bolt {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: il-bolt-draw 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.15s forwards;
+}
+
+.il-bolt-fill {
+  fill: #fff;
+  opacity: 0;
+  animation: il-fill-in 0.4s ease 0.9s forwards;
+}
+
+@keyframes il-bolt-draw { to { stroke-dashoffset: 0; } }
+@keyframes il-fill-in   { to { opacity: 1; } }
+
+@keyframes il-breathe {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(79,142,247,0.3), 0 0 24px rgba(79,142,247,0.35), 0 0 60px rgba(79,142,247,0.10); }
+  50%       { box-shadow: 0 0 0 1px rgba(79,142,247,0.5), 0 0 36px rgba(79,142,247,0.55), 0 0 90px rgba(79,142,247,0.18); }
+}
+
+/* ── Wordmark ── */
+.il-name {
+  margin-top: 22px;
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  color: #fff;
+  opacity: 0;
+  animation: il-fade-up 0.5s ease 0.7s forwards;
+}
+
+/* ── Waveform bars ── */
+.il-wave {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 20px;
+  height: 24px;
+  opacity: 0;
+  animation: il-fade-up 0.5s ease 0.85s forwards;
+}
+
+.il-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: #4f8ef7;
+  animation: il-bar-wave var(--d, 0.9s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+.il-bar:nth-child(1)  { --d: 0.7s; --delay: 0.00s; height: 6px;  }
+.il-bar:nth-child(2)  { --d: 0.9s; --delay: 0.10s; height: 14px; }
+.il-bar:nth-child(3)  { --d: 0.6s; --delay: 0.20s; height: 20px; background: #7cb4fb; }
+.il-bar:nth-child(4)  { --d: 1.1s; --delay: 0.05s; height: 10px; }
+.il-bar:nth-child(5)  { --d: 0.8s; --delay: 0.15s; height: 18px; background: #7cb4fb; }
+.il-bar:nth-child(6)  { --d: 0.7s; --delay: 0.25s; height: 8px;  }
+.il-bar:nth-child(7)  { --d: 0.9s; --delay: 0.00s; height: 22px; }
+.il-bar:nth-child(8)  { --d: 0.6s; --delay: 0.20s; height: 12px; background: #5a9cf8; }
+.il-bar:nth-child(9)  { --d: 1.0s; --delay: 0.10s; height: 6px;  }
+.il-bar:nth-child(10) { --d: 0.8s; --delay: 0.30s; height: 16px; }
+
+@keyframes il-bar-wave {
+  from { transform: scaleY(0.3); opacity: 0.5; }
+  to   { transform: scaleY(1);   opacity: 1;   }
+}
+
+/* ── Status text ── */
+.il-status {
+  margin-top: 18px;
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(79, 142, 247, 0.6);
+  opacity: 0;
+  animation: il-fade-up 0.5s ease 1s forwards, il-flicker 4s linear 1.5s infinite;
+}
+
+@keyframes il-flicker {
+  0%, 92%, 100% { opacity: 1;   }
+  93%            { opacity: 0.3; }
+  94%            { opacity: 1;   }
+  95%            { opacity: 0.5; }
+  96%            { opacity: 1;   }
+}
+
+/* ── Bottom sweep bar ── */
+.il-sweep {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(79, 142, 247, 0.8) 50%, transparent 100%);
+  animation: il-sweep 2s ease-in-out infinite;
+}
+
+@keyframes il-sweep {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateX(100%);  opacity: 0; }
+}
+
+/* ── Shared keyframes ── */
+@keyframes il-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
 }
