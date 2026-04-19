@@ -139,20 +139,27 @@
     border-radius: 10px !important;
     font-weight: 600;
     font-size: 0.8125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
 
   &__manage-btn {
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-size: 0.75rem;
-    text-decoration: none;
-    opacity: 0.5;
+    text-decoration: underline;
+    opacity: 0.8;
     background: transparent;
     border: none;
     cursor: pointer;
+    padding: 4px;
+    margin-top: 4px;
+    transition: all 0.2s ease;
     
     &:hover {
-      opacity: 0.8;
-      text-decoration: underline;
+      opacity: 1;
+      color: #fff;
     }
   }
 }
