@@ -46,7 +46,7 @@ export class Security implements OnInit {
     this.registerLoading.set(true);
     const uid = this.auth.firebaseUser()?.uid;
     const email = this.auth.firebaseUser()?.email;
-    
+
     if (!uid || !email) {
       this.toast.show('User session not found', 'error');
       this.registerLoading.set(false);

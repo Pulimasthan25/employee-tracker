@@ -1054,42 +1054,111 @@
 .timeline__unlock-status {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
   margin-left: auto;
-  margin-right: var(--spacing-md);
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     margin-left: 0;
-    margin-right: 0;
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+.unlock-pill {
+  display: flex;
+  align-items: center;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 2px;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.05);
+
+  &:hover {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.08);
+  }
+}
+
+.unlock-pill__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 0 8px;
+  color: #22c55e;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  user-select: none;
+}
+
+.unlock-pill__icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.4));
+}
+
+.unlock-pill__label {
+  letter-spacing: 0.02em;
+}
+
+.unlock-pill__divider {
+  width: 1px;
+  height: 12px;
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.unlock-pill__timer {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.unlock-pill__lock-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 8px;
+  color: #22c55e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0.8;
+  }
+
+  &:hover {
+    background: #22c55e;
+    color: #fff;
+    border-color: #22c55e;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@media (max-width: 768px) {
+  .unlock-pill {
     width: 100%;
     justify-content: space-between;
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border);
-    margin-bottom: var(--spacing-sm);
+    padding: 4px;
   }
-}
-
-.timeline__unlock-badge {
-  display: flex;
-  align-items: center;
-  padding: 4px 10px;
-  background: rgba(34, 197, 94, 0.1); // Using direct success color if var not found
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  border-radius: 999px;
-  color: #22c55e;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.8125rem;
-  font-weight: 500;
   
-  svg {
-    flex-shrink: 0;
+  .unlock-pill__info {
+    flex: 1;
   }
-}
-
-.timeline__lock-btn {
-  height: 28px !important;
-  font-size: 0.8125rem !important;
-  padding: 0 var(--spacing-sm) !important;
-  display: flex;
-  align-items: center;
-}
+}

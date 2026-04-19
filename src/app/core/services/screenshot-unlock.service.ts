@@ -13,7 +13,7 @@ export class ScreenshotUnlockService {
     return Math.max(0, Math.ceil((exp.getTime() - Date.now()) / 60000));
   });
 
-  unlock(durationMinutes = 15): void {
+  unlock(durationMinutes = 30): void {
     this.lock(); // Clear existing
     
     this.isUnlocked.set(true);

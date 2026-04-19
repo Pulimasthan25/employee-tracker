@@ -2,7 +2,7 @@
   <app-passkey-setup 
     [isRegistered]="isRegistered()" 
     [loading]="unlockLoading()" 
-    [remainingSessionHint]="15" 
+    [remainingSessionHint]="30" 
     (registerAndUnlock)="onRegisterAndUnlock()" 
     (authenticate)="onAuthenticate()"
     (managePasskeys)="onManagePasskeys()" />
@@ -65,17 +65,24 @@
     <div class="timeline__meta">
       @if (isAdmin()) {
       <div class="timeline__unlock-status">
-        <span class="timeline__unlock-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"
-            style="margin-right: 4px;">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0 1 9.9-1" />
-          </svg>
-          Unlocked · {{ unlockServicePublic.remainingMinutes() }}m
-        </span>
-        <button type="button" class="btn btn--ghost timeline__lock-btn" (click)="unlockServicePublic.lock()">
-          Lock
-        </button>
+        <div class="unlock-pill">
+          <div class="unlock-pill__info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="unlock-pill__icon">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+            </svg>
+            <span class="unlock-pill__label">Unlocked</span>
+            <span class="unlock-pill__divider"></span>
+            <span class="unlock-pill__timer">{{ unlockServicePublic.remainingMinutes() }}m</span>
+          </div>
+          <button type="button" class="unlock-pill__lock-btn" (click)="unlockServicePublic.lock()" aria-label="Lock screenshots">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span>Lock</span>
+          </button>
+        </div>
       </div>
       }
 
