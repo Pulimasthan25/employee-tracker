@@ -53,6 +53,7 @@ export class Timeline {
   readonly selectedUserId = signal<string>('all');
   readonly lightboxShot = signal<Screenshot | null>(null);
   readonly lightboxIndex = signal<number>(0);
+  readonly privacyMode = signal<boolean>(true);
 
   readonly unlockLoading = signal<boolean>(false);
 

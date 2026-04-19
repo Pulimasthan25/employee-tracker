@@ -12,6 +12,20 @@
   align-items: center;
   gap: var(--space-xl);
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: var(--space-md);
+    padding-bottom: var(--space-xs);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 
 .timeline__filters {
@@ -21,8 +35,9 @@
   flex: 1;
 
   @media (max-width: 768px) {
-    width: 100%;
-    gap: var(--space-sm);
+    width: auto;
+    flex: 0 0 auto;
+    gap: var(--space-md);
   }
 }
 
@@ -186,6 +201,13 @@
   display: flex;
   align-items: center;
   gap: var(--space-lg);
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    flex: 0 0 auto;
+    gap: var(--space-md);
+    padding-right: var(--space-md);
+  }
 }
 
 .timeline__privacy-toggle {
@@ -210,6 +232,7 @@
 .timeline__count {
   font-size: 0.875rem;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .timeline__count-num {
@@ -689,29 +712,15 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    filter: blur(6px);
-    transition: filter var(--transition-normal);
-
-    .timeline--reveal & {
-      filter: blur(0);
-    }
   }
 
   &:hover {
     opacity: 0.85;
-
-    img {
-      filter: blur(2px);
-    }
   }
 
   &--active {
     border-color: var(--accent);
     opacity: 1;
-
-    img {
-      filter: blur(0);
-    }
   }
 }
 
@@ -833,67 +842,9 @@
   .timeline__toolbar {
     gap: var(--space-md);
   }
-
-  .timeline__meta {
-    width: 100%;
-    justify-content: space-between;
-    margin-top: var(--space-xs);
-  }
 }
 
 @media (max-width: 768px) {
-  .timeline__toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-md);
-  }
-
-  .timeline__filters {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-sm);
-    flex: 1;
-  }
-
-  .timeline__date-nav {
-    flex: 1.5;
-    min-width: 0;
-    display: flex;
-    gap: 4px;
-
-    .timeline__date-input {
-      flex: 1;
-      min-width: 0;
-      padding: 0 var(--space-md);
-      font-size: 0.875rem;
-    }
-
-    .timeline__nav-btn {
-      flex-shrink: 0;
-    }
-  }
-
-  .timeline__user-select {
-    flex: 1;
-    min-width: 0;
-
-    .timeline__select-label { display: none; }
-    .timeline__select { 
-      width: 100%; 
-      flex: 1; 
-      padding: 0 var(--space-md) !important; 
-      font-size: 0.875rem;
-      height: 42px !important;
-    }
-  }
-
-  .timeline__meta {
-    order: 3;
-    margin-left: 0;
-  }
-
-
   .timeline__row {
     flex-direction: column;
     gap: var(--space-md);
@@ -1148,17 +1099,5 @@
 
   &:active {
     transform: scale(0.98);
-  }
-}
-
-@media (max-width: 768px) {
-  .unlock-pill {
-    width: 100%;
-    justify-content: space-between;
-    padding: 4px;
-  }
-  
-  .unlock-pill__info {
-    flex: 1;
   }
 }
