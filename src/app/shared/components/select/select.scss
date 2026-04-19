@@ -1,0 +1,166 @@
+.app-select {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 160px;
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    padding-left: 2px;
+    margin-bottom: var(--space-xs);
+  }
+
+  &__container {
+    position: relative;
+    width: 100%;
+  }
+
+  &__trigger {
+    width: 100%;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-md);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    transition: all var(--transition-normal);
+    outline: none;
+    user-select: none;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    &:focus {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+      /* Reduced/Minimal Shadow as requested */
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+  }
+
+  &__value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  &__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: transform var(--transition-normal), color var(--transition-normal);
+
+    .is-open & {
+      transform: rotate(180deg);
+      color: var(--accent);
+    }
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    /* Clean box shadow for depth and contrast */
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
+    max-height: 260px;
+    overflow-y: auto;
+    
+    /* Ensure no weird overflow for scrollbar */
+    padding: 2px;
+  }
+
+  &__options {
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+
+    &:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    &.is-selected {
+      background: rgba(79, 142, 247, 0.1);
+      color: var(--accent);
+    }
+  }
+
+  &__option-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__option-label {
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  &__check {
+    color: var(--accent);
+    display: flex;
+    animation: scale-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+}
+
+@keyframes scale-in {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Robust Scrollbar for the dropdown */
+.app-select__dropdown {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--bg-hover);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+    border: 1px solid transparent;
+    background-clip: content-box;
+  }
+}

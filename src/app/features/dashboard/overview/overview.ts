@@ -11,6 +11,8 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { DatePipe, CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import type { ActivityLog } from '../../../core/services/activity.service';
 import type { DisplayRow } from '../../../core/services/activity.service';
 import { ActivityService } from '../../../core/services/activity.service';
@@ -21,7 +23,8 @@ import { IdleService, type IdleSession } from '../../../core/services/idle.servi
 import { ShiftService, type ShiftSession } from '../../../core/services/shift.service';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
 import { ToastService } from '../../../core/services/toast.service';
-import { fadeIn, slideInUp, staggerFadeIn, scaleIn, expandVertical } from '../../../shared/animations';
+import { expandVertical, fadeIn, scaleIn, slideInUp, staggerFadeIn } from '../../../shared/animations';
+import { AppSelect, SelectOption } from '../../../shared/components/select/select';
 import { TimelineReport } from '../../reports/timeline/timeline';
 
 function formatDuration(seconds: number): string {
@@ -36,7 +39,7 @@ function formatDuration(seconds: number): string {
 
 @Component({
   selector: 'app-overview',
-  imports: [TimelineReport, DatePipe, CommonModule],
+  imports: [TimelineReport, DatePipe, CommonModule, AppSelect, ReactiveFormsModule],
   templateUrl: './overview.html',
   styleUrl: './overview.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -71,7 +74,7 @@ export class Overview implements OnDestroy {
 
     if (this.isAdmin()) {
       // Admin: show last activity for every user, or filter if dropdown used
-      const selected = this.selectedEmployeeId();
+      const selected = this.selectedEmployeeId() || 'all';
       if (selected !== 'all') {
         const own = userMap.get(selected);
         return own ? [own] : [];
@@ -93,9 +96,20 @@ export class Overview implements OnDestroy {
   hasLoadedOnce = signal(false);
   connectionError = signal(false);
   selectedDate = signal<string>(this.todayString());
-  selectedEmployeeId = signal<'all' | string>('all');
+  readonly employeeControl = new FormControl('all');
+  readonly selectedEmployeeId = toSignal(this.employeeControl.valueChanges, { initialValue: 'all' as string | null });
   readonly activeShift = signal<ShiftSession | null>(null);
   readonly idleSessions = signal<IdleSession[]>([]);
+  readonly employeeOptions = computed<SelectOption[]>(() => {
+    const list: SelectOption[] = [{ label: 'All employees', value: 'all' }];
+    this.employees().forEach(emp => {
+      list.push({
+        label: emp.displayName || emp.email,
+        value: emp.uid
+      });
+    });
+    return list;
+  });
 
   readonly now = signal<Date>(new Date());
   private timeInterval: any;
@@ -131,7 +145,7 @@ export class Overview implements OnDestroy {
 
   totalSeconds = computed(() => {
     const list = this.logs();
-    const selected = this.selectedEmployeeId();
+    const selected = this.selectedEmployeeId() || 'all';
     if (selected !== 'all') {
       return sumUniqueTimeSeconds(
         list.map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
@@ -156,7 +170,7 @@ export class Overview implements OnDestroy {
 
   productiveSeconds = computed(() => {
     const list = this.logs().filter((l) => l.category === 'productive');
-    const selected = this.selectedEmployeeId();
+    const selected = this.selectedEmployeeId() || 'all';
     if (selected !== 'all') {
       return sumUniqueTimeSeconds(
         list.map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }))
@@ -204,7 +218,7 @@ export class Overview implements OnDestroy {
       const ts = this.authService.appUser()?.idleThresholdSeconds ?? 300;
       return this.idleService.getTotalBreakSeconds(sessions, { thresholdSeconds: ts });
     }
-    const selected = this.selectedEmployeeId();
+    const selected = this.selectedEmployeeId() || 'all';
     if (selected === 'all') {
       const perUserThreshold = new Map(
         employees.map((e) => [e.uid, e.idleThresholdSeconds ?? 300] as const)
@@ -235,7 +249,7 @@ export class Overview implements OnDestroy {
       // For non-admins, ensure the selected ID is their own
       if (!this.isAdmin()) {
         const uid = this.authService.firebaseUser()?.uid;
-        if (uid) untracked(() => this.selectedEmployeeId.set(uid));
+        if (uid) untracked(() => this.employeeControl.setValue(uid));
       }
 
       untracked(() => {
@@ -341,7 +355,7 @@ export class Overview implements OnDestroy {
   private async loadIdleSessions(from: Date, to: Date): Promise<void> {
     try {
       if (this.isAdmin()) {
-        const selected = this.selectedEmployeeId();
+        const selected = this.selectedEmployeeId() || 'all';
         const data =
           selected === 'all'
             ? await this.idleService.getAllIdleSessions(from, to)
@@ -401,7 +415,7 @@ export class Overview implements OnDestroy {
 
   private async loadActiveShift(): Promise<void> {
     const isAdm = this.isAdmin();
-    const selected = this.selectedEmployeeId();
+    const selected = this.selectedEmployeeId() || 'all';
 
     if (isAdm) {
       if (selected === 'all') {
@@ -438,7 +452,7 @@ export class Overview implements OnDestroy {
   }
 
   setSelectedEmployee(id: string): void {
-    this.selectedEmployeeId.set(id === 'all' ? 'all' : id);
+    this.employeeControl.setValue(id === 'all' ? 'all' : id);
     this.applyEmployeeFilter();
     untracked(() => {
       void this.loadActiveShift();
@@ -451,7 +465,7 @@ export class Overview implements OnDestroy {
 
   private applyEmployeeFilter(): void {
     const all = this.allLogs();
-    const selected = this.selectedEmployeeId();
+    const selected = this.selectedEmployeeId() || 'all';
     this.logs.set(
       selected === 'all' ? all : all.filter((log) => log.userId === selected)
     );

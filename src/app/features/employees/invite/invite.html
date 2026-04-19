@@ -54,92 +54,69 @@
       </div>
     </div>
   } @else {
-    <form class="invite__form" (ngSubmit)="submit()">
+    <form class="invite__form" [formGroup]="inviteForm" (ngSubmit)="submit()">
       @if (error()) {
         <div class="invite__error">{{ error() }}</div>
       }
-
+ 
       <div class="invite__field">
         <label for="invite-email" class="invite__label">Email</label>
         <input
           id="invite-email"
           type="email"
           class="invite__input"
-          [(ngModel)]="email"
-          name="email"
+          formControlName="email"
           placeholder="employee@example.com"
-          required
         />
       </div>
-
+ 
       <div class="invite__field">
         <label for="invite-password" class="invite__label">Password</label>
         <input
           id="invite-password"
           type="password"
           class="invite__input"
-          [(ngModel)]="password"
-          name="password"
+          formControlName="password"
           placeholder="Required for login"
-          required
-          minlength="6"
         />
       </div>
-
+ 
       <div class="invite__field">
         <label for="invite-displayName" class="invite__label">Display name</label>
         <input
           id="invite-displayName"
           type="text"
           class="invite__input"
-          [(ngModel)]="displayName"
-          name="displayName"
+          formControlName="displayName"
           placeholder="Jane Doe"
-          required
         />
       </div>
-
+ 
       <div class="invite__field">
-        <label for="invite-role" class="invite__label">Role</label>
-        <select
-          id="invite-role"
-          class="invite__input"
-          [(ngModel)]="role"
-          name="role"
+        <app-select
+          label="Role"
+          [options]="roleOptions"
+          formControlName="role"
         >
-          @for (opt of roleOptions; track opt.value) {
-            <option [ngValue]="opt.value">{{ opt.label }}</option>
-          }
-        </select>
+        </app-select>
       </div>
-
+      
       <div class="invite__field">
-        <label for="invite-teamId" class="invite__label">Team <span class="invite__optional">(optional)</span></label>
-        <select
-          id="invite-teamId"
-          class="invite__input"
-          [(ngModel)]="teamId"
-          name="teamId"
+        <app-select
+          label="Team"
+          [options]="teamOptions()"
+          formControlName="teamId"
         >
-          <option value="">No team (global)</option>
-          @for (team of availableTeams(); track team) {
-            <option [value]="team">{{ team }}</option>
-          }
-        </select>
+        </app-select>
       </div>
-
+ 
       <div class="invite__field">
-        <label for="invite-interval" class="invite__label">Screenshot interval</label>
-        <select
-          id="invite-interval"
-          class="invite__input"
-          [(ngModel)]="intervalSeconds"
-          name="intervalSeconds"
+        <app-select
+          label="Screenshot interval"
+          [options]="intervalOptions"
+          formControlName="intervalSeconds"
         >
-          @for (opt of intervalOptions; track opt.value) {
-            <option [ngValue]="opt.value">{{ opt.label }}</option>
-          }
-        </select>
+        </app-select>
       </div>
 
       <div class="invite__actions">

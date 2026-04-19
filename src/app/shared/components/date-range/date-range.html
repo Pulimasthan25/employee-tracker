@@ -8,9 +8,9 @@
   
   @if (selectedRange() === 'custom') {
     <div class="date-range__custom-wrap">
-      <input type="date" class="date-range__date-input" [ngModel]="customFrom()" (ngModelChange)="customFrom.set($event)" />
+      <input type="date" class="date-range__date-input" [formControl]="fromControl" />
       <span class="date-range__sep">to</span>
-      <input type="date" class="date-range__date-input" [ngModel]="customTo()" (ngModelChange)="customTo.set($event)" />
+      <input type="date" class="date-range__date-input" [formControl]="toControl" />
     </div>
   }
 </div>

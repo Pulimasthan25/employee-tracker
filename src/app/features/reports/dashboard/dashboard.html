@@ -10,14 +10,11 @@
 
       @if (isAdmin()) {
       <div class="reports-dashboard__employee-filter">
-        <!-- <label for="rep-emp">Member</label> -->
-        <select id="rep-emp" class="reports-dashboard__select" [value]="selectedEmployeeId()"
-          (change)="setSelectedEmployee($any($event.target).value)">
-          <option value="all">All employees</option>
-          @for (emp of employees(); track emp.uid) {
-          <option [value]="emp.uid">{{ emp.displayName || emp.email }}</option>
-          }
-        </select>
+        <app-select 
+          [options]="employeeOptions()" 
+          [formControl]="employeeControl"
+          (valueChange)="setSelectedEmployee($event)">
+        </app-select>
       </div>
       }
     </div>

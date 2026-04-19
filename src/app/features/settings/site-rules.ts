@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SiteRuleService, SiteRule } from '../../core/services/site-rule.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { EmployeeService } from '../../core/services/employee.service';
@@ -8,11 +8,12 @@ import { SettingsService } from '../../core/services/settings.service';
 import { ActivatedRoute } from '@angular/router';
 import { ToastService } from '../../core/services/toast.service';
 import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../shared/animations';
+import { AppSelect, SelectOption } from '../../shared/components/select/select';
 
 @Component({
   selector: 'app-site-rules',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AppSelect],
   templateUrl: './site-rules.html',
   styleUrl: './site-rules.scss',
   animations: [fadeIn, staggerFadeIn, scaleIn, slideInUp]
@@ -24,10 +25,30 @@ export class SiteRules implements OnInit, OnDestroy {
   private readonly settingsService = inject(SettingsService);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
+  private readonly fb = inject(FormBuilder);
+
+  readonly ruleForm = this.fb.group({
+    displayName: ['', [Validators.required]],
+    keywords: ['', [Validators.required]],
+    category: ['productive', [Validators.required]],
+    teamId: ['']
+  });
 
   readonly rules = this.siteRuleService.rules;
   readonly rulesLoading = this.siteRuleService.loading;
   readonly availableTeams = signal<string[]>([]);
+  
+  readonly teamOptions = computed<SelectOption[]>(() => {
+    const list: SelectOption[] = [{ label: 'Global (all teams)', value: '' }];
+    this.availableTeams().forEach(t => list.push({ label: t, value: t }));
+    return list;
+  });
+
+  readonly categoryOptions: SelectOption[] = [
+    { label: 'Productive', value: 'productive' },
+    { label: 'Unproductive', value: 'unproductive' },
+    { label: 'Neutral', value: 'neutral' },
+  ];
 
   async ngOnInit() {
     // Start the Firestore listener only when this admin page mounts
@@ -89,12 +110,6 @@ export class SiteRules implements OnInit, OnDestroy {
     }
   }
 
-  // Form fields
-  newDisplayName = signal('');
-  newKeywords = signal('');
-  newCategory = signal<'productive' | 'unproductive' | 'neutral'>('productive');
-  newTeamId = signal('');
-
   isSeeding = signal(false);
   editingRuleId = signal<string | null>(null);
 
@@ -121,10 +136,12 @@ export class SiteRules implements OnInit, OnDestroy {
   startEdit(rule: SiteRule) {
     if (!rule.id) return;
     this.editingRuleId.set(rule.id);
-    this.newDisplayName.set(rule.displayName);
-    this.newKeywords.set(rule.keywords.join(', '));
-    this.newCategory.set(rule.category);
-    this.newTeamId.set(rule.teamId ?? '');
+    this.ruleForm.patchValue({
+      displayName: rule.displayName,
+      keywords: rule.keywords.join(', '),
+      category: rule.category,
+      teamId: rule.teamId ?? ''
+    });
     this.showForm.set(true);
     // Scroll to form
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -132,50 +149,42 @@ export class SiteRules implements OnInit, OnDestroy {
 
   cancelEdit() {
     this.editingRuleId.set(null);
-    this.newDisplayName.set('');
-    this.newKeywords.set('');
-    this.newCategory.set('productive');
-    this.newTeamId.set('');
+    this.ruleForm.reset({
+      category: 'productive',
+      teamId: ''
+    });
     this.showForm.set(false);
   }
 
   async saveRule() {
-    const displayName = this.newDisplayName().trim();
-    const keywords = this.newKeywords().split(',').map(k => k.trim()).filter(Boolean);
+    if (this.ruleForm.invalid) return;
 
-    if (!displayName || keywords.length === 0) return;
-
-    const teamIdValue = this.newTeamId();
+    const { displayName, keywords: kwStr, category, teamId } = this.ruleForm.getRawValue();
+    const keywords = kwStr!.split(',').map(k => k.trim()).filter(Boolean);
 
     try {
       if (this.editingRuleId()) {
         await this.siteRuleService.updateRule(this.editingRuleId()!, {
-          displayName,
+          displayName: displayName!,
           keywords,
-          category: this.newCategory(),
-          teamId: teamIdValue || undefined
+          category: category as any,
+          teamId: teamId || undefined
         });
         this.toast.show('Rule updated successfully', 'success');
-        this.editingRuleId.set(null);
       } else {
         const newRule: any = {
-          displayName,
+          displayName: displayName!,
           keywords,
-          category: this.newCategory()
+          category: category as any
         };
-        if (teamIdValue) {
-          newRule.teamId = teamIdValue;
+        if (teamId) {
+          newRule.teamId = teamId;
         }
         await this.siteRuleService.addRule(newRule);
         this.toast.show('Rule added successfully', 'success');
       }
 
-      // Reset form
-      this.newDisplayName.set('');
-      this.newKeywords.set('');
-      this.newCategory.set('productive');
-      this.newTeamId.set('');
-      this.showForm.set(false);
+      this.cancelEdit();
     } catch (e) {
       this.toast.show('Failed to save rule', 'error');
     }

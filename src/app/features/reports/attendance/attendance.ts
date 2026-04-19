@@ -8,8 +8,10 @@ import {
   computed,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DateRange } from '../../../shared/components/date-range/date-range';
+import { AppSelect, SelectOption } from '../../../shared/components/select/select';
 import { AuthService, type AppUser } from '../../../core/services/auth.service';
 import { ActivityService, type ActivityLog } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
@@ -27,7 +29,7 @@ function formatDuration(seconds: number): string {
 
 @Component({
   selector: 'app-attendance',
-  imports: [DateRange, FormsModule, DatePipe],
+  imports: [DateRange, FormsModule, ReactiveFormsModule, DatePipe, AppSelect],
   templateUrl: './attendance.html',
   styleUrl: './attendance.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,7 +48,18 @@ export class Attendance {
   readonly activityLogs = signal<ActivityLog[]>([]);
   readonly employees = signal<AppUser[]>([]);
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
-  readonly selectedEmployee = signal<string>('all');
+  readonly employeeControl = new FormControl('all');
+  readonly selectedEmployee = toSignal(this.employeeControl.valueChanges, { initialValue: 'all' as string | null });
+  readonly employeeOptions = computed<SelectOption[]>(() => {
+    const list: SelectOption[] = [{ label: 'All employees', value: 'all' }];
+    this.employees().forEach(emp => {
+      list.push({
+        label: emp.displayName || emp.email,
+        value: emp.uid
+      });
+    });
+    return list;
+  });
   readonly isAdmin = this.auth.isAdmin;
   /** Explicit session uid for non-admin rows (break/productive totals). */
   readonly sessionUid = computed(() => this.auth.firebaseUser()?.uid);
@@ -69,7 +82,7 @@ export class Attendance {
   }
 
   onEmployeeChange(uid: string): void {
-    this.selectedEmployee.set(uid);
+    this.employeeControl.setValue(uid);
     untracked(() => { void this.loadData(); });
   }
 
@@ -193,7 +206,7 @@ export class Attendance {
         if (sel === 'all') {
           shifts = await this.shiftsApi.getAllShifts(range.from, range.to);
         } else {
-          shifts = await this.shiftsApi.getShiftsForUser(sel, range.from, range.to);
+          shifts = await this.shiftsApi.getShiftsForUser(sel!, range.from, range.to);
         }
       } else {
         const uid = this.auth.firebaseUser()?.uid;
@@ -218,7 +231,7 @@ export class Attendance {
       if (isAdm && sel === 'all') {
         activityData = await this.activityService.getTeamActivitySummary(range.from, range.to);
       } else {
-        const uid = isAdm ? sel : this.auth.firebaseUser()?.uid;
+        const uid = isAdm ? sel! : this.auth.firebaseUser()?.uid;
         activityData = uid ? await this.activityService.getActivityForUser(uid, range.from, range.to) : [];
       }
 

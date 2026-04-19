@@ -10,6 +10,8 @@ import {
   afterNextRender,
   OnDestroy,
 } from '@angular/core';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import Chart from 'chart.js/auto';
 
 import type { ActivityLog, DisplayRow } from '../../../core/services/activity.service';
@@ -22,18 +24,19 @@ import { fadeIn, slideInUp, staggerFadeIn, scaleIn, expandVertical } from '../..
 import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AppUsage } from '../app-usage/app-usage';
 import { UrlUsage } from '../url-usage/url-usage';
+import { AppSelect, SelectOption } from '../../../shared/components/select/select';
 
 function formatDuration(seconds: number): string {
   if (!seconds) return '0s';
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  
+
   const parts: string[] = [];
   if (h > 0) parts.push(`${h}h`);
   if (m > 0) parts.push(`${m}m`);
   if (s > 0 || (h === 0 && m === 0)) parts.push(`${s}s`);
-  
+
   return parts.join(' ');
 }
 
@@ -69,7 +72,7 @@ function getDateRange(
 @Component({
   selector: 'app-reports-dashboard',
   standalone: true,
-  imports: [DateRange, AppUsage, UrlUsage],
+  imports: [DateRange, AppUsage, UrlUsage, AppSelect, ReactiveFormsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -93,8 +96,19 @@ export class ReportsDashboard implements OnDestroy {
 
   selectedRange = signal<'today' | '7d' | '30d' | 'custom'>('today');
   currentRangeDates = signal<{ from: Date; to: Date }>(getDateRange('today'));
-  
-  selectedEmployeeId = signal<'all' | string>('all');
+
+  readonly employeeControl = new FormControl('all');
+  readonly selectedEmployeeId = toSignal(this.employeeControl.valueChanges, { initialValue: 'all' as string | null });
+  employeeOptions = computed<SelectOption[]>(() => {
+    const list: SelectOption[] = [{ label: 'All employees', value: 'all' }];
+    this.employees().forEach(emp => {
+      list.push({
+        label: emp.displayName || emp.email,
+        value: emp.uid
+      });
+    });
+    return list;
+  });
   lastUpdated = signal('');
 
   productivityScore = computed(() =>
@@ -193,7 +207,7 @@ export class ReportsDashboard implements OnDestroy {
         untracked(() => this.destroyCharts());
         return;
       }
-      
+
       if (this.productivityChart && this.activityChart) return;
 
       afterNextRender(
@@ -208,10 +222,10 @@ export class ReportsDashboard implements OnDestroy {
     effect(() => {
       const _logs = this.logs();
       const _range = this.selectedRange();
-      
+
       if (this.loading()) return;
       if (!this.productivityChart || !this.activityChart) return;
-      
+
       untracked(() => this.updateCharts());
     });
   }
@@ -239,7 +253,7 @@ export class ReportsDashboard implements OnDestroy {
   }
 
   setSelectedEmployee(id: string): void {
-    this.selectedEmployeeId.set(id === 'all' ? 'all' : id);
+    this.employeeControl.setValue(id === 'all' ? 'all' : id);
     this.applyEmployeeFilter();
   }
 
@@ -287,7 +301,7 @@ export class ReportsDashboard implements OnDestroy {
 
   private applyEmployeeFilter(): void {
     const all = this.allLogs();
-    const selected = this.selectedEmployeeId();
+    const selected = this.selectedEmployeeId() || 'all';
     this.logs.set(selected === 'all' ? all : all.filter((log) => log.userId === selected));
   }
 

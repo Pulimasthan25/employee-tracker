@@ -3,16 +3,13 @@
     <app-date-range (rangeChange)="onRangeChange($event)" />
 
     @if (isAdmin()) {
-      <select
+      <app-select
         class="attendance__select"
-        [value]="selectedEmployee()"
-        (change)="onEmployeeChange($any($event.target).value)"
+        [options]="employeeOptions()"
+        [formControl]="employeeControl"
+        (valueChange)="onEmployeeChange($event)"
       >
-        <option value="all">All employees</option>
-        @for (emp of employees(); track emp.uid) {
-          <option [value]="emp.uid">{{ emp.displayName || emp.email }}</option>
-        }
-      </select>
+      </app-select>
     }
 
     <button class="export-btn" (click)="exportCsv()" [disabled]="loading()">

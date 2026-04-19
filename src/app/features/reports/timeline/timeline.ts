@@ -21,22 +21,28 @@ import { fadeIn, staggerFadeIn, scaleIn } from '../../../shared/animations';
 import { sumUniqueTimeSeconds } from '../../../core/utils/time-utils';
 
 function formatDuration(seconds: number): string {
-  if (!seconds) return '0m';
-  const s = Math.max(0, Math.floor(seconds || 0));
+  if (!seconds || seconds <= 0) return '0s';
+  const s = Math.floor(seconds);
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
-  if (h === 0) return `${m}m`;
-  return `${h}h ${String(m).padStart(2, '0')}m`;
+  const rs = s % 60;
+
+  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m ${String(rs).padStart(2, '0')}s`;
+  if (m > 0) return `${m}m ${String(rs).padStart(2, '0')}s`;
+  return `${rs}s`;
 }
 
 interface TimelineRow {
   userId: string;
   user?: AppUser;
   totalProductiveSeconds: number;
+  totalUnproductiveSeconds: number;
+  totalNeutralSeconds: number;
   timeWorkedStr: string;
+  unproductiveTimeStr: string;
   startTimeStr: string;
   endTimeStr: string;
-  segments: { left: number; width: number }[];
+  segments: { left: number; width: number; category: 'productive' | 'unproductive' | 'neutral' }[];
 }
 
 @Component({
@@ -189,12 +195,12 @@ export class TimelineReport {
     const dayEndMs = to.getTime();
     const dayDurationMs = dayEndMs - dayStartMs;
 
-    const productive = activities.filter((log) =>
-      log.category === 'productive' && log.startTime.getTime() <= dayEndMs && log.endTime.getTime() >= dayStartMs
+    const allLogs = activities.filter((log) =>
+      log.startTime.getTime() <= dayEndMs && log.endTime.getTime() >= dayStartMs
     );
 
     const userLogs = new Map<string, ActivityLog[]>();
-    for (const log of productive) {
+    for (const log of allLogs) {
       if (!userLogs.has(log.userId)) userLogs.set(log.userId, []);
       userLogs.get(log.userId)!.push(log);
     }
@@ -215,7 +221,10 @@ export class TimelineReport {
           userId: user.uid,
           user,
           totalProductiveSeconds: 0,
+          totalUnproductiveSeconds: 0,
+          totalNeutralSeconds: 0,
           timeWorkedStr: '0m',
+          unproductiveTimeStr: '0m',
           startTimeStr: '00:00',
           endTimeStr: '00:00',
           segments: []
@@ -226,25 +235,34 @@ export class TimelineReport {
       logs.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
       const startTimeStr = this.formatTimeAMPM(logs[0].startTime);
       const endTimeStr = this.formatTimeAMPM(logs[logs.length - 1].endTime);
-      const sortedSegments = logs.map((l) => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
-      const totalSecs = sumUniqueTimeSeconds(sortedSegments);
+      
+      const productiveSegments = logs.filter(l => l.category === 'productive').map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
+      const unproductiveSegments = logs.filter(l => l.category === 'unproductive').map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
+      const neutralSegments = logs.filter(l => l.category === 'neutral').map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
 
-      const segments: { left: number; width: number }[] = [];
+      const totalProd = sumUniqueTimeSeconds(productiveSegments);
+      const totalUnprod = sumUniqueTimeSeconds(unproductiveSegments);
+      const totalNeutral = sumUniqueTimeSeconds(neutralSegments);
+
+      const segments: { left: number; width: number; category: 'productive' | 'unproductive' | 'neutral' }[] = [];
       for (const log of logs) {
         const pStart = Math.max(log.startTime.getTime(), dayStartMs);
         const pEnd = Math.min(log.endTime.getTime(), dayEndMs);
         if (pEnd > pStart) {
           const left = ((pStart - dayStartMs) / dayDurationMs) * 100;
           const width = ((pEnd - pStart) / dayDurationMs) * 100;
-          segments.push({ left, width });
+          segments.push({ left, width, category: log.category });
         }
       }
 
       rows.push({
         userId: user.uid,
         user,
-        totalProductiveSeconds: totalSecs,
-        timeWorkedStr: formatDuration(totalSecs),
+        totalProductiveSeconds: totalProd,
+        totalUnproductiveSeconds: totalUnprod,
+        totalNeutralSeconds: totalNeutral,
+        timeWorkedStr: formatDuration(totalProd),
+        unproductiveTimeStr: formatDuration(totalUnprod),
         startTimeStr,
         endTimeStr,
         segments

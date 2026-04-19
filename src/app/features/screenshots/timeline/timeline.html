@@ -46,13 +46,11 @@
 
       @if (isAdmin()) {
       <div class="timeline__user-select">
-        <select id="employee-select" class="timeline__select" [value]="selectedUserId()"
-          (change)="setUser($any($event.target).value)">
-          <option value="all">All employees</option>
-          @for (emp of employees(); track emp.uid) {
-          <option [value]="emp.uid">{{ emp.displayName || emp.email }}</option>
-          }
-        </select>
+        <app-select 
+          [options]="userOptions()" 
+          [formControl]="userControl"
+          (valueChange)="setUser($event)">
+        </app-select>
       </div>
       }
     </div>

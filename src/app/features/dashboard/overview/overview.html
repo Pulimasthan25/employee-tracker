@@ -39,19 +39,14 @@
         <button type="button" class="overview__today-pill" (click)="goToday()" @scaleIn>Today</button>
         }
 
-        <!-- Employee Filter -->
         @if (isAdmin()) {
         <div class="overview__toolbar-divider"></div>
         <div class="overview__filter-wrap">
-          <select id="employee-select" class="overview__select" [value]="selectedEmployeeId()"
-            (change)="setSelectedEmployee($any($event.target).value)">
-            <option value="all">All employees</option>
-            @for (emp of employees(); track emp.uid) {
-            <option [value]="emp.uid">
-              {{ emp.displayName || emp.email }}
-            </option>
-            }
-          </select>
+          <app-select 
+            [options]="employeeOptions()" 
+            [formControl]="employeeControl"
+            (valueChange)="setSelectedEmployee($event)">
+          </app-select>
         </div>
         }
       </div>
@@ -295,7 +290,7 @@
     @if (logs().length > 0) {
     <app-timeline [hideToolbar]="true" [externalLoading]="loading()" [externalActivities]="logs()"
       [externalEmployees]="employees()" [externalSelectedDate]="timelineDate()"
-      [externalSelectedUserId]="selectedEmployeeId()">
+      [externalSelectedUserId]="selectedEmployeeId() || 'all'">
     </app-timeline>
     } @else {
     <div class="overview__empty">

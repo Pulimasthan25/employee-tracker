@@ -101,8 +101,13 @@
               }
             </div>
             <div class="timeline-grid__segments">
-              @for (seg of row.segments; track seg.left) {
-              <div class="timeline-grid__segment" [style.left.%]="seg.left" [style.width.%]="seg.width">
+              @for (seg of row.segments; track $index) {
+              <div class="timeline-grid__segment" 
+                [class.timeline-grid__segment--unproductive]="seg.category === 'unproductive'"
+                [class.timeline-grid__segment--neutral]="seg.category === 'neutral'"
+                [style.left.%]="seg.left" 
+                [style.width.%]="seg.width"
+                [attr.title]="seg.category">
               </div>
               }
             </div>
