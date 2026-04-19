@@ -244,6 +244,18 @@ export class Detail {
     }
   }
 
+  triggerDownload() {
+    const url = this.downloadUrl();
+    if (!url) return;
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'PulseAgent.exe');
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   async onIntervalChange(seconds: number): Promise<void> {
     if (!this.employee()?.uid) return;
     this.savingInterval.set(true);

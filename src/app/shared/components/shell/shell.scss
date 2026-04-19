@@ -230,6 +230,10 @@
   height: 38px;
   border-radius: 9px;
   color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
   text-decoration: none;
   white-space: nowrap;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
