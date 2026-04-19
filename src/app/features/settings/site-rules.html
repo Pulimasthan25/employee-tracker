@@ -6,41 +6,40 @@
     @if (showForm()) {
     <div class="add-section" @slideInUp>
       <h3 class="add-section__title">{{ editingRuleId() ? 'Edit Rule' : 'Add New Rule' }}</h3>
-      <form class="add-form" (submit)="saveRule(); $event.preventDefault()">
+      <form class="add-form" [formGroup]="ruleForm" (submit)="saveRule(); $event.preventDefault()">
         <div class="add-form__grid">
-          <div class="form-group">
+          <div class="form-group" [class.is-invalid]="ruleForm.get('displayName')?.invalid && ruleForm.get('displayName')?.touched">
             <label>Display Name</label>
-            <input type="text" [(ngModel)]="newDisplayName" name="displayName" placeholder="e.g. LinkedIn"
+            <input type="text" formControlName="displayName" placeholder="e.g. LinkedIn"
               class="input" />
           </div>
-          <div class="form-group">
+          <div class="form-group" [class.is-invalid]="ruleForm.get('keywords')?.invalid && ruleForm.get('keywords')?.touched">
             <label>Keywords (comma-separated)</label>
-            <input type="text" [(ngModel)]="newKeywords" name="keywords" placeholder="linkedin, linkedin.com"
+            <input type="text" formControlName="keywords" placeholder="linkedin, linkedin.com"
               class="input" />
           </div>
           <div class="form-group">
-            <label>Category</label>
-            <select [(ngModel)]="newCategory" name="category" class="input">
-              <option value="productive">Productive</option>
-              <option value="unproductive">Unproductive</option>
-              <option value="neutral">Neutral</option>
-            </select>
+            <app-select
+              label="Category"
+              [options]="categoryOptions"
+              formControlName="category"
+            >
+            </app-select>
           </div>
           <div class="form-group">
-            <label>Team Scope</label>
-            <select [(ngModel)]="newTeamId" name="teamId" class="input">
-              <option value="">Global (all teams)</option>
-              @for (team of availableTeams(); track team) {
-              <option [value]="team">{{ team }}</option>
-              }
-            </select>
+            <app-select
+              label="Team Scope"
+              [options]="teamOptions()"
+              formControlName="teamId"
+            >
+            </app-select>
           </div>
         </div>
         <div class="add-form__actions">
           <button type="button" class="btn btn--ghost" (click)="cancelEdit()">
             Cancel
           </button>
-          <button type="submit" class="btn btn--primary" [disabled]="!newDisplayName() || !newKeywords()">
+          <button type="submit" class="btn btn--primary" [disabled]="ruleForm.invalid">
             {{ editingRuleId() ? 'Save Changes' : 'Add Rule' }}
           </button>
         </div>

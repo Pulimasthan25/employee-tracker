@@ -1,9 +1,11 @@
 import { Component, ChangeDetectionStrategy, signal, inject, effect, untracked, input, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AuthService, AppUser } from '../../../core/services/auth.service';
 import { ActivityService, ActivityLog } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { AppSelect, SelectOption } from '../../../shared/components/select/select';
 import { fadeIn, staggerFadeIn, scaleIn } from '../../../shared/animations';
 
 function formatDuration(seconds: number): string {
@@ -16,7 +18,7 @@ function formatDuration(seconds: number): string {
 @Component({
   selector: 'app-url-usage',
   standalone: true,
-  imports: [DateRange, FormsModule],
+  imports: [DateRange, FormsModule, ReactiveFormsModule, AppSelect],
   templateUrl: './url-usage.html',
   styleUrl: './url-usage.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,7 +49,15 @@ export class UrlUsage {
   });
 
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
-  readonly selectedEmployee = signal<string>('all');
+  readonly employeeControl = new FormControl('all');
+  readonly selectedEmployee = toSignal(this.employeeControl.valueChanges, { initialValue: 'all' as string | null });
+  readonly employeeOptions = computed<SelectOption[]>(() => {
+    const list: SelectOption[] = [{ label: 'All employees', value: 'all' }];
+    this.employees().forEach(emp => {
+      list.push({ label: emp.displayName || emp.email, value: emp.uid });
+    });
+    return list;
+  });
   readonly employees = signal<AppUser[]>([]);
 
   readonly isAdmin = this.auth.isAdmin;
@@ -56,6 +66,7 @@ export class UrlUsage {
     effect(() => {
       const ready = this.auth.authReady();
       const range = this.dateRange();
+      const sel = this.selectedEmployee();
       const extLogs = this.externalLogs();
 
       if (ready && range && extLogs === null) {
@@ -83,7 +94,7 @@ export class UrlUsage {
         if (sel === 'all') {
           logs = await this.activity.getTeamActivitySummary(range.from, range.to);
         } else {
-          logs = await this.activity.getActivityForUser(sel, range.from, range.to);
+          logs = await this.activity.getActivityForUser(sel!, range.from, range.to);
         }
       } else {
         const user = this.auth.appUser();

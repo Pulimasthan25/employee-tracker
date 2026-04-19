@@ -216,7 +216,7 @@
   padding: 4px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  height: 42px;
+  height: 38px;
   flex-shrink: 0;
 }
 
@@ -308,7 +308,7 @@
 }
 
 .overview__today-pill {
-  height: 42px;
+  height: 38px;
   padding: 0 1.25rem;
   background: var(--accent);
   color: white;
@@ -348,7 +348,7 @@
 
 .overview__select {
   /* This component specific class will now benefit from the global select style */
-  height: 42px !important;
+  min-width: 180px;
 }
 
 .overview__card-value {

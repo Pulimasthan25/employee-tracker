@@ -49,8 +49,7 @@
   background: rgba(255, 255, 255, 0.035);
   padding: 4px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  height: 42px;
+  height: 38px;
   flex-shrink: 0;
 }
 
@@ -140,7 +139,7 @@
 }
 
 .timeline__today-pill {
-  height: 42px;
+  height: 38px;
   padding: 0 1.25rem;
   background: var(--accent);
   color: white;
@@ -178,22 +177,7 @@
 }
 
 .timeline__select {
-  padding: var(--space-sm) var(--space-md);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 0.9375rem;
-  height: 42px;
-  cursor: pointer;
-  width: 172px;
-
-
-  &:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
+  width: 180px;
 }
 
 .timeline__meta {

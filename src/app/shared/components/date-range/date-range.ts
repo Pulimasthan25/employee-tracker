@@ -1,9 +1,9 @@
 import { Component, ChangeDetectionStrategy, signal, output, effect, untracked } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-date-range',
-  imports: [FormsModule],
+  imports: [FormsModule, ReactiveFormsModule],
   templateUrl: './date-range.html',
   styleUrl: './date-range.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -12,14 +12,14 @@ export class DateRange {
   rangeChange = output<{ from: Date; to: Date }>();
   
   selectedRange = signal<'today' | '7d' | '30d' | 'custom'>('today');
-  customFrom = signal<string>(new Date().toISOString().slice(0, 10));
-  customTo = signal<string>(new Date().toISOString().slice(0, 10));
+  readonly fromControl = new FormControl(new Date().toISOString().slice(0, 10));
+  readonly toControl = new FormControl(new Date().toISOString().slice(0, 10));
 
   constructor() {
     effect(() => {
       const selection = this.selectedRange();
-      const fromStr = this.customFrom();
-      const toStr = this.customTo();
+      const fromStr = this.fromControl.value;
+      const toStr = this.toControl.value;
       
       untracked(() => {
         const now = new Date();

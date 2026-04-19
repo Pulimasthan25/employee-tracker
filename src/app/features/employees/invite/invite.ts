@@ -6,12 +6,14 @@ import {
   OnInit,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { AppSelect, SelectOption } from '../../../shared/components/select/select';
+import { computed } from '@angular/core';
 
 @Component({
   selector: 'app-invite',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, ReactiveFormsModule, AppSelect],
   templateUrl: './invite.html',
   styleUrl: './invite.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,6 +21,16 @@ import { EmployeeService } from '../../../core/services/employee.service';
 export class Invite implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  
+  readonly inviteForm = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    displayName: ['', [Validators.required]],
+    teamId: [''],
+    intervalSeconds: [1800],
+    role: ['employee', [Validators.required]]
+  });
 
   readonly submitting = signal(false);
   readonly error = signal<string | null>(null);
@@ -26,6 +38,11 @@ export class Invite implements OnInit {
   readonly downloadUrl = signal<string | null>(null);
   readonly linkCopied = signal(false);
   readonly availableTeams = signal<string[]>([]);
+  readonly teamOptions = computed<SelectOption[]>(() => {
+    const list: SelectOption[] = [{ label: 'No team (global)', value: '' }];
+    this.availableTeams().forEach(t => list.push({ label: t, value: t }));
+    return list;
+  });
 
   ngOnInit() {
     this.fetchLatestRelease();
@@ -87,13 +104,6 @@ export class Invite implements OnInit {
     document.body.removeChild(link);
   }
 
-  email = '';
-  password = '';
-  displayName = '';
-  teamId = '';
-  intervalSeconds = 1800;
-  role: 'admin' | 'employee' = 'employee';
-
   readonly intervalOptions = [
     { label: '1 minute',    value: 60   },
     { label: '5 minutes',   value: 300  },
@@ -104,28 +114,30 @@ export class Invite implements OnInit {
   ];
 
   readonly roleOptions = [
-    { label: 'Admin', value: 'admin' as const },
-    { label: 'Employee', value: 'employee' as const },
+    { label: 'Admin', value: 'admin' },
+    { label: 'Employee', value: 'employee' },
   ];
 
   async submit(): Promise<void> {
-    const email = this.email.trim();
-    const displayName = this.displayName.trim();
-    const password = this.password.trim();
-    if (!email || !displayName || !password) {
-      this.error.set('Email, password, and display name are required.');
+    if (this.inviteForm.invalid) {
+      this.error.set('Please fill all required fields correctly.');
+      this.inviteForm.markAllAsTouched();
       return;
     }
+
     this.error.set(null);
     this.submitting.set(true);
+    
+    const { email, displayName, password, teamId, intervalSeconds, role } = this.inviteForm.getRawValue();
+    
     try {
       await this.employeeService.inviteEmployee({
-        email,
-        displayName,
-        teamId: this.teamId.trim() || undefined,
-        screenshotIntervalSeconds: this.intervalSeconds,
-        role: this.role,
-        password,
+        email: email!,
+        displayName: displayName!,
+        teamId: teamId?.trim() || undefined,
+        screenshotIntervalSeconds: Number(intervalSeconds),
+        role: role as 'admin'|'employee',
+        password: password!,
       });
       this.success.set(true);
     } catch (e: any) {

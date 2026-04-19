@@ -5,12 +5,13 @@
       <app-date-range (rangeChange)="onRangeChange($event)" />
       
       @if (isAdmin()) {
-        <select class="form-select" [ngModel]="selectedEmployee()" (ngModelChange)="selectedEmployee.set($event)" style="margin-left: auto; max-width: 200px;">
-          <option value="all">All employees</option>
-          @for (emp of employees(); track emp.uid) {
-            <option [value]="emp.uid">{{ emp.displayName }}</option>
-          }
-        </select>
+        <app-select
+          class="report__employee-select"
+          [options]="employeeOptions()"
+          [formControl]="employeeControl"
+          style="margin-left: auto; width: 220px;"
+        >
+        </app-select>
       }
     </div>
   }

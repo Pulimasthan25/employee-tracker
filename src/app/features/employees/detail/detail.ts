@@ -17,13 +17,14 @@ import { fadeIn, slideInUp, scaleIn } from '../../../shared/animations';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { AppSelect } from '../../../shared/components/select/select';
 import { Router } from '@angular/router';
 import type { AppUser } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-detail',
-  imports: [RouterLink, DatePipe, FormsModule],
+  imports: [RouterLink, DatePipe, FormsModule, ReactiveFormsModule, AppSelect],
   templateUrl: './detail.html',
   styleUrl: './detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,6 +76,12 @@ export class Detail {
   readonly savingIdleThreshold = signal(false);
   readonly savingShiftHours = signal(false);
 
+  readonly intervalControl = new FormControl<number>(1800);
+  readonly idleThresholdControl = new FormControl<number>(300);
+  readonly shiftStartControl = new FormControl<number>(20);
+  readonly shiftEndControl = new FormControl<number>(4);
+  readonly teamControl = new FormControl<string>('');
+
   readonly shiftHourOptions = Array.from({ length: 24 }, (_, h) => ({
     label: `${String(h).padStart(2, '0')}:00`,
     value: h,
@@ -113,6 +120,11 @@ export class Detail {
       const emp = await this.employeeService.getById(id);
       if (emp) {
         this.employee.set(emp);
+        this.intervalControl.setValue(emp.screenshotIntervalSeconds, { emitEvent: false });
+        this.idleThresholdControl.setValue(emp.idleThresholdSeconds ?? 300, { emitEvent: false });
+        this.shiftStartControl.setValue(emp.shiftStartHour ?? 20, { emitEvent: false });
+        this.shiftEndControl.setValue(emp.shiftEndHour ?? 4, { emitEvent: false });
+        this.teamControl.setValue(emp.teamId || '', { emitEvent: false });
 
         // Fetch all teams for suggestions
         const all = await this.employeeService.getAll();

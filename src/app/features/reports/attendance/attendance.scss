@@ -1,18 +1,8 @@
 @use '../report-shared';
 
 .attendance__select {
-  padding: 8px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md, 10px);
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 13px;
-  height: 34px;
   min-width: 180px;
-  cursor: pointer;
-  color-scheme: dark;
-  outline: none;
+  width: auto;
 }
 
 .attendance__badge {

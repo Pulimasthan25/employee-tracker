@@ -3,7 +3,9 @@ import { DateRange } from '../../../shared/components/date-range/date-range';
 import { AuthService, AppUser } from '../../../core/services/auth.service';
 import { ActivityService, type ActivityLog, type DisplayRow } from '../../../core/services/activity.service';
 import { EmployeeService } from '../../../core/services/employee.service';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AppSelect, SelectOption } from '../../../shared/components/select/select';
 import { fadeIn, staggerFadeIn, scaleIn, expandVertical } from '../../../shared/animations';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 
@@ -27,7 +29,7 @@ function formatDuration(seconds: number): string {
 
 @Component({
   selector: 'app-app-usage',
-  imports: [DateRange, FormsModule],
+  imports: [DateRange, FormsModule, ReactiveFormsModule, AppSelect],
   templateUrl: './app-usage.html',
   styleUrl: './app-usage.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -82,7 +84,15 @@ export class AppUsage implements OnDestroy {
   });
 
   readonly dateRange = signal<{ from: Date; to: Date } | null>(null);
-  readonly selectedEmployee = signal<string>('all');
+  readonly employeeControl = new FormControl('all');
+  readonly selectedEmployee = toSignal(this.employeeControl.valueChanges, { initialValue: 'all' as string | null });
+  readonly employeeOptions = computed<SelectOption[]>(() => {
+    const list: SelectOption[] = [{ label: 'All employees', value: 'all' }];
+    this.employees().forEach(emp => {
+      list.push({ label: emp.displayName || emp.email, value: emp.uid });
+    });
+    return list;
+  });
   readonly employees = signal<AppUser[]>([]);
   readonly expandedBrowsers = signal<Set<string>>(new Set());
 
@@ -130,7 +140,7 @@ export class AppUsage implements OnDestroy {
         if (sel === 'all') {
           logs = await this.activity.getTeamActivitySummary(range.from, range.to);
         } else {
-          logs = await this.activity.getActivityForUser(sel, range.from, range.to);
+          logs = await this.activity.getActivityForUser(sel!, range.from, range.to);
         }
       } else {
         const user = this.auth.appUser();

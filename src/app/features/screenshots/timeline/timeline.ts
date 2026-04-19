@@ -11,7 +11,8 @@ import {
   ElementRef,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ScreenshotService, Screenshot } from '../../../core/services/screenshot.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -19,6 +20,7 @@ import { EmployeeService } from '../../../core/services/employee.service';
 import { WebAuthnService } from '../../../core/services/webauthn.service';
 import { ScreenshotUnlockService } from '../../../core/services/screenshot-unlock.service';
 import { PasskeySetup } from '../../../shared/components/passkey-setup/passkey-setup';
+import { AppSelect, SelectOption } from '../../../shared/components/select/select';
 import type { AppUser } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../../shared/animations';
@@ -26,7 +28,7 @@ import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../../shared/anima
 @Component({
   selector: 'app-timeline',
   standalone: true,
-  imports: [FormsModule, DatePipe, PasskeySetup],
+  imports: [FormsModule, ReactiveFormsModule, DatePipe, PasskeySetup, AppSelect],
   templateUrl: './timeline.html',
   styleUrl: './timeline.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,7 +52,8 @@ export class Timeline {
   readonly screenshots = signal<Screenshot[]>([]);
   readonly employees = signal<AppUser[]>([]);
   readonly selectedDate = signal<string>(this.todayString());
-  readonly selectedUserId = signal<string>('all');
+  readonly userControl = new FormControl('all');
+  readonly selectedUserId = toSignal(this.userControl.valueChanges, { initialValue: 'all' as string | null });
   readonly lightboxShot = signal<Screenshot | null>(null);
   readonly lightboxIndex = signal<number>(0);
   readonly privacyMode = signal<boolean>(true);
@@ -68,6 +71,17 @@ export class Timeline {
   });
 
   readonly isAllMode = computed(() => this.selectedUserId() === 'all');
+  
+  readonly userOptions = computed<SelectOption[]>(() => {
+    const list: SelectOption[] = [{ label: 'All employees', value: 'all' }];
+    this.employees().forEach(emp => {
+      list.push({
+        label: emp.displayName || emp.email,
+        value: emp.uid
+      });
+    });
+    return list;
+  });
 
   // Derived
   readonly byHour = computed(() =>
@@ -125,12 +139,12 @@ export class Timeline {
       }
     } else {
       const currentUid = this.auth.firebaseUser()?.uid ?? '';
-      this.selectedUserId.set(currentUid);
+      this.userControl.setValue(currentUid);
     }
   }
 
   private async loadScreenshots(): Promise<void> {
-    const uid = this.selectedUserId();
+    const uid = this.selectedUserId() || 'all';
     
     // Enforcement: Don't fetch if locked and user is admin
     if (this.isAdmin() && !this.unlockService.isUnlocked()) {
@@ -225,7 +239,7 @@ export class Timeline {
     const max = this.todayString();
     this.selectedDate.set(val > max ? max : val);
   }
-  setUser(val: string): void { this.selectedUserId.set(val); }
+  setUser(val: string): void { this.userControl.setValue(val); }
 
   openDatePicker(): void {
     const input = this.datePickerInput?.nativeElement;
