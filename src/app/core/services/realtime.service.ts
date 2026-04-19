@@ -6,9 +6,11 @@ import {
   Timestamp,
   orderBy,
   limit,
+  where,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { EmployeeService } from './employee.service';
+import { AuthService } from './auth.service';
 
 export interface AgentStatus {
   userId: string;
@@ -39,6 +41,7 @@ export interface LiveActivity {
 @Injectable({ providedIn: 'root' })
 export class RealtimeService {
   private readonly employeeRepo = inject(EmployeeService);
+  private readonly auth = inject(AuthService);
 
   readonly agents = signal<AgentStatus[]>([]);
   readonly liveFeed = signal<LiveActivity[]>([]);
@@ -48,14 +51,8 @@ export class RealtimeService {
   private unsubscribeFeed?: () => void;
   private initialized = false;
 
-  /**
-   * Start Firestore real-time listeners.
-   * Pass a pre-built nameMap (from already-loaded employees) to avoid a
-   * duplicate Firestore read. The listeners are WebSocket-based — they do NOT
-   * poll; updates are pushed by Firestore automatically.
-   */
   async init(nameMap?: Map<string, string>) {
-    if (this.initialized) return;   // already subscribed — no-op
+    if (this.initialized) return;
     this.initialized = true;
     this.feedLoading.set(true);
 
@@ -72,57 +69,87 @@ export class RealtimeService {
   destroy() {
     this.unsubscribeAgents?.();
     this.unsubscribeFeed?.();
-    this.initialized = false;  // allow re-init on next dashboard visit
+    this.initialized = false;
     this.feedLoading.set(false);
   }
 
   private listenToAgents(nameMap: Map<string, string>) {
     const col = collection(db, 'agent_status');
-    this.unsubscribeAgents = onSnapshot(col, (snap) => {
-      const statuses = snap.docs.map((d) => {
-        const data = d.data();
-        const userId = d.id;
-        return {
-          userId,
-          userName: nameMap.get(userId) ?? 'Unknown User',
-          version: data['version'] ?? 'Unknown',
-          platform: data['platform'] ?? 'Unknown',
-          arch: data['arch'] ?? '',
-          hostname: data['hostname'] ?? '',
-          lastSeenAt: data['lastSeenAt']?.toDate() ?? null,
-          trackingPaused: !!data['trackingPaused'],
-          screenshotsPaused: !!data['screenshotsPaused'],
-          isIdle: !!data['isIdle'],
-          lastActivityAt: data['lastActivityAt'],
-          lastScreenshotAt: data['lastScreenshotAt'],
-          lastError: data['lastError'],
-        } as AgentStatus;
-      });
-      this.agents.set(statuses);
-    });
+    const isAdmin = this.auth.isAdmin();
+    const uid = this.auth.firebaseUser()?.uid;
+
+    // Admin: see everyone. Employee: only themselves.
+    const q = isAdmin 
+      ? query(col) 
+      : (uid ? query(col, where('__name__', '==', uid)) : query(col, limit(0)));
+
+    this.unsubscribeAgents = onSnapshot(
+      q, 
+      (snap) => {
+        const statuses = snap.docs.map((d) => {
+          const data = d.data();
+          const userId = d.id;
+          return {
+            userId,
+            userName: nameMap.get(userId) ?? 'Unknown User',
+            version: data['version'] ?? 'Unknown',
+            platform: data['platform'] ?? 'Unknown',
+            arch: data['arch'] ?? '',
+            hostname: data['hostname'] ?? '',
+            lastSeenAt: data['lastSeenAt']?.toDate() ?? null,
+            trackingPaused: !!data['trackingPaused'],
+            screenshotsPaused: !!data['screenshotsPaused'],
+            isIdle: !!data['isIdle'],
+            lastActivityAt: data['lastActivityAt'],
+            lastScreenshotAt: data['lastScreenshotAt'],
+            lastError: data['lastError'],
+          } as AgentStatus;
+        });
+        this.agents.set(statuses);
+      },
+      (error) => {
+        console.warn('[RealtimeService] Agents listener failed:', error.code);
+      }
+    );
   }
 
   private listenToFeed(nameMap: Map<string, string>) {
-    // For live feed, we take the last 20 activities across the team
     const col = collection(db, 'activities');
-    const q = query(col, orderBy('startTime', 'desc'), limit(20));
+    const isAdmin = this.auth.isAdmin();
+    const uid = this.auth.firebaseUser()?.uid;
 
-    this.unsubscribeFeed = onSnapshot(q, (snap) => {
-      const feed = snap.docs.map((d) => {
-        const data = d.data();
-        const userId = data['userId'];
-        return {
-          id: d.id,
-          userId,
-          userName: nameMap.get(userId) ?? 'Unknown',
-          appName: data['appName'] ?? 'Unknown',
-          windowTitle: data['windowTitle'] ?? '',
-          category: data['category'] ?? 'neutral',
-          timestamp: data['startTime']?.toDate() ?? new Date(),
-        } as LiveActivity;
-      });
-      this.liveFeed.set(feed);
-      this.feedLoading.set(false);
-    });
+    // Admin: last 20 across team. Employee: last 20 for self.
+    const q = isAdmin
+      ? query(col, orderBy('startTime', 'desc'), limit(20))
+      : (uid 
+          ? query(col, where('userId', '==', uid), orderBy('startTime', 'desc'), limit(20)) 
+          : query(col, limit(0))
+        );
+
+    this.unsubscribeFeed = onSnapshot(
+      q, 
+      (snap) => {
+        const feed = snap.docs.map((d) => {
+          const data = d.data();
+          const userId = data['userId'];
+          return {
+            id: d.id,
+            userId,
+            userName: nameMap.get(userId) ?? 'Unknown',
+            appName: data['appName'] ?? 'Unknown',
+            windowTitle: data['windowTitle'] ?? '',
+            category: data['category'] ?? 'neutral',
+            timestamp: data['startTime']?.toDate() ?? new Date(),
+          } as LiveActivity;
+        });
+        this.liveFeed.set(feed);
+        this.feedLoading.set(false);
+      },
+      (error) => {
+        console.warn('[RealtimeService] Feed listener failed:', error.code);
+        this.feedLoading.set(false);
+      }
+    );
   }
 }
+

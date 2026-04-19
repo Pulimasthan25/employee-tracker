@@ -8,7 +8,7 @@ import {
   User
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, clearOfflineCache } from '../firebase';
 import { FirebaseClaimsSyncService } from './firebase-claims-sync.service';
 
 export interface AppUser {
@@ -73,6 +73,8 @@ export class AuthService {
 
   async logout() {
     await signOut(auth);
+    // Clear offline Firestore cache so sensitive data is not left on shared computers
+    await clearOfflineCache();
     this.router.navigate(['/auth/login']);
   }
 }

@@ -30,6 +30,9 @@ export class SiteRules implements OnInit, OnDestroy {
   readonly availableTeams = signal<string[]>([]);
 
   async ngOnInit() {
+    // Start the Firestore listener only when this admin page mounts
+    this.siteRuleService.init();
+
     this.settingsService.setPrimaryAction({
       label: 'Add Rule',
       icon: 'plus',
@@ -48,6 +51,8 @@ export class SiteRules implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.settingsService.setPrimaryAction(null);
+    // Stop the Firestore listener when leaving this page
+    this.siteRuleService.destroy();
   }
 
   // Show/Hide Form

@@ -27,21 +27,43 @@ export class SiteRuleService {
   readonly rules = this.rulesSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
 
-  constructor() {
-    this.listenToRules();
-  }
+  private unsubscribe: (() => void) | null = null;
 
-  private listenToRules() {
+  /**
+   * Start the real-time listener. Only call this from admin-only components
+   * (e.g. SiteRules settings page). Calling it from root/constructor would
+   * fire a Firestore read for every user — including employees who lack permission.
+   */
+  init(): void {
+    if (this.unsubscribe) return; // already subscribed
     const colRef = collection(db, 'site_rules');
     const q = query(colRef);
-    onSnapshot(q, (snap) => {
-      const rules = snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as any),
-      }));
-      this.rulesSignal.set(rules);
-      this.loadingSignal.set(false);
-    });
+    this.unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const rules = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as any),
+        }));
+        this.rulesSignal.set(rules);
+        this.loadingSignal.set(false);
+      },
+      (error) => {
+        // Permission-denied is expected if somehow called without admin rights.
+        // Fail silently rather than polluting the console.
+        console.warn('[SiteRuleService] Firestore read denied:', error.code);
+        this.loadingSignal.set(false);
+      }
+    );
+  }
+
+  /** Stop the real-time listener. Call from the component's ngOnDestroy. */
+  destroy(): void {
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    // Reset so loading state is correct if the page is re-entered
+    this.loadingSignal.set(true);
+    this.rulesSignal.set([]);
   }
 
   async addRule(rule: Omit<SiteRule, 'id'>) {

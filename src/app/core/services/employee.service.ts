@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { initializeApp } from 'firebase/app';
+import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { environment } from '../../../environments/environment';
 import {
@@ -108,7 +108,8 @@ export class EmployeeService {
         }
         throw e;
       } finally {
-        // We could delete the secondary app here if needed
+        // Always clean up the secondary app to prevent memory leaks
+        await deleteApp(secondaryApp).catch(() => { /* non-fatal */ });
       }
     }
 
