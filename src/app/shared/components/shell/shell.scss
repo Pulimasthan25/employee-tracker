@@ -29,7 +29,9 @@
   height: 52px;
   padding: 0 1rem 0 0.5rem;
   border-radius: 14px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
 
   @media (max-width: 768px) {
     padding: 0 0.5rem;
@@ -47,7 +49,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(79, 142, 247, 0.4);
+  box-shadow: 
+    0 4px 12px rgba(79, 142, 247, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
 
   svg {
     width: 18px;
@@ -78,7 +82,9 @@
   height: 52px;
   padding: 0 0.75rem 0 1rem;
   border-radius: 14px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
   transition: all 0.2s ease;
 
   &:hover {
@@ -110,7 +116,9 @@
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .shell__user-menu.group:hover .shell__dropdown,
@@ -180,7 +188,9 @@
   padding: 0 0.5rem;
   display: flex;
   align-items: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
   max-width: 100%;
   z-index: 2000;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -191,8 +201,10 @@
     bottom: 2rem;
     padding: 0 0.5rem;
     border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    background: rgba(15, 17, 23, 0.9); // More solid base on mobile
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+    background: rgba(15, 17, 23, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 }
