@@ -138,15 +138,6 @@ export class Security implements OnInit {
     }
 
     try {
-      // If the user already has passkeys, verify one before adding a new one.
-      if (this.credentials().length > 0) {
-        const verified = await this.webauthn.authenticate(uid);
-        if (!verified) {
-          this.toast.show('Identity verification required to add a new passkey.', 'warning');
-          return;
-        }
-      }
-
       await this.webauthn.registerPasskey(uid, email);
       await this.loadCredentials();
       this.toast.show('Passkey registered successfully', 'success');
