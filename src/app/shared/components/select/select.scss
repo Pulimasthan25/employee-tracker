@@ -46,7 +46,6 @@
     &:focus {
       border-color: var(--accent);
       background: rgba(255, 255, 255, 0.08);
-      /* Reduced/Minimal Shadow as requested */
       box-shadow: 0 0 12px var(--accent-glow);
     }
   }
@@ -75,22 +74,22 @@
     }
   }
 
+  // The dropdown is now rendered in an overlay, so we remove manual positioning
   &__dropdown {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
+    width: 100%;
     z-index: 1000;
     border-radius: var(--radius-md);
     overflow: hidden;
-    /* Clean box shadow for depth and contrast */
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
     border: 1px solid var(--glass-border);
     max-height: 260px;
     overflow-y: auto;
-    
-    /* Ensure no weird overflow for scrollbar */
     padding: 2px;
+    
+    // Maintain glassmorphism even in overlay
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
   }
 
   &__options {
@@ -128,20 +127,9 @@
     font-size: 0.9375rem;
     font-weight: 500;
   }
-
-  &__check {
-    color: var(--accent);
-    display: flex;
-    animation: scale-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
 }
 
-@keyframes scale-in {
-  from { transform: scale(0.5); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-/* Robust Scrollbar for the dropdown */
+// Custom Scrollbar for the dropdown
 .app-select__dropdown {
   &::-webkit-scrollbar {
     width: 6px;
