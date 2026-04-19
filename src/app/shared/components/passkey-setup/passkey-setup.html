@@ -1,0 +1,111 @@
+<div class="passkey-setup" @fadeIn>
+  <div class="passkey-setup__content" @scaleIn>
+    
+    @if (!isBrowserSupported()) {
+      <div class="passkey-setup__unsupported">
+        <div class="passkey-setup__icon-area">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="passkey-setup__icon">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+          </svg>
+        </div>
+        <h2 class="passkey-setup__title">Not Supported</h2>
+        <p class="passkey-setup__subtitle">
+          Passkeys are not supported in this browser. Please use a modern version of Chrome, Safari, or Edge.
+        </p>
+      </div>
+    } @else {
+      <!-- Icon Area -->
+      <div class="passkey-setup__icon-area" [class.passkey-setup__icon-area--scanning]="isRegistered() && !loading()">
+        <div class="passkey-setup__glow"></div>
+        <div class="passkey-setup__circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="passkey-setup__icon">
+            <path d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z" />
+            <path d="M7 12C7 9.23858 9.23858 7 12 7" />
+            <path d="M12 17C14.7614 17 17 14.7614 17 12" />
+            <path d="M12 12L12 12.01" stroke-width="3" stroke-linecap="round" />
+            @if (isRegistered()) {
+              <line x1="5" y1="12" x2="19" y2="12" class="passkey-setup__scan-line" />
+            }
+          </svg>
+        </div>
+      </div>
+
+      @if (!isRegistered()) {
+        <!-- State 1: Not Registered -->
+        <h2 class="passkey-setup__title">Screenshot Protection</h2>
+        <p class="passkey-setup__subtitle">
+          Secure your team's visual data with biometric authentication.
+        </p>
+
+        <div class="passkey-setup__info">
+          <div class="passkey-setup__info-item">
+            <div class="passkey-setup__info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                <path d="M12 8v4"/>
+                <path d="M12 16h.01"/>
+              </svg>
+            </div>
+            <div class="passkey-setup__info-text">
+              <strong>Local Biometrics</strong>
+              <span>Use Fingerprint, Face ID, or Windows Hello.</span>
+            </div>
+          </div>
+          <div class="passkey-setup__info-item">
+            <div class="passkey-setup__info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                <line x1="12" y1="18" x2="12.01" y2="18"/>
+              </svg>
+            </div>
+            <div class="passkey-setup__info-text">
+              <strong>Cross-Device</strong>
+              <span>Scan QR code with your phone when prompted.</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn--primary btn--xl btn--glow" [disabled]="loading()" (click)="onPrimaryAction()">
+          @if (loading()) { 
+            <span class="spinner-modern"></span>
+            <span>Registering...</span>
+          }
+          @else { Register & Unlock }
+        </button>
+
+      } @else {
+        <!-- State 2: Registered -->
+        <h2 class="passkey-setup__title">Verify Your Identity</h2>
+        <p class="passkey-setup__subtitle">
+          Authenticate to view protected screenshots. Session remains active for {{ remainingSessionHint() }} minutes.
+        </p>
+
+        <button type="button" class="btn btn--primary btn--xl btn--glow" [disabled]="loading()" (click)="onPrimaryAction()">
+          @if (loading()) { 
+            <span class="spinner-modern"></span>
+            <span>Authenticating...</span>
+          }
+          @else { Unlock Screenshots }
+        </button>
+
+        <p class="passkey-setup__hint">
+          Use your registered biometric or phone-linked passkey
+        </p>
+
+        <button type="button" class="btn btn--link btn--sm" (click)="managePasskeys.emit()">
+          Manage Security Settings
+        </button>
+      }
+
+      @if (error()) {
+        <div class="passkey-setup__error" @fadeIn>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ error() }}</span>
+        </div>
+      }
+    }
+  </div>
+</div>

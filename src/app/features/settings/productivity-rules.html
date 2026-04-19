@@ -174,5 +174,79 @@
       </div>
       }
     </div>
+
+    <!-- Security Section -->
+    <div class="security-section" id="security-section" @fadeIn>
+      <div class="security-section__header">
+        <div class="security-section__title-group">
+          <h3 class="security-section__title">Screenshot Access</h3>
+          <p class="security-section__description">
+            Manage passkeys used to unlock screenshot viewing. Passkeys use your device biometrics or phone authentication.
+          </p>
+        </div>
+        <button type="button" class="btn btn--primary" [disabled]="registerLoading()" (click)="onAddPasskey()">
+          @if (registerLoading()) { 
+            <span class="spinner-modern spinner-modern--sm"></span>
+            <span style="margin-left: 8px;">Adding...</span>
+          }
+          @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="margin-right: 8px;">
+              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3L15.5 7.5z"/>
+            </svg>
+            Add New Passkey
+          }
+        </button>
+      </div>
+
+      @if (registerError()) {
+        <div class="alert alert--danger" @scaleIn>
+          {{ registerError() }}
+        </div>
+      }
+
+      <div class="security-section__list">
+        @if (credentialsLoading()) {
+          @for (i of [1, 2]; track i) {
+            <div class="cred-card cred-card--skeleton">
+              <div class="cred-card__icon"></div>
+              <div class="cred-card__info">
+                <div class="sk-inline"></div>
+                <div class="sk-inline sk-inline--sm"></div>
+              </div>
+            </div>
+          }
+        } @else {
+          @for (cred of credentials(); track cred.credentialId) {
+            <div class="cred-card" @slideInUp>
+              <div class="cred-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <path d="M12 8v4"/><path d="M12 16h.01"/>
+                </svg>
+              </div>
+              <div class="cred-card__info">
+                <div class="cred-card__device">{{ cred.deviceHint || 'Unknown Device' | slice:0:60 }}</div>
+                <div class="cred-card__date">Registered {{ cred.createdAt | date:'mediumDate' }}</div>
+              </div>
+              <button class="btn btn--flat-danger btn--icon btn--sm" 
+                [disabled]="deleteLoadingId() === cred.credentialId"
+                (click)="onDeleteCredential(cred.credentialId)" title="Delete Passkey">
+                @if (deleteLoadingId() === cred.credentialId) {
+                  <span class="spinner-modern spinner-modern--sm"></span>
+                } @else {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                }
+              </button>
+            </div>
+          } @empty {
+            <div class="empty-state">
+              No passkeys registered. Add one to enable screenshot protection.
+            </div>
+          }
+        }
+      </div>
+    </div>
   </div>
 </div>

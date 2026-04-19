@@ -1,74 +1,90 @@
-<div class="timeline" [class.timeline--reveal]="!privacyMode()" @fadeIn>
+@if (!isUnlocked()) {
+  <app-passkey-setup 
+    [isRegistered]="isRegistered()" 
+    [loading]="unlockLoading()" 
+    [error]="unlockError()"
+    [remainingSessionHint]="15" 
+    (registerAndUnlock)="onRegisterAndUnlock()" 
+    (authenticate)="onAuthenticate()"
+    (managePasskeys)="onManagePasskeys()" />
+}
+
+@if (isUnlocked()) {
+<div class="timeline timeline--reveal" @fadeIn>
 
   <!-- Toolbar -->
   <div class="timeline__toolbar">
     <div class="timeline__filters">
       <div class="timeline__date-nav">
         <button type="button" class="timeline__nav-btn" (click)="shiftDate(-1)" aria-label="Previous day">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
         <div class="timeline__date-display-wrap">
           <span class="timeline__date-display-text">{{ selectedDate() | date: 'dd/MM/yyyy' }}</span>
-          <button type="button" class="timeline__date-calendar-btn" aria-label="Open date picker" (click)="openDatePicker()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          <button type="button" class="timeline__date-calendar-btn" aria-label="Open date picker"
+            (click)="openDatePicker()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
           </button>
-          <input #datePickerInput type="date" class="timeline__date-input"
-            [value]="selectedDate()" [max]="todayMax()" (change)="setDate($any($event.target).value)" aria-label="Select date" />
+          <input #datePickerInput type="date" class="timeline__date-input" [value]="selectedDate()" [max]="todayMax()"
+            (change)="setDate($any($event.target).value)" aria-label="Select date" />
         </div>
         <button type="button" class="timeline__nav-btn" (click)="shiftDate(1)" [disabled]="isToday()"
           aria-label="Next day">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </button>
       </div>
 
       @if (!isToday()) {
-        <button type="button" class="timeline__today-pill" (click)="goToday()" @scaleIn>Today</button>
+      <button type="button" class="timeline__today-pill" (click)="goToday()" @scaleIn>Today</button>
       }
 
       @if (isAdmin()) {
-        <div class="timeline__user-select">
-          <select id="employee-select" class="timeline__select" [value]="selectedUserId()"
-            (change)="setUser($any($event.target).value)">
-            <option value="all">All employees</option>
-            @for (emp of employees(); track emp.uid) {
-              <option [value]="emp.uid">{{ emp.displayName || emp.email }}</option>
-            }
-          </select>
-        </div>
+      <div class="timeline__user-select">
+        <select id="employee-select" class="timeline__select" [value]="selectedUserId()"
+          (change)="setUser($any($event.target).value)">
+          <option value="all">All employees</option>
+          @for (emp of employees(); track emp.uid) {
+          <option [value]="emp.uid">{{ emp.displayName || emp.email }}</option>
+          }
+        </select>
+      </div>
       }
     </div>
 
     <div class="timeline__meta">
+      @if (isAdmin()) {
+      <div class="timeline__unlock-status">
+        <span class="timeline__unlock-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"
+            style="margin-right: 4px;">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+          </svg>
+          Unlocked · {{ unlockServicePublic.remainingMinutes() }}m
+        </span>
+        <button type="button" class="btn btn--ghost timeline__lock-btn" (click)="unlockServicePublic.lock()">
+          Lock
+        </button>
+      </div>
+      }
+
       @if (!loading()) {
       <span class="timeline__count" @fadeIn>
         <span class="timeline__count-num">{{ totalCount() }}</span>
         screenshot{{ totalCount() === 1 ? '' : 's' }}
       </span>
-
-      <button type="button" class="btn btn--ghost timeline__privacy-toggle" (click)="privacyMode.set(!privacyMode())"
-        [title]="privacyMode() ? 'Show all screenshots' : 'Hide screenshots'" @scaleIn>
-        @if (privacyMode()) {
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-        Show
-        } @else {
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path
-            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-          <line x1="1" y1="1" x2="23" y2="23" />
-        </svg>
-        Hide
-        }
-      </button>
       }
     </div>
   </div>
@@ -117,13 +133,6 @@
           <img [src]="shot.thumbnailUrl || shot.imageUrl"
             [alt]="shot.windowTitle || 'Screenshot at ' + formatTime(shot.capturedAt)" class="timeline__thumb-img"
             loading="lazy" />
-          <div class="timeline__thumb-privacy-hint">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-              stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
           <!-- time overlay (always shown on hover) -->
           <span class="timeline__thumb-time">{{ formatTime(shot.capturedAt) }}</span>
 
@@ -222,4 +231,5 @@
 
   </div>
 </div>
+}
 }

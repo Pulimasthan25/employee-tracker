@@ -12,15 +12,19 @@ import {
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ScreenshotService, Screenshot } from '../../../core/services/screenshot.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { WebAuthnService } from '../../../core/services/webauthn.service';
+import { ScreenshotUnlockService } from '../../../core/services/screenshot-unlock.service';
+import { PasskeySetup } from '../../../shared/components/passkey-setup/passkey-setup';
 import type { AppUser } from '../../../core/services/auth.service';
 import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../../shared/animations';
 
 @Component({
   selector: 'app-timeline',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, PasskeySetup],
   templateUrl: './timeline.html',
   styleUrl: './timeline.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +35,9 @@ export class Timeline {
   private readonly screenshotService = inject(ScreenshotService);
   private readonly auth = inject(AuthService);
   private readonly employeeService = inject(EmployeeService);
+  private readonly webauthn = inject(WebAuthnService);
+  private readonly unlockService = inject(ScreenshotUnlockService);
+  private readonly router = inject(Router);
 
   readonly isAdmin = this.auth.isAdmin;
 
@@ -43,7 +50,12 @@ export class Timeline {
   readonly selectedUserId = signal<string>('all');
   readonly lightboxShot = signal<Screenshot | null>(null);
   readonly lightboxIndex = signal<number>(0);
-  readonly privacyMode = signal(true);
+
+  readonly unlockLoading = signal<boolean>(false);
+  readonly unlockError = signal<string | null>(null);
+
+  readonly isUnlocked = computed(() => !this.isAdmin() || this.unlockService.isUnlocked());
+  readonly isRegistered = computed(() => this.webauthn.isRegistered());
 
   /** Quick-lookup map: userId → displayName */
   readonly employeeMap = computed(() => {
@@ -95,6 +107,11 @@ export class Timeline {
   }
 
   private async init(): Promise<void> {
+    const uid = this.auth.firebaseUser()?.uid;
+    if (uid) {
+      void this.webauthn.checkRegistration(uid);
+    }
+
     if (this.auth.isAdmin()) {
       try {
         const all = await this.employeeService.getAll();
@@ -104,13 +121,21 @@ export class Timeline {
         // non-fatal
       }
     } else {
-      const uid = this.auth.firebaseUser()?.uid ?? '';
-      this.selectedUserId.set(uid);
+      const currentUid = this.auth.firebaseUser()?.uid ?? '';
+      this.selectedUserId.set(currentUid);
     }
   }
 
   private async loadScreenshots(): Promise<void> {
     const uid = this.selectedUserId();
+    
+    // Enforcement: Don't fetch if locked and user is admin
+    if (this.isAdmin() && !this.unlockService.isUnlocked()) {
+      this.screenshots.set([]);
+      this.loading.set(false);
+      return;
+    }
+
     // For non-admin, uid is always set; for admin 'all' is valid too
     if (!uid) {
       this.screenshots.set([]);
@@ -268,4 +293,65 @@ export class Timeline {
         break;
     }
   }
+
+  async onAuthenticate() {
+    if (this.unlockLoading()) return;
+    this.unlockLoading.set(true);
+    this.unlockError.set(null);
+
+    const uid = this.auth.firebaseUser()?.uid;
+    if (!uid) {
+      this.unlockError.set('User session expired. Please refresh.');
+      this.unlockLoading.set(false);
+      return;
+    }
+
+    try {
+      const success = await this.webauthn.authenticate(uid);
+      if (success) {
+        this.unlockService.unlock();
+        await this.loadScreenshots();
+      } else {
+        this.unlockError.set('Authentication failed or was cancelled. Please try again.');
+      }
+    } finally {
+        this.unlockLoading.set(false);
+    }
+  }
+
+  async onRegisterAndUnlock() {
+    if (this.unlockLoading()) return;
+    this.unlockLoading.set(true);
+    this.unlockError.set(null);
+
+    const uid = this.auth.firebaseUser()?.uid;
+    const email = this.auth.firebaseUser()?.email;
+
+    if (!uid || !email) {
+      this.unlockError.set('User session not found.');
+      this.unlockLoading.set(false);
+      return;
+    }
+
+    try {
+      await this.webauthn.registerPasskey(uid, email);
+      const success = await this.webauthn.authenticate(uid);
+      if (success) {
+        this.unlockService.unlock();
+        await this.loadScreenshots();
+      } else {
+        this.unlockError.set('Registration successful but authentication failed. Try logging in with the new passkey.');
+      }
+    } catch (e: any) {
+      this.unlockError.set(e.message || 'Registration failed.');
+    } finally {
+      this.unlockLoading.set(false);
+    }
+  }
+
+  onManagePasskeys() {
+    this.router.navigate(['/settings/productivity'], { queryParams: { section: 'security' } });
+  }
+
+  protected readonly unlockServicePublic = this.unlockService;
 }
