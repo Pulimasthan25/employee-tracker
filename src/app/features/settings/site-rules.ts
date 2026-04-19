@@ -5,26 +5,22 @@ import { SiteRuleService, SiteRule } from '../../core/services/site-rule.service
 import { ConfirmService } from '../../core/services/confirm.service';
 import { EmployeeService } from '../../core/services/employee.service';
 import { SettingsService } from '../../core/services/settings.service';
-import { AuthService } from '../../core/services/auth.service';
-import { WebAuthnService, StoredCredential } from '../../core/services/webauthn.service';
 import { ActivatedRoute } from '@angular/router';
 import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../shared/animations';
-import { afterNextRender } from '@angular/core';
 
 @Component({
-  selector: 'app-productivity-rules',
+  selector: 'app-site-rules',
+  standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './productivity-rules.html',
-  styleUrl: './productivity-rules.scss',
+  templateUrl: './site-rules.html',
+  styleUrl: './site-rules.scss',
   animations: [fadeIn, staggerFadeIn, scaleIn, slideInUp]
 })
-export class ProductivityRules implements OnInit, OnDestroy {
+export class SiteRules implements OnInit, OnDestroy {
   private readonly siteRuleService = inject(SiteRuleService);
   private readonly confirmService = inject(ConfirmService);
   private readonly employeeService = inject(EmployeeService);
   private readonly settingsService = inject(SettingsService);
-  private readonly auth = inject(AuthService);
-  private readonly webauthn = inject(WebAuthnService);
   private readonly route = inject(ActivatedRoute);
 
   readonly rules = this.siteRuleService.rules;
@@ -46,23 +42,6 @@ export class ProductivityRules implements OnInit, OnDestroy {
       if (e.teamId) teams.add(e.teamId);
     });
     this.availableTeams.set(Array.from(teams).sort());
-
-    // Load WebAuthn credentials
-    this.loadCredentials();
-
-    // Check for scroll to security
-    this.route.queryParams.subscribe(params => {
-      if (params['section'] === 'security') {
-        this.scrollToSecurity.set(true);
-      }
-    });
-
-    afterNextRender(() => {
-      if (this.scrollToSecurity()) {
-        const el = document.getElementById('security-section');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
   }
 
   ngOnDestroy() {
@@ -214,85 +193,5 @@ export class ProductivityRules implements OnInit, OnDestroy {
         hash = team.charCodeAt(i) + ((hash << 5) - hash);
     }
     return professionalHues[Math.abs(hash) % professionalHues.length];
-  }
-
-  // WebAuthn Security Section
-  credentials = signal<StoredCredential[]>([]);
-  credentialsLoading = signal<boolean>(false);
-  registerLoading = signal<boolean>(false);
-  registerError = signal<string | null>(null);
-  deleteLoadingId = signal<string | null>(null);
-  scrollToSecurity = signal<boolean>(false);
-
-  async loadCredentials() {
-    this.credentialsLoading.set(true);
-    const uid = this.auth.firebaseUser()?.uid;
-    if (!uid || !this.auth.isAdmin()) {
-      this.credentialsLoading.set(false);
-      return;
-    }
-    const creds = await this.webauthn.getStoredCredentials(uid);
-    this.credentials.set(creds);
-    this.credentialsLoading.set(false);
-  }
-
-  async onAddPasskey() {
-    this.registerLoading.set(true);
-    this.registerError.set(null);
-    const uid = this.auth.firebaseUser()?.uid;
-    const email = this.auth.firebaseUser()?.email;
-    
-    if (!uid || !email) {
-      this.registerError.set('User session not found');
-      this.registerLoading.set(false);
-      return;
-    }
-
-    try {
-      // If the user already has passkeys, they MUST verify one before adding a new one.
-      // This prevents someone who hijacked a session from adding their own passkey.
-      if (this.credentials().length > 0) {
-        const verified = await this.webauthn.authenticate(uid);
-        if (!verified) {
-          this.registerError.set('Identity verification required to add a new passkey.');
-          return;
-        }
-      }
-
-      await this.webauthn.registerPasskey(uid, email);
-      await this.loadCredentials();
-    } catch (e: any) {
-      this.registerError.set(e.message || 'Registration failed');
-    } finally {
-      this.registerLoading.set(false);
-    }
-  }
-
-  async onDeleteCredential(credentialId: string) {
-    const uid = this.auth.firebaseUser()?.uid;
-    if (!uid) return;
-
-    this.confirmService.confirm({
-      title: 'Remove Passkey?',
-      message: 'You will need to verify your identity to remove this security credential.',
-      confirmText: 'Verify & Delete',
-      onConfirm: async () => {
-        this.deleteLoadingId.set(credentialId);
-        try {
-          // Mandatory verification before deletion
-          const verified = await this.webauthn.authenticate(uid);
-          if (verified) {
-            await this.webauthn.deleteCredential(uid, credentialId);
-            await this.loadCredentials();
-          } else {
-            this.registerError.set('Identity verification failed. Passkey was not removed.');
-          }
-        } catch (e: any) {
-          this.registerError.set(e.message || 'Verification failed');
-        } finally {
-          this.deleteLoadingId.set(null);
-        }
-      }
-    });
   }
 }

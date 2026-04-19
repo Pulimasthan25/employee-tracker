@@ -30,9 +30,14 @@ export const SETTINGS_ROUTES: Routes = [
             ],
           },
           {
-            path: 'productivity',
-            loadComponent: () => import('./productivity-rules').then(m => m.ProductivityRules),
-            data: { animation: 'ProductivityPage' }
+            path: 'site-rules',
+            loadComponent: () => import('./site-rules').then(m => m.SiteRules),
+            data: { animation: 'RulesPage' }
+          },
+          {
+            path: 'security',
+            loadComponent: () => import('./security').then(m => m.Security),
+            data: { animation: 'SecurityPage' }
           },
           {
             path: 'agents',

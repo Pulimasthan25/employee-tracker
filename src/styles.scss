@@ -500,3 +500,21 @@ body {
     padding: 12px;
   }
 }
+
+/* ── Spinner Modern ────────────────────────────────────────────────────── */
+.spinner-modern {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+
+  &--sm {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+  }
+}
