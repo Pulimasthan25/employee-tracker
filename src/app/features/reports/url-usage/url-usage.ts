@@ -9,10 +9,17 @@ import { AppSelect, SelectOption } from '../../../shared/components/select/selec
 import { fadeIn, staggerFadeIn, scaleIn } from '../../../shared/animations';
 
 function formatDuration(seconds: number): string {
-  if (!seconds) return '0h 0m';
+  if (!seconds) return '0s';
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  return `${h}h ${m}m`;
+  const s = Math.floor(seconds % 60);
+  
+  const parts: string[] = [];
+  if (h > 0) parts.push(`${h}h`);
+  if (m > 0) parts.push(`${m}m`);
+  if (s > 0 || (h === 0 && m === 0)) parts.push(`${s}s`);
+  
+  return parts.join(' ');
 }
 
 @Component({
