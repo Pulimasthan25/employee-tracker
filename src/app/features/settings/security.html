@@ -1,3 +1,19 @@
+@if (!isVerified() && isRegistered()) {
+  <!-- Auth Gate: same component used on the screenshots page -->
+  <app-passkey-setup
+    [isRegistered]="true"
+    [loading]="verifyLoading()"
+    [remainingSessionHint]="30"
+    [showManage]="false"
+    context="settings"
+    (authenticate)="onAuthenticate()"
+    (registerAndUnlock)="onRegisterAndUnlock()" />
+} @else if (!isVerified() && !isRegistered()) {
+  <!-- No passkey yet and still checking — show a subtle spinner -->
+  <div class="security-checking">
+    <span class="spinner-modern spinner-modern--sm"></span>
+  </div>
+} @else {
 <div class="settings-page" @fadeIn>
   <div class="settings-container">
     <!-- Security Section -->
@@ -70,3 +86,4 @@
     </div>
   </div>
 </div>
+}

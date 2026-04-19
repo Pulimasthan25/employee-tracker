@@ -37,11 +37,14 @@
         </div>
       </div>
 
-      <h2 class="passkey-setup__title">{{ isRegistered() ? 'Verify Identity' : 'Lock Screenshots' }}</h2>
+      <h2 class="passkey-setup__title">{{ isRegistered() ? 'Verify Identity' : (context() === 'settings' ? 'Setup Security' : 'Lock Screenshots') }}</h2>
       
       <p class="passkey-setup__subtitle">
         @if (isRegistered()) {
-           Unlocks session for <strong>{{ remainingSessionHint() }}m</strong>.
+          Use your device biometrics or security key to confirm it's you.
+          Access stays open for <strong>{{ remainingSessionHint() }} minutes</strong> before locking again.
+        } @else if (context() === 'settings') {
+          Add a passkey to protect sensitive security settings with your device biometrics.
         } @else {
           Enable biometric security to protect sensitive visual data.
         }
@@ -66,7 +69,7 @@
           }
         </button>
 
-        @if (isRegistered()) {
+        @if (isRegistered() && showManage()) {
           <button type="button" class="passkey-setup__manage-btn" (click)="managePasskeys.emit()">
             Manage Security
           </button>

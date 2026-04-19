@@ -1,3 +1,10 @@
+.security-checking {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4xl, 4rem) 0;
+}
+
 .settings-page {
   padding: 0;
   background-color: transparent;

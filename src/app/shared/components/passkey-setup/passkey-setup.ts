@@ -16,6 +16,10 @@ export class PasskeySetup {
   loading = input<boolean>(false);
   error = input<string | null>(null);
   remainingSessionHint = input<number>(15);
+  /** Whether to show the "Manage Security" secondary link. Pass false when already on the security page. */
+  showManage = input<boolean>(true);
+  /** Controls context-specific copy. 'screenshots' (default) | 'settings' */
+  context = input<'screenshots' | 'settings'>('screenshots');
 
   registerAndUnlock = output<void>();
   authenticate = output<void>();
