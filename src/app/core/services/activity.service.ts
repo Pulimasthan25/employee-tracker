@@ -95,6 +95,10 @@ function toDate(val: unknown): Date {
 export class ActivityService {
   private cache = new Map<string, { data: ActivityLog[]; ts: number }>();
 
+  clearCache() {
+    this.cache.clear();
+  }
+
   async getActivityForUser(
     userId: string,
     from: Date,

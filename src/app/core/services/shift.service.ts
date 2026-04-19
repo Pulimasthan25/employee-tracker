@@ -48,6 +48,10 @@ function toDateStr(d: Date): string {
 export class ShiftService {
   private cache = new Map<string, { data: any; ts: number }>();
 
+  clearCache() {
+    this.cache.clear();
+  }
+
   private toShiftSession(id: string, data: Record<string, unknown>): ShiftSession {
     return {
       id,

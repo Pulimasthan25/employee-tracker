@@ -109,12 +109,17 @@ export class Attendance {
     if (!uid) return '0h 0m';
 
     const endTime = status === 'active' ? new Date() : end;
+    const sTime = start.getTime();
+    const eTime = endTime.getTime();
     
     const segments = this.activityLogs()
       .filter((l) => l.userId === uid && 
-                     l.startTime.getTime() >= start.getTime() && 
-                     l.startTime.getTime() <= endTime.getTime())
-      .map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
+                     l.startTime.getTime() < eTime && 
+                     l.endTime.getTime() > sTime)
+      .map(l => ({ 
+        start: Math.max(l.startTime.getTime(), sTime), 
+        end: Math.min(l.endTime.getTime(), eTime) 
+      }));
       
     const total = sumUniqueTimeSeconds(segments);
     return formatDuration(total);
@@ -126,15 +131,17 @@ export class Attendance {
 
     const endTime = status === 'active' ? new Date() : end;
     const threshold = this.idleThresholdForUid(uid);
+    const sTime = start.getTime();
+    const eTime = endTime.getTime();
     
     const segments = this.idleSessions()
       .filter((s) => s.userId === uid && 
-                     s.startTime.getTime() >= start.getTime() && 
-                     s.startTime.getTime() <= endTime.getTime() &&
+                     s.startTime.getTime() < eTime && 
+                     s.endTime.getTime() > sTime &&
                      s.durationSeconds >= threshold)
       .map(s => ({
-        start: s.startTime.getTime(),
-        end: s.endTime.getTime()
+        start: Math.max(s.startTime.getTime(), sTime),
+        end: Math.min(s.endTime.getTime(), eTime)
       }));
 
     const total = sumUniqueTimeSeconds(segments);
@@ -146,13 +153,18 @@ export class Attendance {
     if (!uid) return '0h 0m';
     
     const endTime = status === 'active' ? new Date() : end;
+    const sTime = start.getTime();
+    const eTime = endTime.getTime();
 
     const productiveSegments = this.activityLogs()
       .filter((l) => l.userId === uid && 
                      l.category === 'productive' &&
-                     l.startTime.getTime() >= start.getTime() && 
-                     l.startTime.getTime() <= endTime.getTime())
-      .map(l => ({ start: l.startTime.getTime(), end: l.endTime.getTime() }));
+                     l.startTime.getTime() < eTime && 
+                     l.endTime.getTime() > sTime)
+      .map(l => ({ 
+        start: Math.max(l.startTime.getTime(), sTime), 
+        end: Math.min(l.endTime.getTime(), eTime) 
+      }));
       
     const total = sumUniqueTimeSeconds(productiveSegments);
     return formatDuration(total);
