@@ -2,7 +2,6 @@
   <app-passkey-setup 
     [isRegistered]="isRegistered()" 
     [loading]="unlockLoading()" 
-    [error]="unlockError()"
     [remainingSessionHint]="15" 
     (registerAndUnlock)="onRegisterAndUnlock()" 
     (authenticate)="onAuthenticate()"

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { WebAuthnService, StoredCredential } from '../../core/services/webauthn.service';
 import { ConfirmService } from '../../core/services/confirm.service';
+import { ToastService } from '../../core/services/toast.service';
 import { fadeIn, scaleIn, slideInUp } from '../../shared/animations';
 
 @Component({
@@ -17,12 +18,12 @@ export class Security implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly webauthn = inject(WebAuthnService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly toast = inject(ToastService);
 
   // WebAuthn states
   credentials = signal<StoredCredential[]>([]);
   credentialsLoading = signal<boolean>(false);
   registerLoading = signal<boolean>(false);
-  registerError = signal<string | null>(null);
   deleteLoadingId = signal<string | null>(null);
 
   ngOnInit() {
@@ -43,12 +44,11 @@ export class Security implements OnInit {
 
   async onAddPasskey() {
     this.registerLoading.set(true);
-    this.registerError.set(null);
     const uid = this.auth.firebaseUser()?.uid;
     const email = this.auth.firebaseUser()?.email;
     
     if (!uid || !email) {
-      this.registerError.set('User session not found');
+      this.toast.show('User session not found', 'error');
       this.registerLoading.set(false);
       return;
     }
@@ -58,15 +58,16 @@ export class Security implements OnInit {
       if (this.credentials().length > 0) {
         const verified = await this.webauthn.authenticate(uid);
         if (!verified) {
-          this.registerError.set('Identity verification required to add a new passkey.');
+          this.toast.show('Identity verification required to add a new passkey.', 'warning');
           return;
         }
       }
 
       await this.webauthn.registerPasskey(uid, email);
       await this.loadCredentials();
+      this.toast.show('Passkey registered successfully', 'success');
     } catch (e: any) {
-      this.registerError.set(e.message || 'Registration failed');
+      this.toast.show(e.message || 'Registration failed', 'error');
     } finally {
       this.registerLoading.set(false);
     }
@@ -87,11 +88,12 @@ export class Security implements OnInit {
           if (verified) {
             await this.webauthn.deleteCredential(uid, credentialId);
             await this.loadCredentials();
+            this.toast.show('Passkey removed successfully', 'success');
           } else {
-            this.registerError.set('Identity verification failed.');
+            this.toast.show('Identity verification failed.', 'error');
           }
         } catch (e: any) {
-          this.registerError.set(e.message || 'Verification failed');
+          this.toast.show(e.message || 'Verification failed', 'error');
         } finally {
           this.deleteLoadingId.set(null);
         }

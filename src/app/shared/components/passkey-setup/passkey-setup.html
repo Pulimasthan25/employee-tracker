@@ -47,14 +47,6 @@
         }
       </p>
 
-      @if (error()) {
-        <div class="passkey-setup__error" @fadeIn>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>{{ error() }}</span>
-        </div>
-      }
 
       <div class="passkey-setup__actions">
         <button type="button" class="btn btn--primary passkey-setup__btn" [disabled]="loading()" (click)="onPrimaryAction()">

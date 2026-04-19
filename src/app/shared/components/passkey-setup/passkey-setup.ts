@@ -4,6 +4,7 @@ import { fadeIn, scaleIn } from '../../animations';
 
 @Component({
   selector: 'app-passkey-setup',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './passkey-setup.html',
   styleUrl: './passkey-setup.scss',

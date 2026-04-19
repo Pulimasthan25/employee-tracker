@@ -23,11 +23,6 @@
         </button>
       </div>
 
-      @if (registerError()) {
-        <div class="alert alert--danger" @scaleIn>
-          {{ registerError() }}
-        </div>
-      }
 
       <div class="security-section__list">
         @if (credentialsLoading()) {

@@ -20,10 +20,12 @@ import { WebAuthnService } from '../../../core/services/webauthn.service';
 import { ScreenshotUnlockService } from '../../../core/services/screenshot-unlock.service';
 import { PasskeySetup } from '../../../shared/components/passkey-setup/passkey-setup';
 import type { AppUser } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../../shared/animations';
 
 @Component({
   selector: 'app-timeline',
+  standalone: true,
   imports: [FormsModule, DatePipe, PasskeySetup],
   templateUrl: './timeline.html',
   styleUrl: './timeline.scss',
@@ -38,6 +40,7 @@ export class Timeline {
   private readonly webauthn = inject(WebAuthnService);
   private readonly unlockService = inject(ScreenshotUnlockService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   readonly isAdmin = this.auth.isAdmin;
 
@@ -52,7 +55,6 @@ export class Timeline {
   readonly lightboxIndex = signal<number>(0);
 
   readonly unlockLoading = signal<boolean>(false);
-  readonly unlockError = signal<string | null>(null);
 
   readonly isUnlocked = computed(() => !this.isAdmin() || this.unlockService.isUnlocked());
   readonly isRegistered = computed(() => this.webauthn.isRegistered());
@@ -159,6 +161,7 @@ export class Timeline {
     } catch (e) {
       console.error('Failed to load screenshots:', e);
       this.connectionError.set(true);
+      this.toast.show('Failed to load screenshots. Please check your connection.', 'error');
       this.screenshots.set([]);
     } finally {
       this.loading.set(false);
@@ -297,11 +300,10 @@ export class Timeline {
   async onAuthenticate() {
     if (this.unlockLoading()) return;
     this.unlockLoading.set(true);
-    this.unlockError.set(null);
 
     const uid = this.auth.firebaseUser()?.uid;
     if (!uid) {
-      this.unlockError.set('User session expired. Please refresh.');
+      this.toast.show('User session expired. Please refresh.', 'error');
       this.unlockLoading.set(false);
       return;
     }
@@ -310,9 +312,10 @@ export class Timeline {
       const success = await this.webauthn.authenticate(uid);
       if (success) {
         this.unlockService.unlock();
+        this.toast.show('Screenshots unlocked', 'success');
         await this.loadScreenshots();
       } else {
-        this.unlockError.set('Authentication failed. Please try again or check your device settings.');
+        this.toast.show('Authentication failed. Please try again.', 'error');
       }
     } catch (e: any) {
       this.handleAuthError(e);
@@ -324,13 +327,12 @@ export class Timeline {
   async onRegisterAndUnlock() {
     if (this.unlockLoading()) return;
     this.unlockLoading.set(true);
-    this.unlockError.set(null);
 
     const uid = this.auth.firebaseUser()?.uid;
     const email = this.auth.firebaseUser()?.email;
 
     if (!uid || !email) {
-      this.unlockError.set('User session not found.');
+      this.toast.show('User session not found.', 'error');
       this.unlockLoading.set(false);
       return;
     }
@@ -340,9 +342,10 @@ export class Timeline {
       const success = await this.webauthn.authenticate(uid);
       if (success) {
         this.unlockService.unlock();
+        this.toast.show('Passkey registered and screenshots unlocked', 'success');
         await this.loadScreenshots();
       } else {
-        this.unlockError.set('Registration successful, but verification failed. Please click Unlock.');
+        this.toast.show('Registration successful, but verification failed.', 'warning');
       }
     } catch (e: any) {
       this.handleAuthError(e);
@@ -356,18 +359,18 @@ export class Timeline {
     const msg = e.message || '';
     
     if (msg.includes('NotAllowedError') || msg.includes('cancelled') || msg.includes('timed out')) {
-      this.unlockError.set('Authentication cancelled or timed out. Please try again.');
+      this.toast.show('Authentication cancelled or timed out.', 'info');
     } else if (msg.includes('InvalidStateError')) {
-      this.unlockError.set('This device is already registered. Please try to Unlock instead.');
+      this.toast.show('This device is already registered. Please try to Unlock instead.', 'warning');
     } else if (msg.includes('SecurityError')) {
-      this.unlockError.set('Security error. Ensure you are using a secure connection.');
+      this.toast.show('Security error. Ensure you are using a secure connection.', 'error');
     } else {
-      this.unlockError.set('Something went wrong with the authentication. Please try again.');
+      this.toast.show('Something went wrong with the authentication.', 'error');
     }
   }
 
   onManagePasskeys() {
-    this.router.navigate(['/settings/productivity'], { queryParams: { section: 'security' } });
+    this.router.navigate(['/settings/security']);
   }
 
   protected readonly unlockServicePublic = this.unlockService;
