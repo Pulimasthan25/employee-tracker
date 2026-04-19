@@ -70,7 +70,12 @@ export class Overview implements OnDestroy {
     });
 
     if (this.isAdmin()) {
-      // Admin: show last activity for every user
+      // Admin: show last activity for every user, or filter if dropdown used
+      const selected = this.selectedEmployeeId();
+      if (selected !== 'all') {
+        const own = userMap.get(selected);
+        return own ? [own] : [];
+      }
       return Array.from(userMap.values());
     }
 
@@ -91,6 +96,9 @@ export class Overview implements OnDestroy {
   selectedEmployeeId = signal<'all' | string>('all');
   readonly activeShift = signal<ShiftSession | null>(null);
   readonly idleSessions = signal<IdleSession[]>([]);
+
+  readonly now = signal<Date>(new Date());
+  private timeInterval: any;
 
   lastUpdated = signal('');
 
@@ -235,9 +243,16 @@ export class Overview implements OnDestroy {
         void this.loadActiveShift();
       });
     });
+
+    this.timeInterval = setInterval(() => {
+      this.now.set(new Date());
+    }, 1000);
   }
 
   ngOnDestroy(): void {
+    if (this.timeInterval) {
+      clearInterval(this.timeInterval);
+    }
     this.realtime.destroy();
   }
 
@@ -489,6 +504,17 @@ export class Overview implements OnDestroy {
   getAppPercent(seconds: number): number {
     const total = this.totalSeconds();
     return total === 0 ? 0 : Math.round((seconds / total) * 100);
+  }
+
+  getTimeAgo(date: Date): string {
+    const _now = this.now(); // track signal
+    const seconds = Math.floor((_now.getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return `${Math.max(0, seconds)} secs ago`;
+    const mins = Math.floor(seconds / 60);
+    if (mins < 60) return `${mins} mins ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours} hrs ago`;
+    return '1 day ago';
   }
 
 }

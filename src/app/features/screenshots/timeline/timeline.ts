@@ -12,15 +12,21 @@ import {
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ScreenshotService, Screenshot } from '../../../core/services/screenshot.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { WebAuthnService } from '../../../core/services/webauthn.service';
+import { ScreenshotUnlockService } from '../../../core/services/screenshot-unlock.service';
+import { PasskeySetup } from '../../../shared/components/passkey-setup/passkey-setup';
 import type { AppUser } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../../shared/animations';
 
 @Component({
   selector: 'app-timeline',
-  imports: [FormsModule, DatePipe],
+  standalone: true,
+  imports: [FormsModule, DatePipe, PasskeySetup],
   templateUrl: './timeline.html',
   styleUrl: './timeline.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +37,10 @@ export class Timeline {
   private readonly screenshotService = inject(ScreenshotService);
   private readonly auth = inject(AuthService);
   private readonly employeeService = inject(EmployeeService);
+  private readonly webauthn = inject(WebAuthnService);
+  private readonly unlockService = inject(ScreenshotUnlockService);
+  private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   readonly isAdmin = this.auth.isAdmin;
 
@@ -43,7 +53,12 @@ export class Timeline {
   readonly selectedUserId = signal<string>('all');
   readonly lightboxShot = signal<Screenshot | null>(null);
   readonly lightboxIndex = signal<number>(0);
-  readonly privacyMode = signal(true);
+  readonly privacyMode = signal<boolean>(true);
+
+  readonly unlockLoading = signal<boolean>(false);
+
+  readonly isUnlocked = computed(() => !this.isAdmin() || this.unlockService.isUnlocked());
+  readonly isRegistered = computed(() => this.webauthn.isRegistered());
 
   /** Quick-lookup map: userId → displayName */
   readonly employeeMap = computed(() => {
@@ -95,6 +110,11 @@ export class Timeline {
   }
 
   private async init(): Promise<void> {
+    const uid = this.auth.firebaseUser()?.uid;
+    if (uid) {
+      void this.webauthn.checkRegistration(uid);
+    }
+
     if (this.auth.isAdmin()) {
       try {
         const all = await this.employeeService.getAll();
@@ -104,13 +124,21 @@ export class Timeline {
         // non-fatal
       }
     } else {
-      const uid = this.auth.firebaseUser()?.uid ?? '';
-      this.selectedUserId.set(uid);
+      const currentUid = this.auth.firebaseUser()?.uid ?? '';
+      this.selectedUserId.set(currentUid);
     }
   }
 
   private async loadScreenshots(): Promise<void> {
     const uid = this.selectedUserId();
+    
+    // Enforcement: Don't fetch if locked and user is admin
+    if (this.isAdmin() && !this.unlockService.isUnlocked()) {
+      this.screenshots.set([]);
+      this.loading.set(false);
+      return;
+    }
+
     // For non-admin, uid is always set; for admin 'all' is valid too
     if (!uid) {
       this.screenshots.set([]);
@@ -134,6 +162,7 @@ export class Timeline {
     } catch (e) {
       console.error('Failed to load screenshots:', e);
       this.connectionError.set(true);
+      this.toast.show('Failed to load screenshots. Please check your connection.', 'error');
       this.screenshots.set([]);
     } finally {
       this.loading.set(false);
@@ -268,4 +297,82 @@ export class Timeline {
         break;
     }
   }
+
+  async onAuthenticate() {
+    if (this.unlockLoading()) return;
+    this.unlockLoading.set(true);
+
+    const uid = this.auth.firebaseUser()?.uid;
+    if (!uid) {
+      this.toast.show('User session expired. Please refresh.', 'error');
+      this.unlockLoading.set(false);
+      return;
+    }
+
+    try {
+      const success = await this.webauthn.authenticate(uid);
+      if (success) {
+        this.unlockService.unlock();
+        this.toast.show('Screenshots unlocked', 'success');
+        await this.loadScreenshots();
+      } else {
+        this.toast.show('Authentication failed. Please try again.', 'error');
+      }
+    } catch (e: any) {
+      this.handleAuthError(e);
+    } finally {
+      this.unlockLoading.set(false);
+    }
+  }
+
+  async onRegisterAndUnlock() {
+    if (this.unlockLoading()) return;
+    this.unlockLoading.set(true);
+
+    const uid = this.auth.firebaseUser()?.uid;
+    const email = this.auth.firebaseUser()?.email;
+
+    if (!uid || !email) {
+      this.toast.show('User session not found.', 'error');
+      this.unlockLoading.set(false);
+      return;
+    }
+
+    try {
+      await this.webauthn.registerPasskey(uid, email);
+      const success = await this.webauthn.authenticate(uid);
+      if (success) {
+        this.unlockService.unlock();
+        this.toast.show('Passkey registered and screenshots unlocked', 'success');
+        await this.loadScreenshots();
+      } else {
+        this.toast.show('Registration successful, but verification failed.', 'warning');
+      }
+    } catch (e: any) {
+      this.handleAuthError(e);
+    } finally {
+      this.unlockLoading.set(false);
+    }
+  }
+
+  private handleAuthError(e: any): void {
+    console.error('WebAuthn Error:', e);
+    const msg = e.message || '';
+    
+    if (msg.includes('NotAllowedError') || msg.includes('cancelled') || msg.includes('timed out')) {
+      this.toast.show('Authentication cancelled or timed out.', 'info');
+    } else if (msg.includes('InvalidStateError')) {
+      this.toast.show('This device is already registered. Please try to Unlock instead.', 'warning');
+    } else if (msg.includes('SecurityError')) {
+      this.toast.show('Security error. Ensure you are using a secure connection.', 'error');
+    } else {
+      this.toast.show('Something went wrong with the authentication.', 'error');
+    }
+  }
+
+  onManagePasskeys() {
+    this.router.navigate(['/settings/security']);
+  }
+
+  protected readonly unlockServicePublic = this.unlockService;
 }

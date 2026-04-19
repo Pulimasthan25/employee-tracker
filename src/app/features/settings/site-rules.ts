@@ -5,20 +5,25 @@ import { SiteRuleService, SiteRule } from '../../core/services/site-rule.service
 import { ConfirmService } from '../../core/services/confirm.service';
 import { EmployeeService } from '../../core/services/employee.service';
 import { SettingsService } from '../../core/services/settings.service';
+import { ActivatedRoute } from '@angular/router';
+import { ToastService } from '../../core/services/toast.service';
 import { fadeIn, staggerFadeIn, scaleIn, slideInUp } from '../../shared/animations';
 
 @Component({
-  selector: 'app-productivity-rules',
+  selector: 'app-site-rules',
+  standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './productivity-rules.html',
-  styleUrl: './productivity-rules.scss',
+  templateUrl: './site-rules.html',
+  styleUrl: './site-rules.scss',
   animations: [fadeIn, staggerFadeIn, scaleIn, slideInUp]
 })
-export class ProductivityRules implements OnInit, OnDestroy {
+export class SiteRules implements OnInit, OnDestroy {
   private readonly siteRuleService = inject(SiteRuleService);
   private readonly confirmService = inject(ConfirmService);
   private readonly employeeService = inject(EmployeeService);
   private readonly settingsService = inject(SettingsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly toast = inject(ToastService);
 
   readonly rules = this.siteRuleService.rules;
   readonly rulesLoading = this.siteRuleService.loading;
@@ -100,6 +105,9 @@ export class ProductivityRules implements OnInit, OnDestroy {
     this.isSeeding.set(true);
     try {
       await this.siteRuleService.seedDefaultRules();
+      this.toast.show('Default rules imported', 'success');
+    } catch (e) {
+      this.toast.show('Failed to import defaults', 'error');
     } finally {
       this.isSeeding.set(false);
     }
@@ -134,32 +142,38 @@ export class ProductivityRules implements OnInit, OnDestroy {
 
     const teamIdValue = this.newTeamId();
 
-    if (this.editingRuleId()) {
-      await this.siteRuleService.updateRule(this.editingRuleId()!, {
-        displayName,
-        keywords,
-        category: this.newCategory(),
-        teamId: teamIdValue || undefined
-      });
-      this.editingRuleId.set(null);
-    } else {
-      const newRule: any = {
-        displayName,
-        keywords,
-        category: this.newCategory()
-      };
-      if (teamIdValue) {
-        newRule.teamId = teamIdValue;
+    try {
+      if (this.editingRuleId()) {
+        await this.siteRuleService.updateRule(this.editingRuleId()!, {
+          displayName,
+          keywords,
+          category: this.newCategory(),
+          teamId: teamIdValue || undefined
+        });
+        this.toast.show('Rule updated successfully', 'success');
+        this.editingRuleId.set(null);
+      } else {
+        const newRule: any = {
+          displayName,
+          keywords,
+          category: this.newCategory()
+        };
+        if (teamIdValue) {
+          newRule.teamId = teamIdValue;
+        }
+        await this.siteRuleService.addRule(newRule);
+        this.toast.show('Rule added successfully', 'success');
       }
-      await this.siteRuleService.addRule(newRule);
-    }
 
-    // Reset form
-    this.newDisplayName.set('');
-    this.newKeywords.set('');
-    this.newCategory.set('productive');
-    this.newTeamId.set('');
-    this.showForm.set(false);
+      // Reset form
+      this.newDisplayName.set('');
+      this.newKeywords.set('');
+      this.newCategory.set('productive');
+      this.newTeamId.set('');
+      this.showForm.set(false);
+    } catch (e) {
+      this.toast.show('Failed to save rule', 'error');
+    }
   }
 
   async deleteRule(id: string | undefined) {
@@ -169,7 +183,12 @@ export class ProductivityRules implements OnInit, OnDestroy {
       message: 'This site will no longer be categorized for your team. Are you sure?',
       confirmText: 'Delete',
       onConfirm: async () => {
-        await this.siteRuleService.deleteRule(id);
+        try {
+          await this.siteRuleService.deleteRule(id);
+          this.toast.show('Rule deleted', 'success');
+        } catch (e) {
+          this.toast.show('Failed to delete rule', 'error');
+        }
       }
     });
   }
