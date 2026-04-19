@@ -68,6 +68,7 @@
 *::after {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none; /* Prevents default context menu on long press (iOS/Android) */
 }
 
 html {
@@ -84,6 +85,14 @@ body {
   min-height: 100dvh;
   position: relative;
   overflow-x: hidden;
+  user-select: none; /* Prevents text selection globally */
+  -webkit-user-select: none;
+
+  /* Re-enable selection for interactive inputs */
+  input, textarea, [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
+  }
 
   /* Premium Mesh Gradient Background */
   &::before {
