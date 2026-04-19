@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, deleteUser, type User } from 'firebase/auth';
 import { environment } from '../../../environments/environment';
 import {
   collection,
@@ -85,6 +85,8 @@ export class EmployeeService {
     return toAppUser(d.id, d.data() as Record<string, unknown>);
   }
 
+
+
   async inviteEmployee(data: {
     email: string;
     displayName: string;
@@ -93,25 +95,6 @@ export class EmployeeService {
     role: 'admin' | 'employee';
     password?: string;
   }): Promise<void> {
-    let authUid: string | null = null;
-
-    if (data.password) {
-      // Initialize a secondary app so the current admin doesn't get logged out
-      const secondaryApp = initializeApp(environment.firebase, 'SecondaryApp' + Date.now());
-      const secondaryAuth = getAuth(secondaryApp);
-      try {
-        const cred = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
-        authUid = cred.user.uid;
-      } catch (e: any) {
-        if (e.code === 'auth/email-already-in-use') {
-          throw new Error('User already exists. If you previously deleted this user from the tracker, you must also delete their account from the Console before re-inviting.');
-        }
-        throw e;
-      } finally {
-        // We could delete the secondary app here if needed
-      }
-    }
-
     const userData = {
       email: data.email,
       displayName: data.displayName,
@@ -122,14 +105,40 @@ export class EmployeeService {
       createdAt: Timestamp.fromDate(new Date()),
     };
 
-    if (authUid) {
-      await setDoc(doc(db, 'users', authUid), { ...userData, uid: authUid });
-      // Push Firestore role into Firebase Auth custom claims for the new account (admin invite path).
-      void this.claimsSync.syncUser(authUid);
+    if (data.password) {
+      const secondaryApp = initializeApp(environment.firebase, 'SecondaryApp' + Date.now());
+      const secondaryAuth = getAuth(secondaryApp);
+      let createdUser: User | null = null;
+
+      try {
+        const cred = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
+        createdUser = cred.user;
+        const authUid = cred.user.uid;
+
+        // Write to Firestore while still in the cleanup-guarded block
+        await setDoc(doc(db, 'users', authUid), { ...userData, uid: authUid });
+
+        // Push Firestore role into Firebase Auth custom claims
+        void this.claimsSync.syncUser(authUid);
+      } catch (e: any) {
+        // If Firestore write failed, cleanup the orphaned Auth account
+        if (createdUser) {
+          await deleteUser(createdUser).catch(() => { /* non-fatal secondary error */ });
+        }
+
+        if (e.code === 'auth/email-already-in-use') {
+          throw new Error('User already exists in Authentication. Please delete them.');
+        }
+        throw e;
+      } finally {
+        await deleteApp(secondaryApp).catch(() => {});
+      }
     } else {
+      // Legacy path — just create Firestore doc
       const col = collection(db, 'users');
       await addDoc(col, userData);
     }
+
     this.invalidateCache();
   }
 
@@ -140,6 +149,7 @@ export class EmployeeService {
 
   async repairAgent(uid: string): Promise<void> {
     await updateDoc(doc(db, 'users', uid), { pendingCommand: 'repair' });
+    this.invalidateCache();
   }
 
   async reactivate(uid: string): Promise<void> {

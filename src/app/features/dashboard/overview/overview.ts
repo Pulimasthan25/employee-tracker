@@ -277,6 +277,9 @@ export class Overview implements OnDestroy {
   }
 
   refreshData(): void {
+    this.activityService.clearCache();
+    this.idleService.clearCache();
+    this.shiftService.clearCache();
     untracked(() => this.loadData());
   }
 

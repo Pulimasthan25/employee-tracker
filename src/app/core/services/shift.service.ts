@@ -48,6 +48,10 @@ function toDateStr(d: Date): string {
 export class ShiftService {
   private cache = new Map<string, { data: any; ts: number }>();
 
+  clearCache() {
+    this.cache.clear();
+  }
+
   private toShiftSession(id: string, data: Record<string, unknown>): ShiftSession {
     return {
       id,
@@ -122,10 +126,16 @@ export class ShiftService {
       where('shiftDate', '<=', toStr),
       orderBy('shiftDate', 'desc')
     );
-    return onSnapshot(q, (snap) => {
-      const shifts = snap.docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
-      callback(shifts);
-    });
+    return onSnapshot(
+      q, 
+      (snap) => {
+        const shifts = snap.docs.map((d) => this.toShiftSession(d.id, d.data() as Record<string, unknown>));
+        callback(shifts);
+      },
+      (error) => {
+        console.warn('[ShiftService] Shifts listener failed:', error.code);
+      }
+    );
   }
 
   async getActiveShift(userId: string): Promise<ShiftSession | null> {

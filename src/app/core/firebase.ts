@@ -1,6 +1,6 @@
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, Firestore, enableIndexedDbPersistence, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFirestore, Firestore, enableIndexedDbPersistence, clearIndexedDbPersistence, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage, FirebaseStorage, connectStorageEmulator } from 'firebase/storage';
 import { environment } from '../../environments/environment';
 
@@ -25,4 +25,17 @@ if (typeof window !== 'undefined') {
       console.warn('The current browser does not support all of the features required to enable persistence');
     }
   });
+}
+
+/**
+ * Clears the Firestore IndexedDB offline cache.
+ * Call on logout to remove sensitive cached data (screenshots, activities, users)
+ * from shared computers. Non-fatal — errors are silently ignored.
+ */
+export async function clearOfflineCache(): Promise<void> {
+  try {
+    await clearIndexedDbPersistence(db);
+  } catch {
+    // Non-fatal — db may still be running; cache will be cleared on next cold start
+  }
 }

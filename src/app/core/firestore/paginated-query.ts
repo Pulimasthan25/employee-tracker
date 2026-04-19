@@ -1,9 +1,7 @@
 import {
-  collection,
   getDocs,
   limit,
   query,
-  startAfter,
   type CollectionReference,
   type QueryConstraint,
   type QueryDocumentSnapshot,
@@ -11,7 +9,7 @@ import {
 
 /**
  * Fetches documents matching `baseConstraints` up to a fixed limit.
- * Used to manage Firebase read costs.
+ * This is intentionally capped at 500 records to manage Firebase Free Tier read limits.
  */
 export async function getDocsAllPages(
   col: CollectionReference,

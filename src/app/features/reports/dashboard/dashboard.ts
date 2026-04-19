@@ -234,6 +234,7 @@ export class ReportsDashboard implements OnDestroy {
   }
 
   refreshData() {
+    this.activityService.clearCache();
     untracked(() => this.loadData());
   }
 

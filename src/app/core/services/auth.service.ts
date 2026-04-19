@@ -8,8 +8,9 @@ import {
   User
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, clearOfflineCache } from '../firebase';
 import { FirebaseClaimsSyncService } from './firebase-claims-sync.service';
+import { NgZone } from '@angular/core';
 
 export interface AppUser {
   uid: string;
@@ -28,6 +29,7 @@ export interface AppUser {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private router = inject(Router);
+  private zone = inject(NgZone);
   private readonly claimsSync = inject(FirebaseClaimsSyncService);
 
   // Signals — Angular 21 reactive state
@@ -41,26 +43,35 @@ export class AuthService {
 
   constructor() {
     onAuthStateChanged(auth, async (user) => {
-      this.firebaseUser.set(user);
+      let appUser: AppUser | null = null;
       if (user) {
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists()) {
-          const data = snap.data() as any;
-          this.appUser.set({
-            ...data,
-            uid: snap.id,
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt)
-          } as AppUser);
-        } else {
-          this.appUser.set(null);
+        try {
+          const snap = await getDoc(doc(db, 'users', user.uid));
+          if (snap.exists()) {
+            const data = snap.data() as any;
+            appUser = {
+              ...data,
+              uid: snap.id,
+              createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt)
+            } as AppUser;
+          }
+        } catch (e) {
+          console.error('Error fetching user profile:', e);
         }
-        // Align Auth custom claims with Firestore role (promote/demote) without manual scripts.
-        void this.claimsSync.syncSelf();
-      } else {
-        this.appUser.set(null);
       }
-      this.isLoading.set(false);
-      this.authReady.set(true);
+
+      this.zone.run(() => {
+        this.firebaseUser.set(user);
+        this.appUser.set(appUser);
+        
+        if (user) {
+          // Align Auth custom claims with Firestore role (promote/demote) without manual scripts.
+          void this.claimsSync.syncSelf();
+        }
+        
+        this.isLoading.set(false);
+        this.authReady.set(true);
+      });
     });
   }
 
@@ -73,6 +84,8 @@ export class AuthService {
 
   async logout() {
     await signOut(auth);
+    // Clear offline Firestore cache so sensitive data is not left on shared computers
+    await clearOfflineCache();
     this.router.navigate(['/auth/login']);
   }
 }

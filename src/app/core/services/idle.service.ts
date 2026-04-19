@@ -38,6 +38,10 @@ export interface BreakTotalOptions {
 export class IdleService {
   private cache = new Map<string, { data: IdleSession[]; ts: number }>();
 
+  clearCache() {
+    this.cache.clear();
+  }
+
   async getIdleSessionsForUser(
     userId: string,
     from: Date,
