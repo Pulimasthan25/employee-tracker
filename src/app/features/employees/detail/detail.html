@@ -1,11 +1,11 @@
 <div class="detail" @fadeIn>
   <div class="detail__header">
-    <a routerLink=".." class="detail__back">
+    <button type="button" routerLink=".." class="detail__back">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="15 18 9 12 15 6"/>
       </svg>
       Back to employees
-    </a>
+    </button>
   </div>
 
   @if (loading()) {
@@ -261,9 +261,9 @@
             </button>
           </div>
           
-          <a [href]="downloadUrl()" class="btn btn--primary detail__success-download" target="_blank" download [class.disabled]="!downloadUrl()">
+          <button type="button" (click)="triggerDownload()" class="btn btn--primary detail__success-download" [disabled]="!downloadUrl()">
             Download Agent
-          </a>
+          </button>
           <button type="button" class="btn btn--ghost" (click)="showReactivationSuccess.set(false)" style="margin-top: 8px;">Dismiss</button>
         </div>
       }

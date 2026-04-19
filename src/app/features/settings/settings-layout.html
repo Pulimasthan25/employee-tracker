@@ -2,7 +2,7 @@
   <div class="settings-layout__header">
     @if (showTabs()) {
     <nav class="settings-layout__tabs" @fadeIn>
-      <a routerLink="/settings/employees" routerLinkActive="settings-layout__tab--active" class="settings-layout__tab">
+      <button type="button" routerLink="/settings/employees" routerLinkActive="settings-layout__tab--active" class="settings-layout__tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"
           style="margin-right: 8px;">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -11,16 +11,16 @@
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
         Employees
-      </a>
-      <a routerLink="/settings/site-rules" routerLinkActive="settings-layout__tab--active"
+      </button>
+      <button type="button" routerLink="/settings/site-rules" routerLinkActive="settings-layout__tab--active"
         class="settings-layout__tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"
           style="margin-right: 8px;">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
         </svg>
         Site Rules
-      </a>
-      <a routerLink="/settings/agents" routerLinkActive="settings-layout__tab--active" class="settings-layout__tab">
+      </button>
+      <button type="button" routerLink="/settings/agents" routerLinkActive="settings-layout__tab--active" class="settings-layout__tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"
           style="margin-right: 8px;">
           <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
@@ -29,8 +29,8 @@
           <line x1="6" y1="18" x2="6.01" y2="18"></line>
         </svg>
         Agents
-      </a>
-      <a routerLink="/settings/security" routerLinkActive="settings-layout__tab--active" class="settings-layout__tab">
+      </button>
+      <button type="button" routerLink="/settings/security" routerLinkActive="settings-layout__tab--active" class="settings-layout__tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"
           style="margin-right: 8px;">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -38,13 +38,13 @@
           <path d="M12 16h.01" />
         </svg>
         Security
-      </a>
+      </button>
     </nav>
 
     <div class="settings-layout__actions" @fadeIn>
       @if (primaryAction(); as action) {
       @if (action.routerLink) {
-      <a [routerLink]="action.routerLink" class="btn" [ngClass]="action.btnClass || 'btn--primary'">
+      <button type="button" [routerLink]="action.routerLink" class="btn" [ngClass]="action.btnClass || 'btn--primary'">
         @if (action.icon === 'plus') {
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
           style="margin-right: 6px;">
@@ -53,9 +53,9 @@
         </svg>
         }
         {{ action.label }}
-      </a>
+      </button>
       } @else {
-      <button class="btn" [ngClass]="action.btnClass || 'btn--primary'" (click)="executeAction()">
+      <button type="button" class="btn" [ngClass]="action.btnClass || 'btn--primary'" (click)="executeAction()">
         @if (action.icon === 'plus') {
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
           style="margin-right: 6px;">

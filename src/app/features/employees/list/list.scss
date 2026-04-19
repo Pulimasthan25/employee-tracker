@@ -142,6 +142,11 @@ $cols: 1.6fr 2fr 1.1fr 0.9fr 1fr 1.4fr 0.9fr 1.1fr 1.1fr 50px;
   font-size: 0.9rem;
   color: var(--text-primary);
   text-decoration: none;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
 
   &--link {
     border-bottom: 1px solid var(--border);

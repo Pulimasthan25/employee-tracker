@@ -130,7 +130,7 @@
         <!-- Removed staggerFadeIn to reduce animation noise -->
         <div class="list__rows-container">
           @for (emp of sortedEmployees(); track emp.uid) {
-            <a [routerLink]="[emp.uid]" class="list__table-row list__table-row--link" [class.list__table-row--active]="emp.active" [class.list__table-row--inactive]="!emp.active">
+            <button type="button" [routerLink]="[emp.uid]" class="list__table-row list__table-row--link" [class.list__table-row--active]="emp.active" [class.list__table-row--inactive]="!emp.active">
               <span class="list__table-cell list__table-cell--name">
                 <div class="list__avatar-mini" [style.--team-hue]="getTeamHue(emp.teamId)">{{ (emp.displayName || emp.email)[0].toUpperCase() }}</div>
                 {{ emp.displayName || '—' }}
@@ -185,7 +185,7 @@
                   </div>
                 }
               </div>
-            </a>
+            </button>
           }
         </div>
       </div>

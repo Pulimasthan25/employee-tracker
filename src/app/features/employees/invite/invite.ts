@@ -75,6 +75,18 @@ export class Invite implements OnInit {
     }
   }
 
+  triggerDownload() {
+    const url = this.downloadUrl();
+    if (!url) return;
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'PulseAgent.exe');
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   email = '';
   password = '';
   displayName = '';

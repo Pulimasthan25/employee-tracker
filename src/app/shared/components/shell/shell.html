@@ -20,9 +20,9 @@
       <nav class="shell__sat-section shell__sat-section--nav">
         <div class="shell__sat-track">
           @for (item of visibleNav(); track item.path) {
-          <a [routerLink]="item.path" routerLinkActive="active"
+          <button [routerLink]="item.path" routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: item.path !== '/settings' && item.path !== '/reports' }"
-            class="shell__sat-tab">
+            class="shell__sat-tab" type="button">
             <div class="shell__sat-icon">
               @switch (item.icon) {
               @case ('grid') {
@@ -67,7 +67,7 @@
               }
             </div>
             <span class="shell__sat-label">{{ item.label }}</span>
-          </a>
+          </button>
           }
         </div>
       </nav>
