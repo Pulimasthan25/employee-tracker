@@ -312,10 +312,12 @@ export class Timeline {
         this.unlockService.unlock();
         await this.loadScreenshots();
       } else {
-        this.unlockError.set('Authentication failed or was cancelled. Please try again.');
+        this.unlockError.set('Authentication failed. Please try again or check your device settings.');
       }
+    } catch (e: any) {
+      this.handleAuthError(e);
     } finally {
-        this.unlockLoading.set(false);
+      this.unlockLoading.set(false);
     }
   }
 
@@ -340,12 +342,27 @@ export class Timeline {
         this.unlockService.unlock();
         await this.loadScreenshots();
       } else {
-        this.unlockError.set('Registration successful but authentication failed. Try logging in with the new passkey.');
+        this.unlockError.set('Registration successful, but verification failed. Please click Unlock.');
       }
     } catch (e: any) {
-      this.unlockError.set(e.message || 'Registration failed.');
+      this.handleAuthError(e);
     } finally {
       this.unlockLoading.set(false);
+    }
+  }
+
+  private handleAuthError(e: any): void {
+    console.error('WebAuthn Error:', e);
+    const msg = e.message || '';
+    
+    if (msg.includes('NotAllowedError') || msg.includes('cancelled') || msg.includes('timed out')) {
+      this.unlockError.set('Authentication cancelled or timed out. Please try again.');
+    } else if (msg.includes('InvalidStateError')) {
+      this.unlockError.set('This device is already registered. Please try to Unlock instead.');
+    } else if (msg.includes('SecurityError')) {
+      this.unlockError.set('Security error. Ensure you are using a secure connection.');
+    } else {
+      this.unlockError.set('Something went wrong with the authentication. Please try again.');
     }
   }
 
