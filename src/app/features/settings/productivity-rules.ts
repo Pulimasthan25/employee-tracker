@@ -249,6 +249,16 @@ export class ProductivityRules implements OnInit, OnDestroy {
     }
 
     try {
+      // If the user already has passkeys, they MUST verify one before adding a new one.
+      // This prevents someone who hijacked a session from adding their own passkey.
+      if (this.credentials().length > 0) {
+        const verified = await this.webauthn.authenticate(uid);
+        if (!verified) {
+          this.registerError.set('Identity verification required to add a new passkey.');
+          return;
+        }
+      }
+
       await this.webauthn.registerPasskey(uid, email);
       await this.loadCredentials();
     } catch (e: any) {
@@ -259,15 +269,30 @@ export class ProductivityRules implements OnInit, OnDestroy {
   }
 
   async onDeleteCredential(credentialId: string) {
-    this.deleteLoadingId.set(credentialId);
     const uid = this.auth.firebaseUser()?.uid;
     if (!uid) return;
 
-    try {
-      await this.webauthn.deleteCredential(uid, credentialId);
-      await this.loadCredentials();
-    } finally {
-      this.deleteLoadingId.set(null);
-    }
+    this.confirmService.confirm({
+      title: 'Remove Passkey?',
+      message: 'You will need to verify your identity to remove this security credential.',
+      confirmText: 'Verify & Delete',
+      onConfirm: async () => {
+        this.deleteLoadingId.set(credentialId);
+        try {
+          // Mandatory verification before deletion
+          const verified = await this.webauthn.authenticate(uid);
+          if (verified) {
+            await this.webauthn.deleteCredential(uid, credentialId);
+            await this.loadCredentials();
+          } else {
+            this.registerError.set('Identity verification failed. Passkey was not removed.');
+          }
+        } catch (e: any) {
+          this.registerError.set(e.message || 'Verification failed');
+        } finally {
+          this.deleteLoadingId.set(null);
+        }
+      }
+    });
   }
 }
